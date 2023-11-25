@@ -1,0 +1,373 @@
+<div class="flex flex-col flex-auto min-w-0">
+    <!--<erp-headboard [trayName]="'Volver'" [icon]="'arrow_back'" [tray]="'list-lottery-control'" [path]="'/system/human-talent/processes/psychoactive-program'"></erp-headboard>-->
+
+    <!-- Menu -->
+    <div class="flex flex-col shadow bg-card">
+        <div class="flex flex-col flex-0 lg:flex-row items-center max-w-5xl w-full mx-auto px-8 lg:h-18 bg-card">
+            <!-- Menu -->
+            <div class="flex items-center mt-8 mb-4 lg:m-0 lg:ml-auto space-x-6">
+                <button mat-button [color]="'primary'" class="sm:inline-block text-secondary rounded-lg" [matMenuTriggerFor]="controlMenu">Acción</button>
+                <mat-menu #controlMenu="matMenu" [xPosition]="'after'">
+
+                    <!--<button mat-menu-item (click)="savePlanning()">Guardar Planificación</button>-->
+                    <button mat-menu-item *ngIf="field != 'aprobado_ps'" (click)="enablePlanning()">
+                        <mat-icon [svgIcon]="'mat_solid:edit_note'"></mat-icon>
+                        {{field}}
+                    </button>
+                    <button mat-menu-item
+                            (click)="executeCommand('report')">
+                        <mat-icon [svgIcon]="'mat_solid:local_printshop'"></mat-icon>
+                        Reporte Planificación
+                    </button>
+                    <button mat-menu-item [routerLink]="['../']">
+                        <mat-icon [svgIcon]="'mat_solid:article'"></mat-icon>Regresar a Listado de Planes
+                    </button>
+                    <button mat-menu-item [routerLink]="['../../../']">
+                        <mat-icon [svgIcon]="'mat_solid:menu_open'"></mat-icon>Regresar al Menu Principal
+                    </button>
+
+                </mat-menu>
+
+                <button mat-button [color]="'primary'" class="sm:inline-block text-secondary rounded-lg" [matMenuTriggerFor]="settingsMenu">Settings</button>
+                <mat-menu #settingsMenu="matMenu" [xPosition]="'after'">
+                    <button mat-menu-item
+                            [routerLink]="['/system/human-talent/modules/processes/psychoactive-program/organization-chart-selection']">
+                        <mat-icon [svgIcon]="'mat_solid:account_tree'"></mat-icon>Ver Lista de Unidades
+                    </button>
+                    <button mat-menu-item
+                            [routerLink]="['/system/human-talent/modules/processes/psychoactive-program/test-type']">
+                        <mat-icon [svgIcon]="'mat_solid:auto_fix_high'"></mat-icon>Ver Tipos de Pruebas
+                    </button>
+                </mat-menu>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Calendar -->
+    <div class="sm:col-span-2 md:col-span-4 flex flex-col flex-auto p-6 m-2 bg-card shadow rounded-2xl overflow-hidden">
+
+        <p-toast></p-toast>
+
+        <div class="flex flex-col sm:flex-row items-start justify-between">
+            <div class="text-lg font-medium tracking-tight leading-6 truncate">{{MONTH_NAMES[month]}}</div>
+            <span class="ml-1 text-lg font-normal">{{ year }}</span>
+
+            <div>
+                <button
+                    type="button"
+                    class="transition ease-in-out duration-100 inline-flex cursor-pointer hover:bg-gray-200 p-1 rounded-full"
+                    [ngClass]="{ 'cursor-not-allowed opacity-25': month === 0 }"
+                    [disabled]="true"
+                    (click)="month = month - 1"
+                    (click)="getNoOfDays()">
+                    <svg class="h-6 w-6 text-gray-500 inline-flex" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
+                <button
+                    type="button"
+                    class="transition ease-in-out duration-100 inline-flex cursor-pointer hover:bg-gray-200 p-1 rounded-full"
+                    [ngClass]="{ 'cursor-not-allowed opacity-25': month === 11 }"
+                    [disabled]="true"
+                    (click)="month = month + 1"
+                    (click)="getNoOfDays()">
+                    <svg class="h-6 w-6 text-gray-500 inline-flex" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-1 grid-flow-row gap-6 w-full mt-8 sm:mt-4">
+
+            <!-- Overview -->
+            <div class="flex flex-col">
+
+                <div class="flex flex-wrap mb-3 -mx-1">
+                    <ng-container *ngFor="let day of DAYS; let index = index">
+                        <div style="width: 14.26%" class="px-1">
+                            <div class="font-medium text-center text-xs">{{ day }}</div>
+                        </div>
+                    </ng-container>
+                </div>
+                <div class="flex flex-wrap -mx-1" cdkDropListGroup>
+                    <!--<ng-container *ngFor="let blankday of blankdays">
+                        <div style="width: 14.28%" class="text-center border-none p-1 border-transparent text-sm"></div>
+                    </ng-container>-->
+                    <ng-container *ngFor="let week of weeks; let index = index;" >
+                        <ng-container *ngFor="let dayObj of week; let dateIndex = index;" >
+                            <div *ngIf="!checkEmptyObject(dayObj)" style="width: 14.28%" class="text-center border-none p-1 border-transparent text-sm">
+                            </div>
+                            <div *ngIf="checkEmptyObject(dayObj)" style="width: 14.28%" class="px-1 mb-1" (click)="['editado_ps'].includes(selected.estado) && dayObj?.schedules.length > 0 && onEventClick($event, dayObj)"  #infoDetailsPanelOrigin>
+
+                                <div class="col-span-1 sm:col-span-1 flex flex-col items-center justify-center py-8 px-1 rounded-2xl text-secondary bg-primary-100 dark:bg-white dark:bg-opacity-5"
+                                     [ngClass]="{'bg-primary-500 text-white': isToday(dayObj.day) === true,'hover:bg-primary-200': isToday(dayObj.day) === false, 'text-primary-800 bg-primary-100 dark:text-primary-50 dark:bg-primary-500': checkSchedule(dayObj)}"
+                                     >
+                                    <div class="text-5xl font-semibold leading-none tracking-tight">
+                                        {{ dayObj.day }}
+
+                                        <div class="font-medium text-center text-xs h-7" cdkDropList [cdkDropListData]="dayObj.schedules" (cdkDropListDropped)="['editado_ps'].includes(selected.estado) && drop($event)">
+                                            <div *ngFor="let schedule of dayObj.schedules" cdkDrag class="grab" (click)="['elaborado_ps','aprobado_ps'].includes(selected.estado) && viewDetail(schedule)">
+                                                {{ schedule.name }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </ng-container>
+                    </ng-container>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <ng-template #eventPanel>
+
+        <!-- Preview mode -->
+        <ng-container *ngIf="panelMode === 'view'">
+            <div class="flex flex-col py-4 px-6 w-full max-w-160 space-y-1.5 border text-md rounded shadow-md overflow-auto bg-card">
+                <!-- Info -->
+                <div class="flex">
+                    <mat-icon [svgIcon]="'heroicons_outline:information-circle'"></mat-icon>
+                    <div class="flex flex-auto justify-between ml-6">
+                        <!-- Info -->
+                        <div>
+                            <div class="text-3xl font-semibold tracking-tight leading-none">{{event?.schedules[0].name}}</div>
+                        </div>
+                        <!-- Actions -->
+                        <div class="flex -mt-2 -mr-2 ml-10">
+
+                            <!-- Recurring event -->
+                            <ng-container >
+                                <!-- Delete -->
+                                <button
+                                    mat-icon-button
+                                    (click)="deleteEvent()">
+                                    <mat-icon [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                </button>
+                            </ng-container>
+                        </div>
+                    </div>
+                </div>
+                <!-- Calendar -->
+                <div class="flex mt-6">
+                    <mat-icon [svgIcon]="'heroicons_outline:calendar'"></mat-icon>
+                    <div class="flex flex-auto items-center ml-6">
+                        <div class="leading-none">{{event?.date}}</div>
+                    </div>
+                </div>
+
+                <form
+                    class="flex flex-col w-full p-6 pt-8 sm:pt-10 sm:pr-8"
+                    [formGroup]="eventForm">
+
+                    <!--<mat-form-field class="flex-auto gt-xs:pr-3">
+                        <mat-label>Unidad Organizacional</mat-label>
+                        <mat-icon
+                            matPrefix
+                            class="hidden sm:flex icon-size-5"
+                            [svgIcon]="'heroicons_solid:office-building'"></mat-icon>
+                        <input type="text"
+                               matInput
+                               [matAutocomplete]="oficina_inc"
+                               (keyup)="searchOrganizationalUnits($event.target.value)"
+                               placeholder="Oficina Recepción ...."
+                               [formControlName]="'id_uo'">
+                        <mat-autocomplete autoActiveFirstOption
+                                          #oficina_inc="matAutocomplete"
+                                          [displayWith]="getOrganizationalUnits.bind(this)">
+                            <mat-option *ngFor="let uo of organizationalUnits" [value]="uo.id_uo">
+                                {{uo.nombre_unidad}}
+                            </mat-option>
+                        </mat-autocomplete>
+                    </mat-form-field>-->
+                    <mat-form-field class="flex-auto gt-xs:pr-3 min-w-60">
+                        <mat-label>Unidad Organizacional</mat-label>
+                        <mat-select (selectionChange)="selectionOrganizationalUnits($event)"
+                                    [placeholder]="'Seleccione Unidad ....'"
+                                    [formControlName]="'id_uo'"
+                                    [compareWith]="displayUnits">
+                            <mat-option *ngFor="let uo of organizationalUnits" [value]="uo.id_uo">
+                                {{uo.nombre_unidad}}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </form>
+
+                <!-- Description -->
+                <div class="flex mt-6">
+                    <mat-icon [svgIcon]="'heroicons_outline:menu-alt-2'"></mat-icon>
+                    <div class="flex-auto ml-6">{{'Descripcion'}}</div>
+                </div>
+
+            </div>
+        </ng-container>
+    </ng-template>
+
+    <!--<div class="flex items-start justify-start bg-gray-200 h-full">
+        <div class="antialiased sans-serif">
+            <div>
+                <div class="container mx-auto px-4 py-2 md:py-10">
+                    <div class="mb-5 w-64">
+                        <label class="font-bold mb-1 text-gray-700 block">Select Date</label>
+                        <div class="relative">
+                            <input type="hidden" name="date" x-ref="date" />
+                            <input
+                                type="text"
+                                readonly
+                                [(ngModel)]="datepickerValue"
+
+                                (keydown.escape)="showDatepicker = false"
+                                class="w-full pl-4 pr-10 py-3 leading-none rounded-lg shadow-sm focus:outline-none focus:shadow-outline text-gray-600 font-medium"
+                                placeholder="Select date"
+                            />
+
+                            <div class="absolute top-0 right-0 px-3 py-2">
+                                <svg class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                    />
+                                </svg>
+                            </div>
+
+                            <div
+                                class="bg-white mt-12 rounded-lg shadow p-4 absolute top-0 left-0"
+                                style="width: 50rem"
+                                [hidden]="!showDatepicker"
+                                (keydown.away)="showDatepicker = false"
+                            >
+                                <div class="flex justify-between items-center mb-2">
+                                    <div>
+                                        <span class="text-lg font-bold text-gray-800">{{ MONTH_NAMES[month] }}</span>
+                                        <span class="ml-1 text-lg text-gray-600 font-normal">{{ year }}</span>
+                                    </div>
+                                    <div>
+                                        <button
+                                            type="button"
+                                            class="
+                      transition
+                      ease-in-out
+                      duration-100
+                      inline-flex
+                      cursor-pointer
+                      hover:bg-gray-200
+                      p-1
+                      rounded-full
+                    "
+                                            [ngClass]="{ 'cursor-not-allowed opacity-25': month === 0 }"
+                                            [disabled]="month === 0 ? true : false"
+                                            (click)="month = month - 1"
+                                            (click)="getNoOfDays()"
+                                        >
+                                            <svg
+                                                class="h-6 w-6 text-gray-500 inline-flex"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor"
+                                            >
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                                            </svg>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            class="
+                      transition
+                      ease-in-out
+                      duration-100
+                      inline-flex
+                      cursor-pointer
+                      hover:bg-gray-200
+                      p-1
+                      rounded-full
+                    "
+                                            [ngClass]="{ 'cursor-not-allowed opacity-25': month === 11 }"
+                                            [disabled]="month === 11 ? true : false"
+                                            (click)="month = month + 1"
+                                            (click)="getNoOfDays()"
+                                        >
+                                            <svg
+                                                class="h-6 w-6 text-gray-500 inline-flex"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor"
+                                            >
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="flex flex-wrap mb-3 -mx-1">
+                                    <ng-container *ngFor="let day of DAYS; let index = index">
+                                        <div style="width: 14.26%" class="px-1">
+                                            <div class="text-gray-800 font-medium text-center text-xs">{{ day }}</div>
+                                        </div>
+                                    </ng-container>
+                                </div>
+
+                                <div class="flex flex-wrap -mx-1">
+                                    <ng-container *ngFor="let blankday of blankdays">
+                                        <div style="width: 14.28%" class="text-center border-none p-1 border-transparent text-sm"></div>
+                                    </ng-container>
+                                    <ng-container *ngFor="let date of no_of_days; let dateIndex = index; trackBy: trackByIdentity">
+                                        <div style="width: 14.28%" class="px-1 mb-1">
+                                            <div
+                                                (click)="getDateValue(date)"
+                                                class="
+                        cursor-pointer
+                        text-center text-sm
+                        rounded-full
+                        leading-loose
+                        transition
+                        ease-in-out
+                        duration-100
+                      "
+                                                [ngClass]="{
+                        'bg-blue-500 text-white': isToday(date) === true,
+                        'text-gray-700 hover:bg-blue-200': isToday(date) === false
+                      }"
+                                            >
+                                                {{ date }}
+                                            </div>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>-->
+
+
+
+    <!--<div cdkDropList [cdkDropListData]="groups" (cdkDropListDropped)="dropGroup($event)">
+        <div cdkDropListGroup class="example-container" *ngFor="let group of groups" cdkDrag [cdkDragData]="group">
+            <h2>{{group.week}}</h2>
+            <div cdkDropList class="example-list" id={{group.id}}
+                 [cdkDropListData]="group.items"
+                 (cdkDropListDropped)="dropItem($event)"
+                 [cdkDropListConnectedTo]="getConnectedList()">
+                <div class="example-box" *ngFor="let item of group.items" cdkDrag [cdkDragData]="item">
+                    <h2>{{item.dateLottery}}</h2>
+                    <div cdkDropList class="example-list" id={{item.id}}
+                         [cdkDropListData]="item.unitLottery"
+                         (cdkDropListDropped)="dropItem($event)"
+                         [cdkDropListConnectedTo]="getConnectedList()">
+                        <div class="example-box" *ngFor="let unit of item.unitLottery" cdkDrag [cdkDragData]="unit">
+                            {{unit.nombre_unidad}}
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>-->
+
+</div>

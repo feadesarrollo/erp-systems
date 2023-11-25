@@ -1,0 +1,740 @@
+<div class="flex flex-col flex-auto w-full">
+
+    <div class="flex flex-wrap w-full max-w-screen-xl mx-auto p-6 md:p-8">
+
+        <!-- Title and action buttons -->
+        <div class="flex items-center justify-between w-full">
+            <div>
+                <div class="text-3xl font-semibold tracking-tight leading-8">Panel de Análisis</div>
+                <div class="font-medium tracking-tight text-secondary">Supervise la evolución de los reclamos, y genere informes</div>
+            </div>
+            <div class="flex items-center ml-6">
+                <!--<button
+                    class="hidden sm:inline-flex"
+                    mat-stroked-button>
+                    <mat-icon
+                        class="icon-size-5"
+                        [svgIcon]="'heroicons_solid:cog'"></mat-icon>
+                    <span class="ml-2">Settings</span>
+                </button>-->
+                <button
+                    class="hidden sm:inline-flex ml-3"
+                    mat-flat-button
+                    [color]="'primary'">
+                    <mat-icon
+                        class="icon-size-5"
+                        [svgIcon]="'heroicons_solid:save'"></mat-icon>
+                    <span class="ml-2">Exportar</span>
+                </button>
+
+                <!-- Actions menu (visible on xs) -->
+                <div class="sm:hidden">
+                    <button
+                        [matMenuTriggerFor]="actionsMenu"
+                        mat-icon-button>
+                        <mat-icon [svgIcon]="'heroicons_outline:dots-vertical'"></mat-icon>
+                    </button>
+                    <mat-menu #actionsMenu="matMenu">
+                        <button mat-menu-item>Exportar</button>
+                        <!--<button mat-menu-item>Settings</button>-->
+                    </mat-menu>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 w-full mt-8">
+            <!-- Resumen Reclamo -->
+            <div class="sm:col-span-2 lg:col-span-3 dark flex flex-col flex-auto bg-card shadow rounded-2xl overflow-hidden">
+                <div class="flex items-center justify-between mt-10 ml-10 mr-6 sm:mr-10">
+                    <div class="flex flex-col">
+                        <div class="mr-4 text-2xl md:text-3xl font-semibold tracking-tight leading-7">Resumen Reclamo</div>
+                        <div class="font-medium text-secondary">Reclamos Generados por Gestión y Periodo</div>
+                    </div>
+                    <div class="ml-2">
+                        <!--<mat-button-toggle-group
+                            class="hidden sm:inline-flex border-none space-x-1"
+                            value="this-year"
+                            #visitorsYearSelector="matButtonToggleGroup">
+                            <mat-button-toggle
+                                class="px-1.5 rounded-full overflow-hidden border-none font-medium"
+                                value="last-year">Last Year
+                            </mat-button-toggle>
+                            <mat-button-toggle
+                                class="px-1.5 rounded-full overflow-hidden border-none font-medium"
+                                value="this-year">This Year
+                            </mat-button-toggle>
+                        </mat-button-toggle-group>-->
+                        <div [formGroup]="FilterForm" class="hidden sm:inline-flex border-none space-x-1">
+                            <!-- Gestion -->
+
+                            <!--<mat-form-field class="px-1.5 rounded-full overflow-hidden border-none font-medium" [matTooltip]="'Seleccione GESTIÓN'">
+                                <mat-icon
+                                    matPrefix
+                                    class="hidden sm:flex icon-size-5"
+                                    [svgIcon]="'heroicons_solid:calendar'"></mat-icon>
+                                <mat-select [formControlName]="'gestion'"
+                                            (selectionChange)="onGestionChange($event)"
+                                            [placeholder]="'Gestión'"
+                                            #visitorsYearSelector="matSelect">
+                                    <mat-option  [value]="'blank'">
+                                        Last Year
+                                    </mat-option>
+                                    <mat-option  [value]="'gestion'">
+                                        This Year
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>-->
+                            <mat-form-field class="px-1.5 pt-3 rounded-full overflow-hidden border-none font-medium" [matTooltip]="'Seleccione GESTIÓN'">
+                                <mat-icon
+                                    matPrefix
+                                    class="hidden sm:flex icon-size-5"
+                                    [svgIcon]="'heroicons_solid:calendar'"></mat-icon>
+                                <mat-select [formControlName]="'gestion'"
+                                            (selectionChange)="onGestionChange($event)"
+                                            [placeholder]="'Gestión'"
+                                            #visitorsYearSelector="matSelect">
+                                    <mat-option  [value]="'blank'">
+                                        Seleccione gestión...
+                                    </mat-option>
+                                    <mat-option *ngFor="let ges of listaGestion" [value]="ges.id_gestion">
+                                        {{ges.gestion}}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+
+                            <!-- Mes -->
+                            <mat-form-field class="px-1.5 pt-3 rounded-full overflow-hidden border-none font-medium" [matTooltip]="'Seleccione PERIODO'">
+                                <mat-icon
+                                    matPrefix
+                                    class="hidden sm:flex icon-size-5"
+                                    [svgIcon]="'heroicons_solid:calendar'"></mat-icon>
+                                <mat-select [formControlName]="'periodo'"
+                                            [placeholder]="'Periodo'">
+                                    <mat-option (click)="onPeriodoChange(month.id_periodo)" *ngFor="let month of listaPeriodo" [value]="month.id_periodo">
+                                        {{month.literal}}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                        <div class="sm:hidden">
+                            <button
+                                mat-icon-button
+                                [matMenuTriggerFor]="visitorsMenu">
+                                <mat-icon [svgIcon]="'heroicons_outline:dots-vertical'"></mat-icon>
+                            </button>
+                            <mat-menu #visitorsMenu="matMenu">
+                                <button mat-menu-item>This Year</button>
+                                <button mat-menu-item>Last Year</button>
+                            </mat-menu>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-col flex-auto h-80">
+                    <apx-chart
+                        class="flex-auto w-full h-full"
+                        [chart]="chartVisitors.chart"
+                        [colors]="chartVisitors.colors"
+                        [dataLabels]="chartVisitors.dataLabels"
+                        [fill]="chartVisitors.fill"
+                        [grid]="chartVisitors.grid"
+                        [series]="chartVisitors.series['gestion']"
+                        [stroke]="chartVisitors.stroke"
+                        [tooltip]="chartVisitors.tooltip"
+                        [xaxis]="chartVisitors.xaxis"
+                        [yaxis]="chartVisitors.yaxis"></apx-chart>
+                </div>
+            </div>
+            <ng-container *ngIf="showDetalle">
+                <!-- Anulado -->
+                <div *ngIf="showAnulado" class="sm:col-span-2 lg:col-span-1 flex flex-col flex-auto bg-card shadow rounded-2xl overflow-hidden">
+                    <div class="flex items-start justify-between m-6 mb-0">
+                        <div class="text-lg font-medium tracking-tight leading-6 truncate">Anulados</div>
+                        <!--<div class="ml-2">
+                            <button
+                                class="h-6 min-h-6 px-2 rounded-full bg-hover"
+                                mat-button
+                                [matMenuTriggerFor]="conversionMenu">
+                                <span class="font-medium text-sm text-secondary">30 days</span>
+                            </button>
+                            <mat-menu #conversionMenu="matMenu">
+                                <button mat-menu-item>30 days</button>
+                                <button mat-menu-item>3 months</button>
+                                <button mat-menu-item>9 months</button>
+                            </mat-menu>
+                        </div>-->
+                    </div>
+                    <div class="flex flex-col lg:flex-row lg:items-center mx-6 mt-3">
+                        <div class="text-7xl font-bold tracking-tighter leading-tight">{{data.anulado.amount | number:'1.0-0'}}</div>
+                        <div class="flex lg:flex-col lg:ml-3">
+                            <mat-icon
+                                class="icon-size-5 text-green-500"
+                                [svgIcon]="'heroicons_solid:trending-up'"></mat-icon>
+                            <div class="flex items-center ml-1 lg:ml-0 lg:mt-0.5 text-md leading-none whitespace-nowrap text-secondary">
+                                <span class="font-medium text-green-500">{{ percentAnulado  }} %</span>
+                                <span class="ml-1">evolución registros</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-auto h-20">
+                        <apx-chart
+                            class="flex-auto w-full h-full"
+                            [chart]="chartAnulado.chart"
+                            [colors]="chartAnulado.colors"
+                            [series]="chartAnulado.series"
+                            [stroke]="chartAnulado.stroke"
+                            [tooltip]="chartAnulado.tooltip"
+                            [xaxis]="chartAnulado.xaxis"
+                            [yaxis]="chartAnulado.yaxis"></apx-chart>
+                    </div>
+                </div>
+
+                <!-- Archivo con Respuesta -->
+                <div *ngIf="showArchivoConRespuesta" class="sm:col-span-2 lg:col-span-1 flex flex-col flex-auto bg-card shadow rounded-2xl overflow-hidden">
+                    <div class="flex items-start justify-between m-6 mb-0">
+                        <div class="text-lg font-medium tracking-tight leading-6 truncate">Archivo con Respuesta</div>
+                        <!--<div class="ml-2">
+                            <button
+                                class="h-6 min-h-6 px-2 rounded-full bg-hover"
+                                mat-button
+                                [matMenuTriggerFor]="conversionMenu">
+                                <span class="font-medium text-sm text-secondary">30 days</span>
+                            </button>
+                            <mat-menu #conversionMenu="matMenu">
+                                <button mat-menu-item>30 days</button>
+                                <button mat-menu-item>3 months</button>
+                                <button mat-menu-item>9 months</button>
+                            </mat-menu>
+                        </div>-->
+                    </div>
+                    <div class="flex flex-col lg:flex-row lg:items-center mx-6 mt-3">
+                        <div class="text-7xl font-bold tracking-tighter leading-tight">{{data.archivo_con_respuesta.amount | number:'1.0-0'}}</div>
+                        <div class="flex lg:flex-col lg:ml-3">
+                            <mat-icon
+                                class="icon-size-5 text-green-500"
+                                [svgIcon]="'heroicons_solid:trending-up'"></mat-icon>
+                            <div class="flex items-center ml-1 lg:ml-0 lg:mt-0.5 text-md leading-none whitespace-nowrap text-secondary">
+                                <span class="font-medium text-green-500">{{ percentArchivoConRespuesta  }} %</span>
+                                <span class="ml-1">evolución registros</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-auto h-20">
+                        <apx-chart
+                            class="flex-auto w-full h-full"
+                            [chart]="chartArchivoConRespuesta.chart"
+                            [colors]="chartArchivoConRespuesta.colors"
+                            [series]="chartArchivoConRespuesta.series"
+                            [stroke]="chartArchivoConRespuesta.stroke"
+                            [tooltip]="chartArchivoConRespuesta.tooltip"
+                            [xaxis]="chartArchivoConRespuesta.xaxis"
+                            [yaxis]="chartArchivoConRespuesta.yaxis"></apx-chart>
+                    </div>
+                </div>
+                <!-- Borrador -->
+                <div *ngIf="showBorrador" class="flex flex-col flex-auto bg-card shadow rounded-2xl overflow-hidden">
+                    <div class="flex items-start justify-between m-6 mb-0">
+                        <div class="text-lg font-medium tracking-tight leading-6 truncate">Borrador</div>
+                        <!--<div class="ml-2">
+                            <button
+                                class="h-6 min-h-6 px-2 rounded-full bg-hover"
+                                mat-button
+                                [matMenuTriggerFor]="impressionsMenu">
+                                <span class="font-medium text-sm text-secondary">30 days</span>
+                            </button>
+                            <mat-menu #impressionsMenu="matMenu">
+                                <button mat-menu-item>30 days</button>
+                                <button mat-menu-item>3 months</button>
+                                <button mat-menu-item>9 months</button>
+                            </mat-menu>
+                        </div>-->
+                    </div>
+                    <div class="flex flex-col lg:flex-row lg:items-center mx-6 mt-3">
+                        <div class="text-7xl font-bold tracking-tighter leading-tight">{{data.borrador.amount | number:'1.0-0'}}</div>
+                        <div class="flex lg:flex-col lg:ml-3">
+                            <mat-icon
+                                class="icon-size-5 text-green-500"
+                                [svgIcon]="'heroicons_solid:trending-up'"></mat-icon>
+                            <div class="flex items-center ml-1 lg:ml-0 lg:mt-0.5 text-md leading-none whitespace-nowrap text-secondary">
+                                <span class="font-medium text-green-500">{{ percentBorrador }} %</span>
+                                <span class="ml-1">evolución registros</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-auto h-20">
+                        <apx-chart
+                            class="flex-auto w-full h-full"
+                            [chart]="chartBorrador.chart"
+                            [colors]="chartBorrador.colors"
+                            [series]="chartBorrador.series"
+                            [stroke]="chartBorrador.stroke"
+                            [tooltip]="chartBorrador.tooltip"
+                            [xaxis]="chartBorrador.xaxis"
+                            [yaxis]="chartBorrador.yaxis"></apx-chart>
+                    </div>
+                </div>
+                <!-- Pendiente Asignación -->
+                <div *ngIf="showPendienteAsignacion" class="flex flex-col flex-auto bg-card shadow rounded-2xl overflow-hidden">
+                    <div class="flex items-start justify-between m-6 mb-0">
+                        <div class="text-lg font-medium tracking-tight leading-6 truncate">Pendiente Asignación</div>
+                        <!--<div class="ml-2">
+                            <button
+                                class="h-6 min-h-6 px-2 rounded-full bg-hover"
+                                mat-button
+                                [matMenuTriggerFor]="impressionsMenu">
+                                <span class="font-medium text-sm text-secondary">30 days</span>
+                            </button>
+                            <mat-menu #impressionsMenu="matMenu">
+                                <button mat-menu-item>30 days</button>
+                                <button mat-menu-item>3 months</button>
+                                <button mat-menu-item>9 months</button>
+                            </mat-menu>
+                        </div>-->
+                    </div>
+                    <div class="flex flex-col lg:flex-row lg:items-center mx-6 mt-3">
+                        <div class="text-7xl font-bold tracking-tighter leading-tight">{{data.pendiente_asignacion.amount | number:'1.0-0'}}</div>
+                        <div class="flex lg:flex-col lg:ml-3">
+                            <mat-icon
+                                class="icon-size-5 text-green-500"
+                                [svgIcon]="'heroicons_solid:trending-up'"></mat-icon>
+                            <div class="flex items-center ml-1 lg:ml-0 lg:mt-0.5 text-md leading-none whitespace-nowrap text-secondary">
+                                <span class="font-medium text-green-500">{{ percentPendienteAsignacion  }} %</span>
+                                <span class="ml-1">evolución registros</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-auto h-20">
+                        <apx-chart
+                            class="flex-auto w-full h-full"
+                            [chart]="chartPendienteAsignacion.chart"
+                            [colors]="chartPendienteAsignacion.colors"
+                            [series]="chartPendienteAsignacion.series"
+                            [stroke]="chartPendienteAsignacion.stroke"
+                            [tooltip]="chartPendienteAsignacion.tooltip"
+                            [xaxis]="chartPendienteAsignacion.xaxis"
+                            [yaxis]="chartPendienteAsignacion.yaxis"></apx-chart>
+                    </div>
+                </div>
+
+                <!-- Pendiente Respuesta  -->
+                <div *ngIf="showPendienteRespuesta" class="flex flex-col flex-auto bg-card shadow rounded-2xl overflow-hidden">
+                    <div class="flex items-start justify-between m-6 mb-0">
+                        <div class="text-lg font-medium tracking-tight leading-6 truncate">Pendiente Respuesta</div>
+                        <!--<div class="ml-2">
+                            <button
+                                class="h-6 min-h-6 px-2 rounded-full bg-hover"
+                                mat-button
+                                [matMenuTriggerFor]="impressionsMenu">
+                                <span class="font-medium text-sm text-secondary">30 days</span>
+                            </button>
+                            <mat-menu #impressionsMenu="matMenu">
+                                <button mat-menu-item>30 days</button>
+                                <button mat-menu-item>3 months</button>
+                                <button mat-menu-item>9 months</button>
+                            </mat-menu>
+                        </div>-->
+                    </div>
+                    <div class="flex flex-col lg:flex-row lg:items-center mx-6 mt-3">
+                        <div class="text-7xl font-bold tracking-tighter leading-tight">{{data.pendiente_respuesta.amount | number:'1.0-0'}}</div>
+                        <div class="flex lg:flex-col lg:ml-3">
+                            <mat-icon
+                                class="icon-size-5 text-green-500"
+                                [svgIcon]="'heroicons_solid:trending-up'"></mat-icon>
+                            <div class="flex items-center ml-1 lg:ml-0 lg:mt-0.5 text-md leading-none whitespace-nowrap text-secondary">
+                                <span class="font-medium text-green-500">{{ percentPendienteRespuesta }} %</span>
+                                <span class="ml-1">evolución registros</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-auto h-20">
+                        <apx-chart
+                            class="flex-auto w-full h-full"
+                            [chart]="chartPendienteRespuesta.chart"
+                            [colors]="chartPendienteRespuesta.colors"
+                            [series]="chartPendienteRespuesta.series"
+                            [stroke]="chartPendienteRespuesta.stroke"
+                            [tooltip]="chartPendienteRespuesta.tooltip"
+                            [xaxis]="chartPendienteRespuesta.xaxis"
+                            [yaxis]="chartPendienteRespuesta.yaxis"></apx-chart>
+                    </div>
+                </div>
+
+                <!-- Pendiente Revisión -->
+                <div *ngIf="showPendienteRevision" class="flex flex-col flex-auto bg-card shadow rounded-2xl overflow-hidden">
+                    <div class="flex items-start justify-between m-6 mb-0">
+                        <div class="text-lg font-medium tracking-tight leading-6 truncate">Pendiente Revisión</div>
+                        <!--<div class="ml-2">
+                            <button
+                                class="h-6 min-h-6 px-2 rounded-full bg-hover"
+                                mat-button
+                                [matMenuTriggerFor]="impressionsMenu">
+                                <span class="font-medium text-sm text-secondary">30 days</span>
+                            </button>
+                            <mat-menu #impressionsMenu="matMenu">
+                                <button mat-menu-item>30 days</button>
+                                <button mat-menu-item>3 months</button>
+                                <button mat-menu-item>9 months</button>
+                            </mat-menu>
+                        </div>-->
+                    </div>
+                    <div class="flex flex-col lg:flex-row lg:items-center mx-6 mt-3">
+                        <div class="text-7xl font-bold tracking-tighter leading-tight">{{data.pendiente_revision.amount | number:'1.0-0'}}</div>
+                        <div class="flex lg:flex-col lg:ml-3">
+                            <mat-icon
+                                class="icon-size-5 text-green-500"
+                                [svgIcon]="'heroicons_solid:trending-up'"></mat-icon>
+                            <div class="flex items-center ml-1 lg:ml-0 lg:mt-0.5 text-md leading-none whitespace-nowrap text-secondary">
+                                <span class="font-medium text-green-500">{{ percentPendienteRevision }} %</span>
+                                <span class="ml-1">evolución registros</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-auto h-20">
+                        <apx-chart
+                            class="flex-auto w-full h-full"
+                            [chart]="chartPendienteRevision.chart"
+                            [colors]="chartPendienteRevision.colors"
+                            [series]="chartPendienteRevision.series"
+                            [stroke]="chartPendienteRevision.stroke"
+                            [tooltip]="chartPendienteRevision.tooltip"
+                            [xaxis]="chartPendienteRevision.xaxis"
+                            [yaxis]="chartPendienteRevision.yaxis"></apx-chart>
+                    </div>
+                </div>
+
+                <!-- Registrado Ripat -->
+                <div *ngIf="showRegistradoRipat" class="flex flex-col flex-auto bg-card shadow rounded-2xl overflow-hidden">
+                    <div class="flex items-start justify-between m-6 mb-0">
+                        <div class="text-lg font-medium tracking-tight leading-6 truncate">Registrado Ripat</div>
+                        <!--<div class="ml-2">
+                            <button
+                                class="h-6 min-h-6 px-2 rounded-full bg-hover"
+                                mat-button
+                                [matMenuTriggerFor]="impressionsMenu">
+                                <span class="font-medium text-sm text-secondary">30 days</span>
+                            </button>
+                            <mat-menu #impressionsMenu="matMenu">
+                                <button mat-menu-item>30 days</button>
+                                <button mat-menu-item>3 months</button>
+                                <button mat-menu-item>9 months</button>
+                            </mat-menu>
+                        </div>-->
+                    </div>
+                    <div class="flex flex-col lg:flex-row lg:items-center mx-6 mt-3">
+                        <div class="text-7xl font-bold tracking-tighter leading-tight">{{data.registrado_ripat.amount | number:'1.0-0'}}</div>
+                        <div class="flex lg:flex-col lg:ml-3">
+                            <mat-icon
+                                class="icon-size-5 text-green-500"
+                                [svgIcon]="'heroicons_solid:trending-up'"></mat-icon>
+                            <div class="flex items-center ml-1 lg:ml-0 lg:mt-0.5 text-md leading-none whitespace-nowrap text-secondary">
+                                <span class="font-medium text-green-500">{{ percentRegistradoRipat }} %</span>
+                                <span class="ml-1">evolución registros</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-auto h-20">
+                        <apx-chart
+                            class="flex-auto w-full h-full"
+                            [chart]="chartRegistradoRipat.chart"
+                            [colors]="chartRegistradoRipat.colors"
+                            [series]="chartRegistradoRipat.series"
+                            [stroke]="chartRegistradoRipat.stroke"
+                            [tooltip]="chartRegistradoRipat.tooltip"
+                            [xaxis]="chartRegistradoRipat.xaxis"
+                            [yaxis]="chartRegistradoRipat.yaxis"></apx-chart>
+                    </div>
+                </div>
+
+                <!-- Respuesta Parcial  -->
+                <div *ngIf="showRespuestaParcial" class="flex flex-col flex-auto bg-card shadow rounded-2xl overflow-hidden">
+                    <div class="flex items-start justify-between m-6 mb-0">
+                        <div class="text-lg font-medium tracking-tight leading-6 truncate">Respuesta Parcial</div>
+                        <!--<div class="ml-2">
+                            <button
+                                class="h-6 min-h-6 px-2 rounded-full bg-hover"
+                                mat-button
+                                [matMenuTriggerFor]="impressionsMenu">
+                                <span class="font-medium text-sm text-secondary">30 days</span>
+                            </button>
+                            <mat-menu #impressionsMenu="matMenu">
+                                <button mat-menu-item>30 days</button>
+                                <button mat-menu-item>3 months</button>
+                                <button mat-menu-item>9 months</button>
+                            </mat-menu>
+                        </div>-->
+                    </div>
+                    <div class="flex flex-col lg:flex-row lg:items-center mx-6 mt-3">
+                        <div class="text-7xl font-bold tracking-tighter leading-tight">{{data.respuesta_parcial.amount | number:'1.0-0'}}</div>
+                        <div class="flex lg:flex-col lg:ml-3">
+                            <mat-icon
+                                class="icon-size-5 text-green-500"
+                                [svgIcon]="'heroicons_solid:trending-up'"></mat-icon>
+                            <div class="flex items-center ml-1 lg:ml-0 lg:mt-0.5 text-md leading-none whitespace-nowrap text-secondary">
+                                <span class="font-medium text-green-500">{{ percentRespuestaParcial }} %</span>
+                                <span class="ml-1">evolución registros</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-auto h-20">
+                        <apx-chart
+                            class="flex-auto w-full h-full"
+                            [chart]="chartRespuestaParcial.chart"
+                            [colors]="chartRespuestaParcial.colors"
+                            [series]="chartRespuestaParcial.series"
+                            [stroke]="chartRespuestaParcial.stroke"
+                            [tooltip]="chartRespuestaParcial.tooltip"
+                            [xaxis]="chartRespuestaParcial.xaxis"
+                            [yaxis]="chartRespuestaParcial.yaxis"></apx-chart>
+                    </div>
+                </div>
+
+                <!-- Respuesta Registrado Ripat  -->
+                <div *ngIf="showRespuestaRegistradoRipat" class="flex flex-col flex-auto bg-card shadow rounded-2xl overflow-hidden">
+                    <div class="flex items-start justify-between m-6 mb-0">
+                        <div class="text-lg font-medium tracking-tight leading-6 truncate">Respuesta Registrado Ripat</div>
+                        <!--<div class="ml-2">
+                            <button
+                                class="h-6 min-h-6 px-2 rounded-full bg-hover"
+                                mat-button
+                                [matMenuTriggerFor]="impressionsMenu">
+                                <span class="font-medium text-sm text-secondary">30 days</span>
+                            </button>
+                            <mat-menu #impressionsMenu="matMenu">
+                                <button mat-menu-item>30 days</button>
+                                <button mat-menu-item>3 months</button>
+                                <button mat-menu-item>9 months</button>
+                            </mat-menu>
+                        </div>-->
+                    </div>
+                    <div class="flex flex-col lg:flex-row lg:items-center mx-6 mt-3">
+                        <div class="text-7xl font-bold tracking-tighter leading-tight">{{data.respuesta_registrado_ripat.amount | number:'1.0-0'}}</div>
+                        <div class="flex lg:flex-col lg:ml-3">
+                            <mat-icon
+                                class="icon-size-5 text-green-500"
+                                [svgIcon]="'heroicons_solid:trending-up'"></mat-icon>
+                            <div class="flex items-center ml-1 lg:ml-0 lg:mt-0.5 text-md leading-none whitespace-nowrap text-secondary">
+                                <span class="font-medium text-green-500">{{ percentRespuestaRegistradoRipat }} %</span>
+                                <span class="ml-1">evolución registros</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-auto h-20">
+                        <apx-chart
+                            class="flex-auto w-full h-full"
+                            [chart]="chartRespuestaRegistradoRipat.chart"
+                            [colors]="chartRespuestaRegistradoRipat.colors"
+                            [series]="chartRespuestaRegistradoRipat.series"
+                            [stroke]="chartRespuestaRegistradoRipat.stroke"
+                            [tooltip]="chartRespuestaRegistradoRipat.tooltip"
+                            [xaxis]="chartRespuestaRegistradoRipat.xaxis"
+                            [yaxis]="chartRespuestaRegistradoRipat.yaxis"></apx-chart>
+                    </div>
+                </div>
+            </ng-container>
+        </div>
+
+        <!-- Reclamo vs. Respuesta -->
+        <div *ngIf="showDetalle" class="flex flex-col flex-auto mt-8 bg-card shadow rounded-2xl overflow-hidden">
+            <div class="flex items-start justify-between m-6 mb-0">
+                <div class="text-lg font-medium tracking-tight leading-6 truncate">Reclamos vs. Respuestas</div>
+                <!--<div class="ml-2">
+                    <button
+                        class="h-6 min-h-6 px-2 rounded-full bg-hover"
+                        mat-button
+                        [matMenuTriggerFor]="conversionMenu">
+                        <span class="font-medium text-sm text-secondary">30 days</span>
+                    </button>
+                    <mat-menu #conversionMenu="matMenu">
+                        <button mat-menu-item>30 days</button>
+                        <button mat-menu-item>3 months</button>
+                        <button mat-menu-item>9 months</button>
+                    </mat-menu>
+                </div>-->
+            </div>
+            <div class="flex items-start mt-6 mx-6">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-12">
+                    <div class="flex flex-col">
+                        <div class="flex items-center">
+                            <div class="font-medium text-secondary leading-5">Total General</div>
+                            <mat-icon
+                                class="ml-1.5 icon-size-4 text-hint"
+                                [svgIcon]="'heroicons_solid:information-circle'"
+                                [matTooltip]="'El total general se calcula utilizando la proporción histórica entre reclamos y respuestas. La mejor puntuación es 100, la peor puntuación es 0.'"></mat-icon>
+                        </div>
+                        <div class="flex items-start mt-2">
+                            <div class="text-4xl font-bold tracking-tight leading-none">{{data.reclamoVsRespuesta.overallScore}}</div>
+                            <div class="flex items-center ml-2">
+                                <mat-icon
+                                    class="icon-size-5 text-green-500"
+                                    [svgIcon]="'heroicons_solid:arrow-circle-up'"></mat-icon>
+                                <div class="ml-1 text-md font-medium text-green-500">{{data.reclamoVsRespuesta.overallScorePercent}}%</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col">
+                        <div class="flex items-center">
+                            <div class="font-medium text-secondary leading-5">Total Reclamos</div>
+                            <mat-icon
+                                class="ml-1.5 icon-size-4 text-hint"
+                                [svgIcon]="'heroicons_solid:information-circle'"
+                                [matTooltip]="'El total reclamos es la proporción promedio entre los reclamos y respuestas.'"></mat-icon>
+                        </div>
+                        <div class="flex items-start mt-2">
+                            <div class="text-4xl font-bold tracking-tight leading-none">{{data.reclamoVsRespuesta.averageRatio | number:'1.0-0'}}</div>
+                            <div class="flex items-center ml-2" *ngIf="data.reclamoVsRespuesta.averageRatioPercent > data.reclamoVsRespuesta.predictedRatioPercent">
+                                <mat-icon
+                                    class="icon-size-5 text-green-500"
+                                    [svgIcon]="'heroicons_solid:arrow-circle-up'"></mat-icon>
+                                <div class="ml-1 text-md font-medium text-green-500">{{data.reclamoVsRespuesta.averageRatioPercent | number:'1.0-0'}}%</div>
+                            </div>
+                            <div class="flex items-center ml-2" *ngIf="data.reclamoVsRespuesta.averageRatioPercent < data.reclamoVsRespuesta.predictedRatioPercent">
+                                <mat-icon
+                                    class="icon-size-5 text-red-500"
+                                    [svgIcon]="'heroicons_solid:arrow-circle-down'"></mat-icon>
+                                <div class="ml-1 text-md font-medium text-red-500">{{data.reclamoVsRespuesta.averageRatioPercent | number:'1.0-0'}}%</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col">
+                        <div class="flex items-center">
+                            <div class="font-medium text-secondary leading-5">Total Respuestas</div>
+                            <mat-icon
+                                class="ml-1.5 icon-size-4 text-hint"
+                                [svgIcon]="'heroicons_solid:information-circle'"
+                                [matTooltip]="'El total respuestas es la proporción promedio entre los reclamos y respuestas.'"></mat-icon>
+                        </div>
+                        <div class="flex items-start mt-2">
+                            <div class="text-4xl font-bold tracking-tight leading-none">{{data.reclamoVsRespuesta.predictedRatio | number:'1.0-0'}}</div>
+                            <div class="flex items-center ml-2" *ngIf="data.reclamoVsRespuesta.predictedRatioPercent > data.reclamoVsRespuesta.averageRatioPercent">
+                                <mat-icon
+                                    class="icon-size-5 text-green-500"
+                                    [svgIcon]="'heroicons_solid:arrow-circle-up'"></mat-icon>
+                                <div class="ml-1 text-md font-medium text-green-500">{{data.reclamoVsRespuesta.predictedRatioPercent | number:'1.0-0'}}%</div>
+                            </div>
+                            <div class="flex items-center ml-2" *ngIf="data.reclamoVsRespuesta.predictedRatioPercent < data.reclamoVsRespuesta.averageRatioPercent">
+                                <mat-icon
+                                    class="icon-size-5 text-red-500"
+                                    [svgIcon]="'heroicons_solid:arrow-circle-down'"></mat-icon>
+                                <div class="ml-1 text-md font-medium text-red-500">{{data.reclamoVsRespuesta.predictedRatioPercent | number:'1.0-0'}}%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex-col flex-auto h-80 mt-3">
+                <apx-chart
+                    class="flex-auto w-full h-full"
+                    [chart]="chartReclamoVsRespuesta.chart"
+                    [colors]="chartReclamoVsRespuesta.colors"
+                    [dataLabels]="chartReclamoVsRespuesta.dataLabels"
+                    [grid]="chartReclamoVsRespuesta.grid"
+                    [legend]="chartReclamoVsRespuesta.legend"
+                    [series]="chartReclamoVsRespuesta.series"
+                    [stroke]="chartReclamoVsRespuesta.stroke"
+                    [tooltip]="chartReclamoVsRespuesta.tooltip"
+                    [xaxis]="chartReclamoVsRespuesta.xaxis"
+                    [yaxis]="chartReclamoVsRespuesta.yaxis"></apx-chart>
+            </div>
+        </div>
+
+        <!-- Section title -->
+        <div *ngIf="showDetalle" class="w-full mt-12">
+            <div class="text-2xl font-semibold tracking-tight leading-6">Clientes</div>
+            <div class="font-medium tracking-tight text-secondary">Propiedades demográficas de clientes</div>
+        </div>
+        <div *ngIf="showDetalle" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 w-full mt-6 md:mt-8">
+            <!-- Gender -->
+            <div class="flex flex-col flex-auto bg-card shadow rounded-2xl overflow-hidden p-6">
+                <div class="flex items-start justify-between">
+                    <div class="text-lg font-medium tracking-tight leading-6 truncate">Genero</div>
+                    <!--<div class="ml-2">
+                        <button
+                            class="h-6 min-h-6 px-2 rounded-full bg-hover"
+                            mat-button
+                            [matMenuTriggerFor]="conversionMenu">
+                            <span class="font-medium text-sm text-secondary">30 days</span>
+                        </button>
+                        <mat-menu #conversionMenu="matMenu">
+                            <button mat-menu-item>30 days</button>
+                            <button mat-menu-item>3 months</button>
+                            <button mat-menu-item>9 months</button>
+                        </mat-menu>
+                    </div>-->
+                </div>
+                <div class="flex flex-col flex-auto mt-6 h-44">
+                    <apx-chart
+                        class="flex flex-auto items-center justify-center w-full h-full"
+                        [chart]="chartGenero.chart"
+                        [colors]="chartGenero.colors"
+                        [labels]="chartGenero.labels"
+                        [plotOptions]="chartGenero.plotOptions"
+                        [series]="chartGenero.series"
+                        [states]="chartGenero.states"
+                        [tooltip]="chartGenero.tooltip"></apx-chart>
+                </div>
+                <div class="mt-8">
+                    <div class="-my-3 divide-y">
+                        <ng-container *ngFor="let dataset of data.genero.series; let i = index">
+                            <div class="grid grid-cols-3 py-3">
+                                <div class="flex items-center">
+                                    <div
+                                        class="flex-0 w-2 h-2 rounded-full"
+                                        [style.backgroundColor]="chartGenero.colors[i]"></div>
+                                    <div class="ml-3 truncate">{{data.genero.labels[i]}}</div>
+                                </div>
+                                <div class="font-medium text-right">{{ dataset | number:'1.0-0'}}</div>
+                                <div class="text-right text-secondary">{{(dataset / data.genero.uniqueVisitors) * 100 | number:'1.0-2'}}%</div>
+                            </div>
+                        </ng-container>
+                    </div>
+                </div>
+            </div>
+            <!-- Age -->
+            <!--<div class="flex flex-col flex-auto bg-card shadow rounded-2xl overflow-hidden p-6">
+                <div class="flex items-start justify-between">
+                    <div class="text-lg font-medium tracking-tight leading-6 truncate">Age</div>
+                    <div class="ml-2">
+                        <button
+                            class="h-6 min-h-6 px-2 rounded-full bg-hover"
+                            mat-button
+                            [matMenuTriggerFor]="conversionMenu">
+                            <span class="font-medium text-sm text-secondary">30 days</span>
+                        </button>
+                        <mat-menu #conversionMenu="matMenu">
+                            <button mat-menu-item>30 days</button>
+                            <button mat-menu-item>3 months</button>
+                            <button mat-menu-item>9 months</button>
+                        </mat-menu>
+                    </div>
+                </div>
+                <div class="flex flex-col flex-auto mt-6 h-44">
+                    <apx-chart
+                        class="flex flex-auto items-center justify-center w-full h-full"
+                        [chart]="chartAge.chart"
+                        [colors]="chartAge.colors"
+                        [labels]="chartAge.labels"
+                        [plotOptions]="chartAge.plotOptions"
+                        [series]="chartAge.series"
+                        [states]="chartAge.states"
+                        [tooltip]="chartAge.tooltip"></apx-chart>
+                </div>
+                <div class="mt-8">
+                    <div class="-my-3 divide-y">
+                        <ng-container *ngFor="let dataset of data.age.series; let i = index">
+                            <div class="grid grid-cols-3 py-3">
+                                <div class="flex items-center">
+                                    <div
+                                        class="flex-0 w-2 h-2 rounded-full"
+                                        [style.backgroundColor]="chartAge.colors[i]"></div>
+                                    <div class="ml-3 truncate">{{data.age.labels[i]}}</div>
+                                </div>
+                                <div class="font-medium text-right">{{data.age.uniqueVisitors * dataset / 100 | number:'1.0-0'}}</div>
+                                <div class="text-right text-secondary">{{dataset}}%</div>
+                            </div>
+                        </ng-container>
+                    </div>
+                </div>
+            </div>-->
+        </div>
+
+    </div>
+</div>

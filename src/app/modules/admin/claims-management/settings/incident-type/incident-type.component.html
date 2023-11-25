@@ -1,0 +1,139 @@
+<div class="sm:absolute sm:inset-0 flex flex-col flex-auto min-w-0 sm:overflow-hidden bg-card dark:bg-transparent">
+    <div class="relative flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between py-4 px-6 md:px-8 border-b">
+        <!-- Actions -->
+        <div class="flex shrink-0 items-end mt-1 sm:mt-0 sm:ml-4">
+
+            <p-toast></p-toast>
+
+            <!-- Search -->
+            <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript fuse-mat-rounded min-w-72">
+                <mat-icon
+                    class="icon-size-5"
+                    matPrefix
+                    [svgIcon]="'heroicons_solid:search'"></mat-icon>
+                <input
+                    matInput
+                    [formControl]="searchInputControl"
+                    [autocomplete]="'off'"
+                    [placeholder]="'Buscar clientes'">
+            </mat-form-field>
+
+        </div>
+    </div>
+    <div class="flex flex-auto overflow-auto">
+        <div class="flex flex-col flex-auto sm:mb-18 overflow-auto sm:overflow-y-auto">
+            <mat-table #table
+                       [dataSource]="dataSource"
+                       class="mat-elevation-z8"
+                       cdkDropList
+                       (cdkDropListDropped)="drop($event)"
+                       cdkDropListData="dataSource"
+                       [cdkDropListDisabled]="dragDisabled">
+
+                <ng-container matColumnDef="position" sticky>
+                    <mat-header-cell *matHeaderCellDef class="min-w-20"> Acciones. </mat-header-cell>
+                    <mat-cell *matCellDef="let row">
+
+                        <button
+                            class="ml-1 -mr-4"
+                            mat-icon-button
+                            (click)="selectedTipoIncidente = row"
+                            [matMenuTriggerFor]="chatsHeaderMenu">
+                            <mat-icon class="cursor-move" (mousedown)="dragDisabled = false;">reorder</mat-icon>
+                            <!--<mat-icon class="dragCursor" (mousedown)="dragDisabled = false;">reorder</mat-icon>-->
+                            <!--<span>{{element.position}}</span>-->
+
+                            <mat-menu #chatsHeaderMenu>
+                                <button mat-menu-item
+                                        (click)="executeCommand('editar')">
+                                    <mat-icon [svgIcon]="'heroicons_outline:pencil-alt'"></mat-icon>
+                                    Editar Tipo Incidente
+                                </button>
+                                <button mat-menu-item
+                                        (click)="executeCommand('eliminar')">
+                                    <mat-icon [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                    Eliminar Tipo Incidente
+                                </button>
+                                <button mat-menu-item
+                                        (click)="executeCommand('exportar')">
+                                    <mat-icon [svgIcon]="'heroicons_outline:cog'"></mat-icon>
+                                    Exportar Tipo Incidente
+                                </button>
+                            </mat-menu>
+
+                        </button>
+
+
+                    </mat-cell>
+                </ng-container>
+
+                <!--<ng-container matColumnDef="name">
+                    <mat-header-cell *matHeaderCellDef class="min-w-72">
+                        <span [style.paddingLeft.px]="40"> Nombre Incidente </span>
+                    </mat-header-cell>
+                    <mat-cell *matCellDef="let row" cdkDrag>
+                        &lt;!&ndash;<button mat-icon-button
+                                [style.visibility]="!row.expandable ? 'hidden' : ''"
+                                [style.marginLeft.px]="row.level * 32"
+                                (click)="treeControl.toggle(row)">&ndash;&gt;
+
+                        <button mat-icon-button
+                                [style.visibility]="!row.expandable ? 'hidden' : ''"
+                                [style.marginLeft.px]="row.level * 32"
+                                (click)="nodeClicked(row)">
+
+                            <mat-icon class="mat-icon-rtl-mirror">
+                                {{treeControl.isExpanded(row) ? 'expand_more' : 'chevron_right'}}
+                            </mat-icon>
+
+                        </button>
+
+                        {{row.name}}
+                    </mat-cell>
+                </ng-container>-->
+
+                <ng-container matColumnDef="nombre_incidente">
+                    <mat-header-cell *matHeaderCellDef class="min-w-72">
+                        <span [style.paddingLeft.px]="40"> Nombre Incidente </span>
+                    </mat-header-cell>
+                    <mat-cell *matCellDef="let row" cdkDrag>
+                        <!--<button mat-icon-button
+                                [style.visibility]="!row.expandable ? 'hidden' : ''"
+                                [style.marginLeft.px]="row.level * 32"
+                                (click)="treeControl.toggle(row)">-->
+
+                            <button mat-icon-button
+                                    [style.visibility]="!row.expandable ? 'hidden' : ''"
+                                    [style.marginLeft.px]="row.level * 32"
+                                    (click)="loadChildren(row)">
+
+                                <mat-icon class="mat-icon-rtl-mirror">
+                                    {{treeControl.isExpanded(row) ? 'expand_more' : 'chevron_right'}}
+                                </mat-icon>
+
+                                <!--<mat-icon class="mat-icon-rtl-mirror">expand_more</mat-icon>-->
+
+                            </button>
+
+                        {{row.data.nombre_incidente}}
+                    </mat-cell>
+                </ng-container>
+
+                <!--<ng-container matColumnDef="count" class="min-w-72">
+                    <mat-header-cell mat-header-cell *matHeaderCellDef> Tiempo </mat-header-cell>
+                    <mat-cell *matCellDef="let row" cdkDrag> {{row.count}} </mat-cell>
+                </ng-container>-->
+                <ng-container matColumnDef="tiempo_respuesta" class="min-w-72">
+                    <mat-header-cell mat-header-cell *matHeaderCellDef> Tiempo </mat-header-cell>
+                    <mat-cell *matCellDef="let row" cdkDrag> {{row.tiempo_respuesta}} </mat-cell>
+                </ng-container>
+
+                <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                <mat-row *matRowDef="let row; columns: displayedColumns;"
+                         cdkDrag
+                         [cdkDragData]="row"></mat-row>
+
+            </mat-table>
+        </div>
+    </div>
+</div>

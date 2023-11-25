@@ -1,0 +1,22 @@
+<!-- Header -->
+<div mat-dialog-title class="flex flex-0 items-center justify-between h-16 pr-3 sm:pr-5 pl-6 sm:pl-8 bg-primary text-on-primary">
+    <div class="text-lg font-medium">{{ containerTitle | uppercase }}</div>
+    <button
+        mat-icon-button
+        [tabIndex]="-1"
+        (click)="Close()">
+        <mat-icon
+            class="text-current"
+            [svgIcon]="'heroicons_outline:x'"></mat-icon>
+    </button>
+</div>
+
+<mat-dialog-content class="relative w-full h-full justify-items-center">
+
+    <erp-claim-report [reclamo] = "claim" *ngIf="containerTitle == 'informe'"></erp-claim-report>
+    <erp-claim-answer [reclamo] = "claim" *ngIf="containerTitle === 'respuesta'"></erp-claim-answer>
+    <erp-claim-files [reclamo] = "claim" *ngIf="containerTitle === 'documento'"></erp-claim-files>
+    <erp-claim-gantt [reclamo] = "claim" *ngIf="containerTitle === 'gantt'"></erp-claim-gantt>
+
+</mat-dialog-content>
+

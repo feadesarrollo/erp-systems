@@ -1,0 +1,422 @@
+<div class="flex flex-col w-full">
+    <!-- View mode -->
+    <ng-container *ngIf="!editMode">
+
+        <!-- Header -->
+        <div class="relative w-full h-40 sm:h-48 px-8 sm:px-12 bg-accent-100 dark:bg-accent-700">
+            <!-- Close button -->
+            <div class="flex items-center justify-end w-full max-w-3xl mx-auto pt-6">
+                <button
+                    mat-icon-button
+                    [matTooltip]="'Cerrar'"
+                    [routerLink]="['../']">
+                    <mat-icon
+                        class="text-white"
+                        [svgIcon]="'heroicons_outline:x-circle'"></mat-icon>
+                </button>
+            </div>
+        </div>
+
+        <!-- Organization -->
+        <div class="relative flex flex-col flex-auto items-center p-6 pt-0 sm:p-12 sm:pt-0">
+            <div class="w-full max-w-3xl">
+
+                <!-- Avatar and actions -->
+                <div class="flex flex-auto items-end -mt-16">
+                    <!-- Avatar -->
+                    <div class="flex items-center justify-center w-32 h-32 rounded-full overflow-hidden ring-4 ring-bg-card">
+                        <!--<img
+                            class="object-cover w-full h-full"
+                            *ngIf="role.avatar"
+                            [src]="role.avatar">-->
+                        <div
+                            class="flex items-center justify-center w-full h-full rounded overflow-hidden uppercase text-8xl font-bold leading-none bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-200">
+                            {{organization.nombre_unidad.charAt(0)}}
+                        </div>
+                    </div>
+                    <!-- Actions -->
+                    <div class="flex items-center ml-auto mb-1">
+                        <button
+                            mat-stroked-button
+                            (click)="toggleEditMode(true)">
+                            <mat-icon
+                                class="icon-size-5"
+                                [svgIcon]="'heroicons_solid:pencil-alt'"></mat-icon>
+                            <span class="ml-2">Editar</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Name -->
+                <div class="mt-3 text-2xl font-bold truncate">{{organization.nombre_unidad}}</div>
+
+                <div class="flex flex-col mt-4 pt-6 border-t space-y-8">
+                    <!-- Fields -->
+                    <ng-container>
+                        <div class="flex text-primary">
+                            <div class="w-full flex-auto gt-xs:pr-3" appearance="fill">
+                                <mat-label class="leading-6 font-bold text-lg">CODIGO</mat-label>
+                                <div class="flex sm:items-center">
+                                    <mat-icon [svgIcon]="'heroicons_solid:identification'"></mat-icon>
+                                    <div class="ml-6 leading-6">{{organization.codigo}}</div>
+                                </div>
+                            </div>
+
+                            <div class="boby-mat-no-subscript boby-mat-dense flex-auto w-full ml-2 sm:ml-4">
+                                <mat-label class="leading-6 font-bold text-lg">NIVEL ORGANIZACIONAL</mat-label>
+                                <div class="flex sm:items-center">
+                                    <mat-icon [svgIcon]="'heroicons_solid:identification'"></mat-icon>
+                                    <div class="ml-6 leading-6">{{organization.nombre_nivel}}</div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </ng-container>
+
+                    <!-- Fields -->
+                    <ng-container>
+                        <div class="flex text-primary">
+                            <div class="boby-mat-no-subscript boby-mat-dense w-full flex-auto">
+                                <mat-label class="leading-6 font-bold text-lg">NOMBRE</mat-label>
+                                <div class="flex sm:items-center">
+                                    <mat-icon [svgIcon]="'heroicons_solid:identification'"></mat-icon>
+                                    <div class="ml-6 leading-6">{{organization.nombre_unidad}}</div>
+                                </div>
+                            </div>
+
+                            <div class="w-full boby-mat-dense flex-auto gt-xs:pr-3 ml-2 sm:ml-4" appearance="fill">
+                                <mat-label class="leading-6 font-bold text-lg">DESCRIPCIÓN</mat-label>
+                                <div class="flex sm:items-center">
+                                    <mat-icon [svgIcon]="'heroicons_solid:user-circle'"></mat-icon>
+                                    <div class="ml-6 leading-6">{{organization.descripcion}}</div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </ng-container>
+
+                    <!-- Fields -->
+                    <ng-container>
+                        <div class="flex text-primary">
+                            <div class="w-full boby-mat-dense flex-auto gt-xs:pr-3" appearance="fill">
+                                <mat-label class="leading-6 font-bold text-lg">CARGO</mat-label>
+                                <div class="flex sm:items-center">
+                                    <mat-icon [svgIcon]="'heroicons_solid:identification'"></mat-icon>
+                                    <div class="ml-6 leading-6">{{organization.nombre_cargo}}</div>
+                                </div>
+                            </div>
+
+                            <div class="w-full boby-mat-dense flex-auto gt-xs:pr-3 ml-2 sm:ml-4" appearance="fill">
+                                <mat-label class="leading-6 font-bold text-lg">CARGO INDIVIDUAL</mat-label>
+                                <div class="flex sm:items-center">
+                                    <mat-icon [svgIcon]="'heroicons_solid:location-marker'"></mat-icon>
+                                    <div class="ml-6 leading-6">{{organization.cargo_individual}}</div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </ng-container>
+
+                    <!-- Fields -->
+                    <ng-container>
+                        <div class="flex text-primary">
+                            <div class="w-full boby-mat-dense flex-auto gt-xs:pr-3" appearance="fill">
+                                <mat-label class="leading-6 font-bold text-lg">PRESUPUESTA</mat-label>
+                                <div class="flex sm:items-center">
+                                    <mat-icon [svgIcon]="'heroicons_solid:globe'"></mat-icon>
+                                    <div class="ml-6 leading-6">{{organization.presupuesta}}</div>
+                                </div>
+                            </div>
+
+                            <div class="w-full boby-mat-dense flex-auto gt-xs:pr-3 ml-2 sm:ml-4" appearance="fill">
+                                <mat-label class="leading-6 font-bold text-lg">NODO BASE</mat-label>
+                                <div class="flex sm:items-center">
+                                    <mat-icon [svgIcon]="'heroicons_solid:device-mobile'"></mat-icon>
+                                    <div class="ml-6 leading-6">{{organization.nodo_base}}</div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </ng-container>
+
+                    <!-- Fields -->
+                    <ng-container>
+                        <div class="flex text-primary">
+                            <div class="w-full boby-mat-dense flex-auto gt-xs:pr-3" appearance="fill">
+                                <mat-label class="leading-6 font-bold text-lg">CORRESPONDENCIA</mat-label>
+                                <div class="flex sm:items-center">
+                                    <mat-icon [svgIcon]="'heroicons_solid:phone'"></mat-icon>
+                                    <div class="ml-6 leading-6">{{organization.correspondencia}}</div>
+                                </div>
+                            </div>
+
+                            <div class="w-full boby-mat-dense flex-auto gt-xs:pr-3 ml-2 sm:ml-4" appearance="fill">
+                                <mat-label class="leading-6 font-bold text-lg">GERENCIA</mat-label>
+                                <div class="flex sm:items-center">
+                                    <mat-icon [svgIcon]="'heroicons_solid:mail'"></mat-icon>
+                                    <div class="ml-6 leading-6">{{organization.gerencia}}</div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </ng-container>
+                </div>
+
+            </div>
+        </div>
+    </ng-container>
+
+    <!-- Edit mode -->
+    <ng-container *ngIf="editMode">
+
+        <!-- Header -->
+        <div class="relative w-full h-40 sm:h-48 px-8 sm:px-12 bg-accent-100 dark:bg-accent-700">
+            <!-- Close button -->
+            <div class="flex items-center justify-end w-full max-w-3xl mx-auto pt-6">
+                <button
+                    mat-icon-button
+                    [matTooltip]="'Cerrar'"
+                    [routerLink]="['../']">
+                    <mat-icon
+                        class="text-white"
+                        [svgIcon]="'heroicons_outline:x-circle'"></mat-icon>
+                </button>
+            </div>
+        </div>
+
+        <!-- Contact form -->
+        <div class="relative flex flex-col flex-auto items-center px-6 sm:px-12">
+            <div class="w-full max-w-3xl">
+                <form [formGroup]="OrgaChartForm">
+
+                    <!-- Avatar -->
+                    <div class="flex flex-auto items-end -mt-16">
+                        <div class="relative flex items-center justify-center w-32 h-32 rounded-full overflow-hidden ring-4 ring-bg-card">
+                            <!-- Upload / Remove avatar -->
+                            <div class="absolute inset-0 bg-black bg-opacity-50 z-10"></div>
+                            <div class="absolute inset-0 flex items-center justify-center z-20">
+                                <div>
+                                    <input
+                                        id="avatar-file-input"
+                                        class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                        type="file"
+                                        [multiple]="false"
+                                        [accept]="'image/jpeg, image/png'"
+                                        (change)="uploadAvatar(avatarFileInput.files)"
+                                        #avatarFileInput>
+                                    <label
+                                        class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
+                                        for="avatar-file-input"
+                                        matRipple>
+                                        <mat-icon
+                                            class="text-white"
+                                            [svgIcon]="'heroicons_outline:camera'"></mat-icon>
+                                    </label>
+                                </div>
+                                <div>
+                                    <button
+                                        mat-icon-button
+                                        (click)="removeAvatar()">
+                                        <mat-icon
+                                            class="text-white"
+                                            [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                    </button>
+                                </div>
+                            </div>
+                            <div
+                                class="flex items-center justify-center w-full h-full rounded overflow-hidden uppercase text-8xl font-bold leading-none bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-200"
+                                *ngIf="true">
+                                {{organization.nombre_unidad.charAt(0)}}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fields -->
+                    <div class="mt-8">
+                        <div class="space-y-4">
+                            <ng-container>
+                                <div class="flex">
+                                    <mat-form-field class="w-full boby-mat-dense flex-auto gt-xs:pr-3" appearance="fill">
+                                        <mat-label>Codigo</mat-label>
+                                        <mat-icon
+                                            matPrefix
+                                            class="hidden sm:flex icon-size-5"
+                                            [svgIcon]="'heroicons_solid:identification'"></mat-icon>
+                                        <input matInput [formControlName]="'codigo'">
+                                    </mat-form-field>
+
+                                    <mat-form-field class="boby-mat-no-subscript boby-mat-dense flex-auto w-full ml-2 sm:ml-4">
+                                        <mat-label>Nivel Organizacional</mat-label>
+                                        <mat-icon
+                                            matPrefix
+                                            class="hidden sm:flex icon-size-5"
+                                            [svgIcon]="'heroicons_solid:identification'"></mat-icon>
+                                        <input matInput [formControlName]="'id_nivel_organizacional'">
+                                    </mat-form-field>
+
+                                </div>
+                            </ng-container>
+                        </div>
+                    </div>
+
+                    <!-- Fields -->
+                    <div class="mt-1">
+                        <div class="space-y-1">
+                            <ng-container>
+                                <div class="flex">
+                                    <mat-form-field class="boby-mat-no-subscript boby-mat-dense w-full flex-auto">
+                                        <mat-label>Nombre</mat-label>
+                                        <mat-icon
+                                            matPrefix
+                                            class="hidden sm:flex icon-size-5"
+                                            [svgIcon]="'heroicons_solid:identification'"></mat-icon>
+                                        <input matInput [formControlName]="'nombre_unidad'">
+                                    </mat-form-field>
+
+                                    <mat-form-field class="w-full boby-mat-dense flex-auto gt-xs:pr-3 ml-2 sm:ml-4" appearance="fill">
+                                        <mat-label>Descripción</mat-label>
+                                        <mat-icon
+                                            matPrefix
+                                            class="hidden sm:flex icon-size-5"
+                                            [svgIcon]="'heroicons_solid:identification'"></mat-icon>
+                                        <input matInput [formControlName]="'descripcion'">
+                                    </mat-form-field>
+                                </div>
+                            </ng-container>
+                        </div>
+                    </div>
+
+                    <!-- Fields -->
+                    <div class="mt-1">
+                        <div class="space-y-1">
+                            <ng-container>
+                                <div class="flex">
+                                    <mat-form-field class="w-full boby-mat-dense flex-auto gt-xs:pr-3" appearance="fill">
+                                        <mat-label>Cargo</mat-label>
+                                        <mat-icon
+                                            matPrefix
+                                            class="hidden sm:flex icon-size-5"
+                                            [svgIcon]="'heroicons_solid:identification'"></mat-icon>
+                                        <input matInput [formControlName]="'nombre_cargo'">
+                                    </mat-form-field>
+
+                                    <mat-form-field class="w-full boby-mat-dense flex-auto gt-xs:pr-3 ml-2 sm:ml-4" appearance="fill">
+                                        <mat-label>Cargo Individual</mat-label>
+                                        <mat-icon
+                                            matPrefix
+                                            class="hidden sm:flex icon-size-5"
+                                            [svgIcon]="'heroicons_solid:user-circle'"></mat-icon>
+                                        <mat-select [placeholder]="'Seleccione una opción....'" [formControlName]="'cargo_individual'">
+                                            <mat-option [value]="'si'">si</mat-option>
+                                            <mat-option [value]="'no'">no</mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+
+                                </div>
+                            </ng-container>
+                        </div>
+                    </div>
+
+                    <!-- Fields -->
+                    <div class="mt-1">
+                        <div class="space-y-1">
+                            <ng-container>
+                                <div class="flex">
+                                    <mat-form-field class="w-full boby-mat-dense flex-auto gt-xs:pr-3" appearance="fill">
+                                        <mat-label>Presupuesta</mat-label>
+                                        <mat-icon
+                                            matPrefix
+                                            class="hidden sm:flex icon-size-5"
+                                            [svgIcon]="'heroicons_solid:user-circle'"></mat-icon>
+                                        <mat-select [placeholder]="'Seleccione una opción....'" [formControlName]="'presupuesta'">
+                                            <mat-option [value]="'si'">si</mat-option>
+                                            <mat-option [value]="'no'">no</mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+
+                                    <mat-form-field class="w-full boby-mat-dense flex-auto gt-xs:pr-3 ml-2 sm:ml-4" appearance="fill">
+                                        <mat-label>Nodo Base</mat-label>
+                                        <mat-icon
+                                            matPrefix
+                                            class="hidden sm:flex icon-size-5"
+                                            [svgIcon]="'heroicons_solid:user-circle'"></mat-icon>
+                                        <mat-select [placeholder]="'Seleccione una opción....'" [formControlName]="'nodo_base'">
+                                            <mat-option [value]="'si'">si</mat-option>
+                                            <mat-option [value]="'no'">no</mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+
+                                </div>
+                            </ng-container>
+                        </div>
+                    </div>
+
+                    <!-- Fields -->
+                    <div class="mt-1">
+                        <div class="space-y-1">
+                            <ng-container>
+                                <div class="flex">
+                                    <mat-form-field class="w-full boby-mat-dense flex-auto gt-xs:pr-3" appearance="fill">
+                                        <mat-label>Correspondencia</mat-label>
+                                        <mat-icon
+                                            matPrefix
+                                            class="hidden sm:flex icon-size-5"
+                                            [svgIcon]="'heroicons_solid:user-circle'"></mat-icon>
+                                        <mat-select [placeholder]="'Seleccione una opción....'" [formControlName]="'correspondencia'">
+                                            <mat-option [value]="'si'">si</mat-option>
+                                            <mat-option [value]="'no'">no</mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+
+                                    <mat-form-field class="w-full boby-mat-dense flex-auto gt-xs:pr-3 ml-2 sm:ml-4" appearance="fill">
+                                        <mat-label>Gerencia</mat-label>
+                                        <mat-icon
+                                            matPrefix
+                                            class="hidden sm:flex icon-size-5"
+                                            [svgIcon]="'heroicons_solid:user-circle'"></mat-icon>
+                                        <mat-select [placeholder]="'Seleccione una opción....'" [formControlName]="'gerencia'">
+                                            <mat-option [value]="'si'">si</mat-option>
+                                            <mat-option [value]="'no'">no</mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+
+                                </div>
+                            </ng-container>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex items-center mt-10 -mx-6 sm:-mx-12 py-4 pr-4 pl-1 sm:pr-12 sm:pl-7 border-t bg-gray-50 dark:bg-transparent">
+                        <!-- Delete -->
+                        <button
+                            mat-button
+                            [color]="'warn'"
+                            [matTooltip]="'Borrar'"
+                            (click)="deleteOrganization()">
+                            Borrar
+                        </button>
+                        <!-- Cancel -->
+                        <button
+                            class="ml-auto"
+                            mat-button
+                            [matTooltip]="'Cancelar'"
+                            [routerLink]="['../']">
+                            Cancelar
+                        </button>
+                        <!-- Save -->
+                        <button
+                            class="ml-2"
+                            mat-flat-button
+                            [color]="'primary'"
+                            [disabled]="OrgaChartForm.invalid"
+                            [matTooltip]="'Guardar'"
+                            (click)="postOrganization()">
+                            Guardar
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </ng-container>
+</div>

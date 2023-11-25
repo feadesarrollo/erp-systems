@@ -1,0 +1,92 @@
+<div class="flex flex-col max-w-240 md:min-w-160 max-h-screen -m-6">
+
+    <!-- Header -->
+    <!--<div class="flex flex-0 items-center justify-between h-16 pr-3 sm:pr-5 pl-6 sm:pl-8 bg-primary text-on-primary">
+        <div class="text-lg font-medium">{{_data.nombre_tipo_documento}}</div>
+        <button
+            mat-icon-button
+            [tabIndex]="-1"
+            (click)="Close()">
+            <mat-icon
+                class="text-current"
+                [svgIcon]="'heroicons_outline:x'"></mat-icon>
+        </button>
+    </div>-->
+
+    <!-- Wizard form -->
+    <!--<form
+        class="flex flex-col flex-auto overflow-y-auto"
+        [formGroup]="UploadForm">-->
+    <!--*ngIf="_data.extension === 'pdf'"-->
+    <ngx-doc-viewer
+        [url]="url"
+        viewer="{{viewer_file}}"
+        style="width:130vh;height:100vh;"
+    ></ngx-doc-viewer>
+
+    <!--<ngx-doc-viewer
+        *ngIf="_data.extension !== 'pdf'"
+        [viewerUrl]="url"
+        [url]="url"
+        viewer="office"
+        style="width:100vh;height:100vh;"
+    ></ngx-doc-viewer>-->
+    <!--<ngx-extended-pdf-viewer
+        src="{{url}}"
+        useBrowserLocale="true">
+    </ngx-extended-pdf-viewer>-->
+
+    <!--<div class="w-full boby-mat-dense flex-auto">
+        <input
+            type="file"
+            [multiple]="false"
+            [accept]="'application/pdf, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'"
+            (change)="onUploadArchivo(avatarFileInput.files)"
+            [formControlName]="'archivo'"
+            #avatarFileInput>
+    </div>-->
+
+    <!--<div>
+        <input
+            id="avatar-file-input"
+            class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+            type="file"
+            [multiple]="false"
+            [accept]="'image/jpeg, image/png'"
+            (change)="onUploadArchivo(avatarFileInput.files)"
+            #avatarFileInput>
+        <label
+            class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
+            for="avatar-file-input"
+            matRipple>
+            <mat-icon
+                class="text-white"
+                [svgIcon]="'heroicons_outline:camera'"></mat-icon>
+        </label>
+    </div>-->
+
+
+    <!-- Actions -->
+    <!--<div class="flex flex-col sm:flex-row sm:items-center justify-end mt-4 sm:mt-6">
+        <div class="flex items-center mt-4 sm:mt-0 -ml-2">
+            &lt;!&ndash; Cancelar &ndash;&gt;
+            <button
+                class="sm:mx-3"
+                mat-stroked-button
+                (click)="Close()">
+                <span>Cancelar</span>
+            </button>
+            &lt;!&ndash; Guardar &ndash;&gt;
+            <button
+                class="order-first sm:order-last"
+                mat-flat-button
+                [color]="'primary'"
+                [disabled]="UploadForm.invalid"
+                (click)="onSaveArchivo()">
+                Guardar
+            </button>
+        </div>
+    </div>-->
+    <!--</form>-->
+</div>
+

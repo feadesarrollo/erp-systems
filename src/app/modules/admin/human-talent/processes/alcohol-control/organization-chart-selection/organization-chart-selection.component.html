@@ -1,0 +1,172 @@
+<div class="flex flex-col flex-auto min-w-0">
+
+    <!--<erp-headboard [trayName]="'Volver'" [icon]="'arrow_back'"  [tray]="'psychoactive-program'" [path]="'/system/human-talent/processes/psychoactive-program'"></erp-headboard>-->
+
+    <p-toast></p-toast>
+
+    <!-- Menu -->
+    <div class="flex flex-col shadow bg-card">
+        <div class="flex flex-col flex-0 lg:flex-row items-center max-w-5xl w-full mx-auto px-8 lg:h-18 bg-card">
+            <div class="flex items-center mt-8 mb-4 lg:m-0 lg:ml-auto space-x-6">
+                <button mat-button [color]="'primary'" class="sm:inline-block text-secondary rounded-lg" [matMenuTriggerFor]="controlMenu">Inicio</button>
+                <mat-menu #controlMenu="matMenu" [xPosition]="'after'">
+                    <button mat-menu-item (click)="openDialogLottery()">
+                        <mat-icon [svgIcon]="'mat_solid:change_circle'"></mat-icon>Generar Plan de Pruebas
+                    </button>
+                    <button mat-menu-item [routerLink]="['../']">
+                        <mat-icon [svgIcon]="'mat_solid:article'"></mat-icon>Volver a Calendario de Pruebas
+                    </button>
+                    <button mat-menu-item [routerLink]="['../../../']">
+                        <mat-icon [svgIcon]="'mat_solid:menu_open'"></mat-icon>Volver al Menu Principal
+                    </button>
+                </mat-menu>
+
+                <button mat-button [color]="'primary'" class="sm:inline-block text-secondary rounded-lg" [matMenuTriggerFor]="settingsMenu">Settings</button>
+                <mat-menu #settingsMenu="matMenu" [xPosition]="'after'">
+                    <button mat-menu-item [routerLink]="['/system/human-talent/modules/processes/psychoactive-program/test-type']">
+                        <mat-icon [svgIcon]="'mat_solid:auto_fix_high'"></mat-icon>Tipo Prueba
+                    </button>
+                </mat-menu>
+
+            </div>
+        </div>
+    </div>
+    <!-- Menu -->
+    <!--<div class="bg-card">
+        <div class="flex flex-col w-full max-w-screen-xl mx-auto px-6 sm:px-8">
+            <div class="relative flex self-start pt-2 pb-1 pl-5 pr-4 cursor-pointer overflow-hidden rounded-t-xl border border-b-0 bg-default"
+                 matRipple
+                 [matMenuTriggerFor]="alcoholMenu">
+                <div class="flex items-center">
+                    <div class="overflow-hidden">
+                        <div class="font-medium leading-6 truncate">Inicio</div>
+                    </div>
+                    <div class="flex items-center justify-center pl-2">
+                        <mat-icon
+                            class="icon-size-5"
+                            [svgIcon]="'heroicons_solid:chevron-down'"></mat-icon>
+                    </div>
+                </div>
+                <mat-menu #alcoholMenu="matMenu"
+                          [xPosition]="'after'">
+                    <button
+                        mat-menu-item
+                        (click)="openDialogLottery()">Generar Sorteo
+                    </button>
+                    <button
+                        mat-menu-item
+                        [routerLink]="['/system/human-talent/processes/psychoactive-program']">Volver a Lista Sorteo
+                    </button>
+                </mat-menu>
+            </div>
+        </div>
+    </div>-->
+
+    <!-- Main -->
+    <div class="flex flex-auto justify-center w-full max-w-8xl mx-auto p-6 sm:p-8">
+
+        <!-- Column -->
+        <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 w-full min-w-0">
+            <!-- Tree -->
+            <boby-card class="flex flex-col max-w-140 w-full p-6 sm:p-8 pb-6">
+
+                <div class="flex items-start justify-between">
+                    <div class="text-xl font-semibold tracking-tight leading-6 truncate">ORGANIGRAMA</div>
+                    <div class="ml-2 -mt-2 -mr-3">
+                        <button
+                            mat-icon-button
+                            [matMenuTriggerFor]="orgaMenu">
+                            <mat-icon
+                                class="icon-size-5"
+                                [svgIcon]="'heroicons_solid:dots-vertical'"></mat-icon>
+                        </button>
+                        <mat-menu #orgaMenu="matMenu">
+                            <!--<button mat-menu-item (click)="saveSelection()">Guardar Selección</button>-->
+                            <button mat-menu-item (click)="refreshOrgChart()">Actualizar Organigrama</button>
+                            <button mat-menu-item (click)="deleteSelection()">Quitar Selección</button>
+                        </mat-menu>
+                    </div>
+                </div>
+
+                <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
+
+                    <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle matTreeNodePadding>
+                        <button mat-icon-button disabled></button>
+                        <!-- [style.marginLeft.px]="node.level * 4" -->
+                        <mat-icon  class="mat-icon-rtl-mirror" *ngIf="!node.expandable">
+                            {{'person'}}
+                        </mat-icon>
+                        <mat-checkbox color="primary" class="checklist-leaf-node"
+                                      [checked]="checklistSelection.isSelected(node)"
+                                      (change)="todoLeafItemSelectionToggle(node, $event.checked)">{{node.item.nombre_unidad}}</mat-checkbox>
+                    </mat-tree-node>
+
+                    <mat-tree-node *matTreeNodeDef="let node; when: hasNoContent" matTreeNodePadding>
+                        <button mat-icon-button disabled></button>
+                        <mat-form-field appearance="fill">
+                            <mat-label>New item...</mat-label>
+                            <input matInput #itemValue placeholder="Ex. Lettuce">
+                        </mat-form-field>
+                        <button mat-button (click)="saveNode(node, itemValue.value)">Save</button>
+                    </mat-tree-node>
+
+                    <mat-tree-node *matTreeNodeDef="let node; when: hasChild" matTreeNodePadding>
+
+                        <!--<mat-icon [style.marginLeft.px]="node.level * 16" class="mat-icon-rtl-mirror" *ngIf="!node.expandable">
+                            {{'person'}}
+                        </mat-icon>-->
+                        <!--[style.marginLeft.px]="node.level*18"-->
+                        <mat-icon  class="mat-icon-rtl-mirror" *ngIf="node.expandable">
+                            {{'groups'}}
+                        </mat-icon>
+
+                        <button mat-icon-button matTreeNodeToggle
+                                [attr.aria-label]="'Toggle ' + node.item"
+                                (click)="loadChildren(node)">
+                            <mat-icon class="mat-icon-rtl-mirror">
+                                {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
+                            </mat-icon>
+                        </button>
+                        <mat-checkbox color="primary" [checked]="descendantsAllSelected(node)"
+                                      [indeterminate]="descendantsPartiallySelected(node)"
+                                      (change)="todoItemSelectionToggle(node, $event.checked)">{{node.item.nombre_unidad}}</mat-checkbox>
+                        <!--<button mat-icon-button (click)="addNewItem(node)"><mat-icon>add</mat-icon></button>-->
+                        <mat-progress-bar *ngIf="node.isLoading"
+                                          mode="indeterminate"
+                                          class="example-tree-progress-bar"></mat-progress-bar>
+                    </mat-tree-node>
+
+                </mat-tree>
+            </boby-card>
+
+            <!-- List -->
+            <boby-card class="flex flex-col max-w-140 w-full p-6 sm:p-8 pb-6">
+
+                <div class="flex items-start justify-between">
+                    <div class="text-xl font-semibold tracking-tight leading-6 truncate">LISTA UNIDADES SELECCIONADAS </div>
+                    <div class="ml-2 -mt-2 -mr-3">
+                        <button
+                            mat-icon-button
+                            [matMenuTriggerFor]="listMenu">
+                            <mat-icon
+                                class="icon-size-5"
+                                [svgIcon]="'heroicons_solid:dots-vertical'"></mat-icon>
+                        </button>
+                        <mat-menu #listMenu="matMenu">
+                            <!--<button mat-menu-item>Guardar Lista</button>-->
+                            <button mat-menu-item>Quitar Lista</button>
+                        </mat-menu>
+                    </div>
+                </div>
+
+                <mat-selection-list #shoes>
+                    <mat-list-option color="primary" *ngFor="let unit of selectedUnits">
+                        {{unit.nombre_unidad}} ({{unit.codigo}})
+                    </mat-list-option>
+                </mat-selection-list>
+            </boby-card>
+
+        </div>
+
+    </div>
+</div>

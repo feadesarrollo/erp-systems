@@ -1,0 +1,399 @@
+<div class="sm:absolute sm:inset-0 flex flex-col flex-auto min-w-0 sm:overflow-hidden bg-card dark:bg-transparent">
+    <div class="relative flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between py-4 px-6 md:px-8 border-b">
+        <!-- Actions -->
+        <div class="flex shrink-0 items-end mt-1 sm:mt-0 sm:ml-4">
+
+            <p-toast position="center"></p-toast>
+
+            <!-- Search -->
+            <mat-form-field class="boby-mat-dense boby-mat-no-subscript boby-mat-rounded min-w-64">
+                <mat-icon
+                    class="icon-size-5"
+                    matPrefix
+                    [svgIcon]="'heroicons_solid:search'"></mat-icon>
+                <input
+                    matInput
+                    [formControl]="searchInputControl"
+                    [autocomplete]="'off'"
+                    [placeholder]="'Buscar Recargo Tarifa'">
+            </mat-form-field>
+            <!-- Add motivo button -->
+            <button
+                class="ml-4 rounded-lg"
+                mat-flat-button
+                [color]="'primary'"
+                [matTooltip]="'Recargo Tarifa'"
+                (click)="openNew()">
+                <mat-icon [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
+                <span class="hidden sm:inline-block ml-2 mr-1">Nuevo</span>
+            </button>
+            <button
+                class="ml-2 rounded-lg"
+                mat-flat-button
+                [color]="'primary'"
+                [matTooltip]="'Actualizar'"
+                (click)="refreshRateSurcharge()">
+                <mat-icon [svgIcon]="'heroicons_outline:refresh'"></mat-icon>
+                <span class="hidden sm:inline-block ml-2 mr-1">Actualizar</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="flex flex-auto overflow-auto">
+        <div class="flex flex-col flex-auto sm:mb-18 overflow-auto sm:overflow-y-auto">
+            <table mat-table [dataSource]="dataSource" matSort matTableExporter  #exporter="matTableExporter" [hiddenColumns]="[0]">
+
+                <ng-container matColumnDef="accion" sticky>
+                    <mat-header-cell *matHeaderCellDef aria-label="row actions" class="min-w-32">Acciones</mat-header-cell>
+                    <mat-cell (click)="selectedRateSurcharge = row" *matCellDef="let row" [ngClass]="{ 'text-blue-800 bg-blue-100 dark:text-blue-50 dark:bg-blue-500': row === selectedRateSurcharge }" class="min-w-32">
+                        <button
+                            class="ml-1 -mr-4"
+                            mat-icon-button
+                            [matMenuTriggerFor]="chatsHeaderMenu">
+                            <mat-icon [svgIcon]="'heroicons_outline:dots-vertical'"></mat-icon>
+
+                            <mat-menu #chatsHeaderMenu>
+                                <button mat-menu-item
+                                        (click)="executeCommand('editar')">
+                                    <mat-icon [svgIcon]="'heroicons_outline:pencil-alt'"></mat-icon>
+                                    Editar Recargo Tarifa
+                                </button>
+                                <button mat-menu-item
+                                        (click)="executeCommand('eliminar')">
+                                    <mat-icon [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                    Eliminar Recargo Tarifa
+                                </button>
+                                <button mat-menu-item
+                                        (click)="executeCommand('tarifa')">
+                                    <mat-icon [svgIcon]="'heroicons_outline:cog'"></mat-icon>
+                                    Consultar Tarifa Aterrizaje
+                                </button>
+                                <button mat-menu-item [matMenuTriggerFor]="formatos">
+                                    <mat-icon [svgIcon]="'heroicons_outline:cog'"></mat-icon>
+                                    Exportar Recargo Tarifa
+                                </button>
+                            </mat-menu>
+                        </button>
+                        <mat-menu #formatos="matMenu">
+                            <button mat-menu-item (click)="exporter.exportTable('xls', {fileName:'Recargo Tarifa'})">XLS</button>
+                            <button mat-menu-item (click)="exporter.exportTable('xlsx', {fileName:'Recargo Tarifa'})">XLSX</button>
+                            <button mat-menu-item (click)="exporter.exportTable('csv', {fileName:'Recargo Tarifa'})">CSV</button>
+                            <button mat-menu-item (click)="exporter.exportTable('json', {fileName:'Recargo Tarifa'})">TXT</button>
+                            <button mat-menu-item (click)="exporter.exportTable('txt', {fileName:'Recargo Tarifa'})">JSON</button>
+                        </mat-menu>
+                    </mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="tarifa">
+                    <mat-header-cell *matHeaderCellDef aria-label="row actions" class="min-w-96">Tarifa Aterrizaje</mat-header-cell>
+                    <mat-cell *matCellDef="let row; let i = index" [ngClass]="{ 'text-blue-800 bg-blue-100 dark:text-blue-50 dark:bg-blue-500': row === selectedRateSurcharge }" class="min-w-96">
+                        <ng-container *ngTemplateOutlet="template; context: {$implicit: row}"></ng-container>
+                        <!-- Custom Template -->
+                        <ng-template #template let-context="context">
+
+                            <div class="flex flex-col mt-1 pt-1 border-t border-b mb-1 pb-1">
+                                <!-- Aeropuerto -->
+                                <div class="flex flex-col sm:flex-row sm:items-center -ml-0.5 mt-2 sm:mt-1 space-y-1 sm:space-y-0 sm:space-x-3">
+                                    <ng-container>
+                                        <div class="flex items-center">
+                                            <mat-icon
+                                                class="icon-size-5 text-hint"
+                                                [svgIcon]="'local_airport'"></mat-icon>
+                                            <div class="ml-1.5 text-md text-primary">ATO: </div>
+                                        </div>
+                                    </ng-container>
+                                    <ng-container>
+                                        <div class="flex items-center">
+                                            <div class="ml-1.5 text-md text-secondary">{{row['descriptionAto']}}</div>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                                <!-- Trafico -->
+                                <div class="flex flex-col sm:flex-row sm:items-center -ml-0.5 mt-2 sm:mt-1 space-y-1 sm:space-y-0 sm:space-x-3">
+                                    <ng-container>
+                                        <div class="flex items-center">
+                                            <mat-icon
+                                                class="icon-size-5 text-hint"
+                                                [svgIcon]="'traffic'"></mat-icon>
+                                            <div class="ml-1.5 text-md text-primary">TRAFICO: </div>
+                                        </div>
+                                    </ng-container>
+                                    <ng-container>
+                                        <div class="flex items-center">
+                                            <div class="ml-1.5 text-md text-secondary">{{row['tipoTrafico']}}</div>
+                                        </div>
+                                    </ng-container>
+                                </div>
+
+                                <!-- Peso Minimo, Maximo -->
+                                <div class="flex flex-col sm:flex-row sm:items-center -ml-0.5 mt-2 sm:mt-1 space-y-1 sm:space-y-0 sm:space-x-3">
+                                    <ng-container>
+                                        <div class="flex items-center">
+                                            <mat-icon
+                                                class="icon-size-5 text-hint"
+                                                [svgIcon]="'iconsmind:box_close'"></mat-icon>
+                                            <div class="ml-1.5 text-md text-primary">PESO MIN: </div>
+                                        </div>
+                                    </ng-container>
+                                    <ng-container>
+                                        <div class="flex items-center">
+                                            <div class="ml-1.5 text-md text-secondary">{{row['pesoMinimo']}}</div>
+                                        </div>
+                                    </ng-container>
+
+                                    <ng-container>
+                                        <div class="flex items-center">
+                                            <mat-icon
+                                                class="icon-size-5 text-hint"
+                                                [svgIcon]="'iconsmind:box_close'"></mat-icon>
+                                            <div class="ml-1.5 text-md text-primary">PESO MAX: </div>
+                                        </div>
+                                    </ng-container>
+                                    <ng-container>
+                                        <div class="flex items-center">
+                                            <div class="ml-1.5 text-md text-secondary">{{row['pesoMaximo']}}</div>
+                                        </div>
+                                    </ng-container>
+                                </div>
+
+                                <!-- Moneda -->
+                                <div class="flex flex-col sm:flex-row sm:items-center -ml-0.5 mt-2 sm:mt-1 space-y-1 sm:space-y-0 sm:space-x-3">
+                                    <ng-container>
+                                        <div class="flex items-center">
+                                            <mat-icon
+                                                class="icon-size-5 text-hint"
+                                                [svgIcon]="'local_atm'"></mat-icon>
+                                            <div class="ml-1.5 text-md text-primary">MONEDA: </div>
+                                        </div>
+                                    </ng-container>
+                                    <ng-container>
+                                        <div class="flex items-center">
+                                            <div class="ml-1.5 text-md text-secondary">{{row['currency']}}</div>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </ng-template>
+                    </mat-cell>
+                </ng-container>
+
+                <ng-container *ngFor="let col of cols; let i = index" matColumnDef="{{col.field}}">
+                    <mat-header-cell *matHeaderCellDef mat-sort-header class="{{col.width}}">  {{col.header}} </mat-header-cell>
+                    <mat-cell *matCellDef="let row"
+                              class="{{col.width}}"
+                              (click)="selectedRateSurcharge = row" [ngClass]="{ 'text-blue-800 bg-blue-100 dark:text-blue-50 dark:bg-blue-500': row === selectedRateSurcharge }"
+                    >
+                        {{['startDate','endDate'].includes(col.field) ? (row[col.field] | date:'d/M/yyyy H:mm') : row[col.field] }}
+                    </mat-cell>
+                </ng-container>
+
+                <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+            </table>
+        </div>
+    </div>
+    <mat-paginator
+        class="sm:absolute sm:inset-x-0 sm:bottom-0 border-b sm:border-t sm:border-b-0 z-10 bg-gray-50 dark:bg-transparent"
+        [ngClass]="{'pointer-events-none': isLoading}"
+        [length]="pagination.length"
+        [pageIndex]="pagination.page"
+        [pageSize]="10"
+        [showFirstLastButtons]="true"
+        [pageSizeOptions]="[5, 10, 25, 50, 100]"></mat-paginator>
+
+    <p-dialog [(visible)]="rateSurchargeDialog"
+              [style]="{width: '900px'}"
+              header="TARIFA ATERRIZAJE RECARGO"
+              [modal]="true"
+              class="p-fluid"
+              [maximizable]="true"
+              [formGroup]="RateSurchargeForm">
+        <ng-template pTemplate="content">
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 w-full min-w-0">
+                <div class="sm:col-span-2 md:col-span-4 lg:col-span-2 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden bg-blue-0 dark:bg-transparent">
+                    <div class="grid border-t divide-x -m-6 ">
+                        <div class="flex flex-col items-left justify-left p-6 sm:p-8">
+                            <div class="text-5xl font-semibold leading-none tracking-tighter">
+
+                                <mat-form-field class="w-full boby-mat-dense flex-auto">
+                                    <mat-label class="text-primary">Tarifa Domingo</mat-label>
+                                    <mat-icon
+                                        matSuffix
+                                        class="hidden sm:flex icon-size-5"
+                                        [svgIcon]="'heroicons_solid:currency-dollar'"></mat-icon>
+                                    <input matInput [formControlName]="'tarifaDomingo'">
+                                    <mat-error *ngIf="RateSurchargeForm.get('tarifaDomingo').hasError('pattern')">
+                                        El dato ingresado tiene que ser un numero entero o decimal.
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field class="w-full boby-mat-dense flex-auto">
+                                    <mat-label class="text-primary">Tarifa Feriado</mat-label>
+                                    <mat-icon
+                                        matSuffix
+                                        class="hidden sm:flex icon-size-5"
+                                        [svgIcon]="'heroicons_solid:currency-dollar'"></mat-icon>
+                                    <input matInput [formControlName]="'tarifaFeriado'">
+                                    <mat-error *ngIf="RateSurchargeForm.get('tarifaFeriado').hasError('pattern')">
+                                        El dato ingresado tiene que ser un numero entero o decimal.
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field class="w-full boby-mat-dense flex-auto">
+                                    <mat-label class="text-primary">Tarifa Semana</mat-label>
+                                    <mat-icon
+                                        matSuffix
+                                        class="hidden sm:flex icon-size-5"
+                                        [svgIcon]="'heroicons_solid:currency-dollar'"></mat-icon>
+                                    <input matInput [formControlName]="'tarifaSemana'">
+                                    <mat-error *ngIf="RateSurchargeForm.get('tarifaSemana').hasError('pattern')">
+                                        El dato ingresado tiene que ser un numero entero o decimal.
+                                    </mat-error>
+                                </mat-form-field>
+
+
+
+                                <mat-form-field class="w-full boby-mat-dense flex-auto">
+                                    <mat-label class="text-primary">Servicio</mat-label>
+                                    <mat-icon
+                                        matPrefix
+                                        class="hidden sm:flex icon-size-5"
+                                        [svgIcon]="'heroicons_solid:cube-transparent'"></mat-icon>
+                                    <mat-select [placeholder]="'Seleccione servicio....'" [formControlName]="'servicio'">
+                                        <mat-option [value]="'Domingo'">Domingo</mat-option>
+                                        <mat-option [value]="'Feriado'">Feriado</mat-option>
+                                        <mat-option [value]="'Nocturno'">Nocturno</mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+
+                                <mat-form-field class="w-full boby-mat-dense flex-auto">
+                                    <mat-label class="text-primary">Tarifa Aterrizaje</mat-label>
+                                    <mat-icon
+                                        matSuffix
+                                        class="hidden sm:flex icon-size-5"
+                                        [svgIcon]="'heroicons_solid:paper-airplane'"></mat-icon>
+                                    <input type="text"
+                                           matInput
+                                           [matAutocomplete]="rateLanding"
+                                           (keyup)="searchRateLanding($event.target.value)"
+                                           placeholder="Buscar Tarifa Aterrizaje ..."
+                                           [formControlName]="'tarifaAterrizajeId'">
+                                    <mat-autocomplete autoActiveFirstOption
+                                                      #rateLanding="matAutocomplete"
+                                                      [displayWith]="getRateLanding.bind(this)">
+                                        <mat-option *ngFor="let rateLanding of filteredRateLanding" [value]="rateLanding.id">
+                                            {{rateLanding.rateLanding}}
+                                        </mat-option>
+                                    </mat-autocomplete>
+                                </mat-form-field>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sm:col-span-2 md:col-span-4 lg:col-span-2 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden bg-blue-0 dark:bg-transparent">
+                    <div class="grid border-t divide-x -m-6 ">
+                        <div class="flex flex-col items-left justify-left p-6 sm:p-8">
+                            <div class="text-5xl font-semibold leading-none tracking-tighter">
+
+                                <mat-form-field class="w-full boby-mat-dense flex-auto">
+                                    <mat-label class="text-primary">porcentaje</mat-label>
+                                    <mat-icon
+                                        matSuffix
+                                        class="hidden sm:flex icon-size-5"
+                                        [svgIcon]="'heroicons_solid:switch-horizontal'"></mat-icon>
+                                    <input matInput [formControlName]="'porcentaje'">
+                                    <mat-error *ngIf="RateSurchargeForm.get('porcentaje').hasError('pattern')">
+                                        El dato ingresado tiene que ser un numero entero o decimal.
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field class="w-full boby-mat-dense flex-auto">
+                                    <mat-label class="text-primary">Formula</mat-label>
+                                    <mat-icon
+                                        matSuffix
+                                        class="hidden sm:flex icon-size-5"
+                                        [svgIcon]="'heroicons_solid:table'"></mat-icon>
+                                    <input matInput [formControlName]="'fromula'">
+                                </mat-form-field>
+
+
+                                <mat-form-field class="w-full boby-mat-dense flex-auto">
+                                    <mat-label class="text-primary">Hora Inicio</mat-label>
+                                    <input matInput [formControlName]="'startHr'" [ngxMatTimepicker]="pickerInit" [format]="24" readonly>
+                                    <mat-icon matSuffix (click)="pickerInit">
+                                        watch_later
+                                    </mat-icon>
+                                </mat-form-field>
+                                <ngx-mat-timepicker #pickerInit [enableMeridian]="true"></ngx-mat-timepicker>
+
+                                <mat-form-field class="w-full boby-mat-dense flex-auto">
+                                    <mat-label class="text-primary">Hora Final</mat-label>
+                                    <input matInput [formControlName]="'endHr'" [ngxMatTimepicker]="pickerEnd" [format]="24" readonly>
+                                    <mat-icon matSuffix>
+                                        watch_later
+                                    </mat-icon>
+                                </mat-form-field>
+                                <ngx-mat-timepicker #pickerEnd [enableMeridian]="true"></ngx-mat-timepicker>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </ng-template>
+
+        <ng-template pTemplate="footer">
+            <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+            <button pButton pRipple label="Guardar" icon="pi pi-check" class="p-button-text" (click)="saveRateSurcharge()" [disabled]="RateSurchargeForm.invalid"></button>
+        </ng-template>
+    </p-dialog>
+
+    <p-dialog [(visible)]="deleteRateSurchargeDialog" header="Confirmar" [modal]="true" [style]="{width:'450px'}">
+        <div class="flex align-items-center justify-content-center">
+            <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+            <span>Esta seguro que desea eliminar el recargo de tarifa?</span>
+        </div>
+        <ng-template pTemplate="footer">
+            <button pButton pRipple icon="pi pi-times" class="p-button-text" label="No" (click)="deleteRateSurchargeDialog = false"></button>
+            <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Si" (click)="confirmDeleteSelected()"></button>
+        </ng-template>
+    </p-dialog>
+
+    <p-dialog [(visible)]="rateLandingDialog"
+              [style]="{width: '900px'}"
+              header="TARIFA ATERRIZAJE"
+              [modal]="true"
+              class="p-fluid"
+              [maximizable]="true">
+
+
+        <ng-template pTemplate="content">
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 w-full min-w-0">
+                <table mat-table [dataSource]="dataSourceRL" matSort>
+
+                    <ng-container *ngFor="let col of colsRL; let i = index" matColumnDef="{{col.field}}">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header class="{{col.width}}">  {{col.header}} </mat-header-cell>
+                        <mat-cell *matCellDef="let row"
+                                  class="{{col.width}}">
+                            {{['startDate_yyyyMMdd','endDate_yyyyMMdd'].includes(col.field) ? (row[col.field] | date:'dd/MM/yyyy') : row[col.field] }}
+                        </mat-cell>
+                    </ng-container>
+
+                    <mat-header-row *matHeaderRowDef="displayedColumnsRL"></mat-header-row>
+                    <mat-row *matRowDef="let row; columns: displayedColumnsRL;"></mat-row>
+                </table>
+            </div>
+
+        </ng-template>
+
+        <ng-template pTemplate="footer">
+            <button pButton pRipple class="p-button-text" (click)="hideLanding()"></button>
+        </ng-template>
+    </p-dialog>
+
+</div>
+

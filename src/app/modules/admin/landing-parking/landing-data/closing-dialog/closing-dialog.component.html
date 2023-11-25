@@ -1,0 +1,189 @@
+<div mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle class="flex flex-0 items-center justify-between h-16 pr-3 sm:pr-5 pl-6 sm:pl-8 bg-primary text-on-primary">
+    <div class="text-lg font-medium">Listado Cierres</div>
+    <button
+        mat-icon-button
+        (click)="Close()"
+        [tabIndex]="-1">
+        <mat-icon
+            class="text-current"
+            [svgIcon]="'heroicons_outline:x'"></mat-icon>
+    </button>
+</div>
+
+<mat-dialog-content>
+    <as-split direction="horizontal">
+        <as-split-area [size]="70">
+            <div class="sm:relative sm:inset-0 flex flex-col flex-auto min-w-0 overflow-x-auto bg-card dark:bg-transparent">
+                <div class="relative flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between py-2 px-6 border-b">
+                    <!-- Actions -->
+                    <div class="flex shrink-0 items-end mt-1 sm:mt-0 sm:ml-4">
+
+                        <p-toast></p-toast>
+
+                        <!-- Search -->
+                        <mat-form-field class="boby-mat-dense boby-mat-no-subscript rounded-full min-w-64">
+                            <mat-icon
+                                class="icon-size-5"
+                                matPrefix
+                                [svgIcon]="'heroicons_solid:search'"></mat-icon>
+                            <input
+                                matInput
+                                [formControl]="searchInputControl"
+                                [autocomplete]="'off'"
+                                [placeholder]="'Buscar Cierre'">
+                        </mat-form-field>
+
+                        <button
+                            class="sm:inline-flex ml-2 rounded-lg"
+                            mat-flat-button
+                            [color]="'primary'"
+                            [matTooltip]="'Exportar Registros'"
+                            (click)="exporter.exportTable('xlsx', {fileName:'Registros de Cierre Aterrizajes'})">
+                            <mat-icon class="icon-size-1" [svgIcon]="'iconsmind:file_excel'"></mat-icon>
+                        </button>
+
+                        <button
+                            class="ml-2 rounded-lg"
+                            mat-flat-button
+                            [color]="'primary'"
+                            [matTooltip]="'Actualizar'"
+                            (click)="refreshItems()">
+                            <mat-icon [svgIcon]="'heroicons_outline:refresh'"></mat-icon>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex flex-auto overflow-auto">
+                    <div class="flex flex-col flex-auto sm:mb-18 overflow-auto sm:overflow-y-auto">
+                        <table mat-table [dataSource]="dataSource" matSort matTableExporter  #exporter="matTableExporter" [hiddenColumns]="[]">
+
+                            <!--<ng-container matColumnDef="accion">
+                                <mat-header-cell *matHeaderCellDef aria-label="row actions" class="min-w-24">Acciones</mat-header-cell>
+                                <mat-cell (click)="selectedItem = row" *matCellDef="let row" class="min-w-24" [ngClass]="{ 'text-primary-800 bg-primary-100 dark:text-primary-50 dark:bg-primary-500': row === selectedItem }">
+                                    <button
+                                        class="ml-1 -mr-4"
+                                        mat-icon-button
+                                        [matMenuTriggerFor]="chatsHeaderMenu">
+                                        <mat-icon [svgIcon]="'heroicons_outline:dots-vertical'"></mat-icon>
+
+                                        <mat-menu #chatsHeaderMenu>
+                                            <button mat-menu-item [matMenuTriggerFor]="formatos">
+                                                <mat-icon [svgIcon]="'heroicons_outline:printer'"></mat-icon>
+                                                Exportar Registros
+                                            </button>
+                                        </mat-menu>
+                                    </button>
+
+                                    <mat-menu #formatos="matMenu">
+                                        <button mat-menu-item (click)="exporter.exportTable('xls', {fileName:'Registros de Cierre Aterrizajes'})">
+                                            <mat-icon class="icon-size-1" [svgIcon]="'iconsmind:file_excel'"></mat-icon>XLS
+                                        </button>
+                                        <button mat-menu-item (click)="exporter.exportTable('xlsx', {fileName:'Registros de Cierre Aterrizajes'})">
+                                            <mat-icon class="icon-size-1" [svgIcon]="'iconsmind:file_excel'"></mat-icon>XLSX
+                                        </button>
+                                        <button mat-menu-item (click)="exporter.exportTable('csv', {fileName:'Registros de Cierre Aterrizajes'})">
+                                            <mat-icon class="icon-size-1" [svgIcon]="'iconsmind:file_csv'"></mat-icon>CSV
+                                        </button>
+                                        <button mat-menu-item (click)="exporter.exportTable('txt', {fileName:'Registros de Cierre Aterrizajes'})">
+                                            <mat-icon class="icon-size-1" [svgIcon]="'iconsmind:file_txt'"></mat-icon>TXT
+                                        </button>
+                                        <button mat-menu-item (click)="exporter.exportTable('json', {fileName:'Registros de Cierre Aterrizajes'})">
+                                            <mat-icon class="icon-size-1" [svgIcon]="'iconsmind:file'"></mat-icon>JSON
+                                        </button>
+                                    </mat-menu>
+                                </mat-cell>
+                            </ng-container>-->
+
+                            <ng-container *ngFor="let col of cols; let i = index" matColumnDef="{{col.field}}">
+                                <mat-header-cell *matHeaderCellDef mat-sort-header class="{{col.width}}">  {{col.header}} </mat-header-cell>
+                                <mat-cell *matCellDef="let row"
+                                          class="{{col.width}}"
+                                          (click)="selected(row)" [ngClass]="{ 'text-primary-800 bg-primary-100 dark:text-primary-50 dark:bg-primary-500': row === selectedItem }">
+                                    {{['fecha_reg','fecha_mod','testdate'].includes(col.field) ? (row[col.field] | date:'dd/M/yyyy') :  row[col.field]}}
+                                </mat-cell>
+                            </ng-container>
+
+                            <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                            <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+
+                            <mat-row *matNoDataRow>
+                                <mat-cell colspan="8" class="text-pink-800 dark:text-pink-50 items-center text-center">NO HAY DATOS PARA MOSTRAR!!</mat-cell>
+                            </mat-row>
+
+
+                        </table>
+                    </div>
+
+                </div>
+
+                <mat-paginator
+                    class="sm:relative sm:inset-x-0 sm:bottom-0 border-b sm:border-t sm:border-b-0 z-10 bg-gray-50 dark:bg-transparent"
+                    [length]="pagination.length"
+                    [pageIndex]="pagination.page"
+                    [pageSize]="pagination.size"
+                    [pageSizeOptions]="pageSizeOptions"
+                    [showFirstLastButtons]="true">
+                </mat-paginator>
+            </div>
+        </as-split-area>
+        <as-split-area [size]="30">
+            <div class="bg-card shadow rounded overflow-x-auto">
+
+                <!-- Actions -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between mt-4 sm:mt-6">
+                    <input
+                        id="{{1}}"
+                        class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                        type="file"
+                        [multiple]="false"
+                        [accept]="'audio/*, video/*, image/*, application/pdf, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'"
+                        (change)="onUploadFile(avatarFileInput.files, selectedItem)"
+                        #avatarFileInput >
+                    <label
+                        class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
+                        for="{{1}}"
+                        matRipple>
+                        <mat-icon
+                            [matTooltip]="'Documento, Audio y Video'"
+                            [svgIcon]="'heroicons_solid:paper-clip'"></mat-icon>
+                    </label>
+                </div>
+
+                <ng-container>
+                    <div class="font-medium">Lista de Archivos</div>
+                    <div class="flex flex-wrap -m-2 mt-2">
+                        <ng-container *ngFor="let file of files; trackBy:trackByFn">
+                            <a class="flex flex-col w-40 h-40 m-2 p-4 shadow rounded-2xl cursor-pointer bg-card"
+                               (click)="fileAction('print', file)">
+                                <div class="aspect-w-9 aspect-h-6">
+                                    <div class="flex items-center justify-center">
+                                        <!-- Icons -->
+                                        <div class="relative">
+                                            <mat-icon
+                                                class="icon-size-14 text-hint"
+                                                [svgIcon]="'iconsmind:file'"></mat-icon>
+                                            <div
+                                                class="absolute left-0 bottom-0 px-1.5 rounded text-sm font-semibold leading-5 text-white"
+                                                [class.bg-red-600]="['pdf'].includes(file.extension)"
+                                                [class.bg-blue-600]="['doc','docx'].includes(file.extension)"
+                                                [class.bg-green-600]="['xls','xlsx'].includes(file.extension)"
+                                                [class.bg-gray-600]="['mp3','mp4','mpeg','webm','x-msvideo','midi','x-midi','x-wav'].includes(file.extension)"
+                                                [class.bg-amber-600]="['png','jpeg','jpg','gif','webp'].includes(file.extension)">
+                                                {{file.extension.toUpperCase()}}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col flex-auto justify-center text-center text-sm font-medium">
+                                    <div
+                                        class="truncate"
+                                        [matTooltip]="file.name">{{file.name}}</div>
+                                </div>
+                            </a>
+                        </ng-container>
+                    </div>
+                </ng-container>
+            </div>
+        </as-split-area>
+    </as-split>
+</mat-dialog-content>

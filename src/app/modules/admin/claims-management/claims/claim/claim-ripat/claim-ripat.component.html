@@ -1,0 +1,121 @@
+<div mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle class="flex flex-0 items-center justify-between h-8 pr-3 sm:pr-5 pl-6 sm:pl-8 bg-primary text-on-primary">
+    <div class="text-lg font-medium">Regitros RIPAT</div>
+    <button
+        mat-icon-button
+        (click)="Close()"
+        [tabIndex]="-1">
+        <mat-icon
+            class="text-current"
+            [svgIcon]="'heroicons_outline:x'"></mat-icon>
+    </button>
+</div>
+<mat-dialog-content>
+<!-- Main -->
+    <div class="sm:inset-0 flex flex-col flex-auto min-w-0 sm:overflow-hidden bg-card dark:bg-transparent mt-4 sm:mt-5">
+
+        <div class="flex flex-auto overflow-auto">
+            <div class="flex flex-col flex-auto overflow-auto sm:overflow-y-auto">
+                <table mat-table [dataSource]="claims" matSort matTableExporter  #exporter="matTableExporter" [hiddenColumns]="[0]">
+
+                    <ng-container matColumnDef="accion">
+                        <mat-header-cell *matHeaderCellDef aria-label="row actions" class="min-w-32">
+                            <div class="pr-2">
+                                <button
+                                    class="-mr-4"
+                                    mat-icon-button
+                                    [matMenuTriggerFor]="options">
+                                    <mat-icon [svgIcon]="'arrow_drop_down_circle'"></mat-icon>
+                                    <!--<mat-icon svgIcon="heroicons_outline:arrow-circle-down"></mat-icon>-->
+                                    <mat-menu #options>
+                                        <button mat-menu-item [matMenuTriggerFor]="columns">
+                                            <mat-icon [svgIcon]="'view_column'"></mat-icon>
+                                            columnas
+                                        </button>
+                                    </mat-menu>
+                                </button>
+                                <mat-menu #columns="matMenu">
+                                    <mat-checkbox value="{{lc.field}}" [checked]="lc.checked" (change)="showOptions($event)"  class="mat-menu-item" *ngFor="let lc of listCheck">{{lc.header}}</mat-checkbox>
+                                </mat-menu>
+                            </div>
+                            Acciones
+                        </mat-header-cell>
+                        <mat-cell (click)="selectedClaim = row" *matCellDef="let row" [ngClass]="{ 'text-primary-800 bg-primary-100 dark:text-primary-50 dark:bg-primary-500': row === selectedClaim }">
+                            <button
+                                mat-icon-button
+                                [matMenuTriggerFor]="actionMenu">
+                                <mat-icon class="icon-size-5" [svgIcon]="'heroicons_solid:dots-vertical'"></mat-icon>
+
+                                <mat-menu #actionMenu>
+                                    <button mat-menu-item
+                                            [routerLink]="[row.id_reclamo]">
+                                        <mat-icon class="icon-size-5" [svgIcon]="'heroicons_solid:cog'"></mat-icon>
+                                        Consulta Detalles
+                                    </button>
+
+                                    <!--<button mat-menu-item
+                                            (click)="executeCommand('update', row)"
+                                            [disabled]="!this.rolesAllowed.includes('update')">
+                                        <mat-icon class="icon-size-5">{{'edit'}}</mat-icon>
+                                        Editar Reclamo
+                                    </button>
+
+                                    <button mat-menu-item
+                                            (click)="executeCommand('delete', row)"
+                                            [disabled]="!this.rolesAllowed.includes('delete')">
+                                        <mat-icon class="icon-size-5">{{'delete'}}</mat-icon>
+                                        Eliminar Reclamo
+                                    </button>
+
+                                    <button mat-menu-item (click)="executeCommand('informe', row)">
+                                        <mat-icon class="text-current">{{'assignment'}}</mat-icon>
+                                        Consulta Informe
+                                    </button>
+
+                                    <button mat-menu-item (click)="executeCommand('respuesta', row)">
+                                        <mat-icon class="text-current">{{'contact_mail'}}</mat-icon>
+                                        Consulta Respuesta
+                                    </button>
+
+                                    <button mat-menu-item (click)="executeCommand('documento', row)">
+                                        <mat-icon class="text-current">{{'folder_shared'}}</mat-icon>
+                                        Consulta Documentos
+                                    </button>
+
+                                    <button mat-menu-item (click)="executeCommand('gantt', row)">
+                                        <mat-icon class="text-current">{{'account_tree'}}</mat-icon>
+                                        Consulta Gantt
+                                    </button>
+
+                                    <button mat-menu-item *ngIf="row.json_attachment.length == 0" (click)="executeCommand('derive', row)">
+                                        <mat-icon class="text-current">{{'sync_alt'}}</mat-icon>
+                                        Derivar Reclamo
+                                    </button>-->
+                                </mat-menu>
+                            </button>
+
+                        </mat-cell>
+                    </ng-container>
+
+                    <ng-container *ngFor="let col of cols; let i = index" matColumnDef="{{col.field}}">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header class="{{col.width}}">{{col.header}}</mat-header-cell>
+                        <mat-cell *matCellDef="let row"
+                                  class="{{col.width}}"
+                                  (click)="selectedClaim = row" [ngClass]="{ 'text-primary-800 bg-primary-100 dark:text-primary-50 dark:bg-primary-500': row === selectedClaim }">
+                            {{['fecha_reg','fecha_mod','fecha_hora_vuelo','fecha_hora_incidente','fecha_hora_recepcion'].includes(col.field) ? (row[col.field] | date:'d/M/yyyy H:mm') : row[col.field] }}
+                        </mat-cell>
+                    </ng-container>
+
+                    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                    <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+                </table>
+            </div>
+        </div>
+        <mat-paginator class="sm:inset-x-0 sm:bottom-0 border-b sm:border-t sm:border-b-0 z-10 bg-gray-50 dark:bg-transparent"
+                       [ngClass]="{'pointer-events-none': isLoading}"
+                       [length]="pagination.length"
+                       [pageIndex]="pagination.page"
+                       [pageSize]="5"
+                       [pageSizeOptions]="pageSizeOptions"
+                       [showFirstLastButtons]="true"></mat-paginator>
+    </div>
+</mat-dialog-content>

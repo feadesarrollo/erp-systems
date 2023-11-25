@@ -1,0 +1,242 @@
+<div class="sm:absolute sm:inset-0 flex flex-col flex-auto min-w-0 sm:overflow-hidden bg-card dark:bg-transparent">
+    <!-- Menu -->
+    <div class="flex flex-col shadow bg-card">
+        <div class="flex flex-col flex-0 lg:flex-row items-center max-w-5xl w-full mx-auto px-8 lg:h-18 bg-card">
+            <div class="flex items-center mt-8 mb-4 lg:m-0 lg:ml-auto space-x-6">
+                <button mat-button [color]="'primary'" class="sm:inline-block text-secondary rounded-lg" [matMenuTriggerFor]="controlMenu">Acción</button>
+                <mat-menu #controlMenu="matMenu" [xPosition]="'after'">
+                    <button mat-menu-item
+                            [routerLink]="['../']">
+                        <mat-icon [svgIcon]="'mat_solid:menu_open'"></mat-icon>Volver a Lista Sorteo
+                    </button>
+                </mat-menu>
+
+                <button mat-button [color]="'primary'" class="sm:inline-block text-secondary rounded-lg" [matMenuTriggerFor]="settingsMenu">Settings</button>
+                <mat-menu #settingsMenu="matMenu" [xPosition]="'after'">
+                    <button mat-menu-item
+                            [routerLink]="['/system/human-talent/modules/processes/psychoactive-program/organization-chart-selection']">
+                        <mat-icon [svgIcon]="'mat_solid:account_tree'"></mat-icon>Organigrama
+                    </button>
+                    <button mat-menu-item
+                            [routerLink]="['/system/human-talent/modules/processes/psychoactive-program/test-type']">
+                        <mat-icon [svgIcon]="'mat_solid:auto_fix_high'"></mat-icon>Tipo Prueba
+                    </button>
+                </mat-menu>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div [formGroup]="FilterForm" class="relative flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between py-2 px-6">
+        <div class="flex shrink-0 items-end mt-1 sm:mt-0 sm:ml-4">
+            <mat-form-field class="boby-mat-dense boby-mat-no-subscript rounded-full min-w-16" [matTooltip]="'Seleccione GESTIÓN'">
+                <mat-icon
+                    matPrefix
+                    class="hidden sm:flex icon-size-5"
+                    [svgIcon]="'heroicons_solid:calendar'"></mat-icon>
+                <mat-select [formControlName]="'year'"
+                            (selectionChange)="onYearChange($event)"
+                            [placeholder]="'Gestión'">
+                    <mat-option [value]="'blank'">Seleccione Gestión...</mat-option>
+                    <mat-option *ngFor="let year of yearList" [value]="year.id_gestion">
+                        {{year.gestion}}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <!-- Month -->
+            <mat-form-field class="boby-mat-dense boby-mat-no-subscript rounded-full ml-1 min-w-16" [matTooltip]="'Seleccione PERIODO'">
+                <mat-icon
+                    matPrefix
+                    class="hidden sm:flex icon-size-5"
+                    [svgIcon]="'heroicons_solid:calendar'"></mat-icon>
+                <mat-select [formControlName]="'month'"
+                            [placeholder]="'Periodo'">
+                    <mat-option (click)="onMonthChange(month.id_periodo)" *ngFor="let month of monthList" [value]="month.id_periodo">
+                        {{month.literal}}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <mat-form-field class="boby-mat-dense boby-mat-no-subscript rounded-full ml-1 min-w-16" [matTooltip]="'Seleccione DIA'">
+                <mat-icon
+                    matPrefix
+                    class="hidden sm:flex icon-size-5"
+                    [svgIcon]="'heroicons_solid:calendar'"></mat-icon>
+                <mat-select [formControlName]="'day'"
+                            [placeholder]="'Dia'">
+                    <mat-option [value]="'all'" (click)="onDayChange('all')">Todos</mat-option>
+                    <mat-option (click)="onDayChange(day)" *ngFor="let day of dayList" [value]="day">
+                        {{day}}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <mat-form-field class="boby-mat-dense boby-mat-no-subscript rounded-full ml-1" [matTooltip]="'Seleccione TIPO'">
+                <mat-icon
+                    matPrefix
+                    class="hidden sm:flex icon-size-5"
+                    [svgIcon]="'heroicons_solid:check-circle'"></mat-icon>
+                <mat-select [formControlName]="'type'"
+                            [placeholder]="'Tipo'"
+                            (selectionChange)="onTypeChange($event)">
+                    <mat-option [value]="'blank'">Seleccione Tipo...</mat-option>
+                    <mat-option [value]="'with_test'">Realizados</mat-option>
+                    <mat-option [value]="'without_test'">Pendientes</mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+    </div>
+
+    <div class="relative flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between py-2 px-6 border-b">
+        <!-- Actions -->
+        <div class="flex shrink-0 items-end mt-1 sm:mt-0 sm:ml-4">
+
+            <p-toast></p-toast>
+
+            <!-- Search -->
+            <mat-form-field class="boby-mat-dense boby-mat-no-subscript rounded-full min-w-64">
+                <mat-icon
+                    class="icon-size-5"
+                    matPrefix
+                    [svgIcon]="'heroicons_solid:search'"></mat-icon>
+                <input
+                    matInput
+                    [formControl]="searchInputControl"
+                    [autocomplete]="'off'"
+                    [placeholder]="'Buscar Sorteo'">
+            </mat-form-field>
+
+            <button
+                class="sm:inline-flex ml-2 rounded-lg"
+                mat-flat-button
+                [color]="'primary'"
+                [matTooltip]="'Exportar Registros'"
+                (click)="exporter.exportTable('xlsx', {fileName:'Registros de Oficina'})">
+                <mat-icon class="icon-size-1" [svgIcon]="'iconsmind:file_excel'"></mat-icon>
+            </button>
+
+            <button
+                class="ml-2 rounded-lg"
+                mat-flat-button
+                [color]="'primary'"
+                [matTooltip]="'Actualizar'"
+                (click)="refreshDetailsOfficials()">
+                <mat-icon [svgIcon]="'heroicons_outline:refresh'"></mat-icon>
+            </button>
+        </div>
+    </div>
+
+    <div class="flex flex-auto overflow-auto">
+        <div class="flex flex-col flex-auto sm:mb-18 overflow-auto sm:overflow-y-auto">
+            <table mat-table [dataSource]="dataSource" matSort matTableExporter  #exporter="matTableExporter" [hiddenColumns]="[0,1,3]">
+
+                <ng-container matColumnDef="accion">
+                    <mat-header-cell *matHeaderCellDef aria-label="row actions" class="min-w-24">Acciones</mat-header-cell>
+                    <mat-cell (click)="selectedOfficial = row" *matCellDef="let row" class="min-w-24" [ngClass]="{ 'text-primary-800 bg-primary-100 dark:text-primary-50 dark:bg-primary-500': row === selectedOfficial }">
+                        <button
+                            class="ml-1 -mr-4"
+                            mat-icon-button
+                            [matMenuTriggerFor]="chatsHeaderMenu">
+                            <mat-icon [svgIcon]="'heroicons_outline:dots-vertical'"></mat-icon>
+
+                            <mat-menu #chatsHeaderMenu>
+                                <button mat-menu-item [matMenuTriggerFor]="formatos">
+                                    <mat-icon [svgIcon]="'heroicons_outline:printer'"></mat-icon>
+                                    Exportar Registros
+                                </button>
+                                <button mat-menu-item
+                                        (click)="executeCommand('test_detail')">
+                                    <mat-icon [svgIcon]="'heroicons_outline:eye'"></mat-icon>
+                                    Completar Detalle Prueba
+                                </button>
+                                <!--<button mat-menu-item
+                                        (click)="executeCommand('delete')">
+                                    <mat-icon [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                    Eliminar Funcionario
+                                </button>-->
+                            </mat-menu>
+                        </button>
+
+                        <mat-menu #formatos="matMenu">
+                            <button mat-menu-item (click)="exporter.exportTable('xls', {fileName:'Registros de Pruebas Psico Activas'})">
+                                <mat-icon class="icon-size-1" [svgIcon]="'iconsmind:file_excel'"></mat-icon>XLS
+                            </button>
+                            <button mat-menu-item (click)="exporter.exportTable('xlsx', {fileName:'Registros de Pruebas Psico Activas'})">
+                                <mat-icon class="icon-size-1" [svgIcon]="'iconsmind:file_excel'"></mat-icon>XLSX
+                            </button>
+                            <button mat-menu-item (click)="exporter.exportTable('csv', {fileName:'Registros de Pruebas Psico Activas'})">
+                                <mat-icon class="icon-size-1" [svgIcon]="'iconsmind:file_csv'"></mat-icon>CSV
+                            </button>
+                            <button mat-menu-item (click)="exporter.exportTable('txt', {fileName:'Registros de Pruebas Psico Activas'})">
+                                <mat-icon class="icon-size-1" [svgIcon]="'iconsmind:file_txt'"></mat-icon>TXT
+                            </button>
+                            <button mat-menu-item (click)="exporter.exportTable('json', {fileName:'Registros de Pruebas Psico Activas'})">
+                                <mat-icon class="icon-size-1" [svgIcon]="'iconsmind:file'"></mat-icon>JSON
+                            </button>
+                        </mat-menu>
+                    </mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="picture">
+                    <mat-header-cell *matHeaderCellDef aria-label="row actions" class="min-w-24">Fotografia</mat-header-cell>
+                    <mat-cell (click)="selectedOfficial = row" *matCellDef="let row" class="min-w-28 min-h-28 items-center justify-center" [ngClass]="{ 'text-primary-800 bg-primary-100 dark:text-primary-50 dark:bg-primary-500': row === selectedOfficial }">
+                        <div class="flex items-center" matBadge="{{row['test_counter']}}" matBadgePosition="after" matBadgeOverlap="true">
+                            <!--<div class="relative flex flex-0 items-center justify-center w-24 h-24 mr-6 rounded overflow-hidden border">-->
+                            <img
+                                class="w-20 h-20 rounded items-center justify-center"
+                                *ngIf="row['picture']"
+                                [alt]="'Fotografia Funcionario'"
+                                [src]="row['picture']">
+                            <div
+                                class="flex items-center justify-center w-full h-full text-xs font-semibold leading-none text-center uppercase"
+                                *ngIf="!row['picture']">
+                                NO THUMB
+                            </div>
+                            <!--</div>-->
+                        </div>
+                    </mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="status">
+                    <mat-header-cell *matHeaderCellDef aria-label="row actions" class="min-w-32">Estado</mat-header-cell>
+                    <mat-cell (click)="selectedOfficial = row; row['result'] == 'positivo' && viewDocument(row)" *matCellDef="let row" class="min-w-32" [ngClass]="{ 'text-primary-800 bg-primary-100 dark:text-primary-50 dark:bg-primary-500': row === selectedOfficial }">
+                        <!--class="flex items-center cursor-pointer hover:bg-hover" [matTooltip]="'Ver Documento'"-->
+                        <div [ngClass]="{ 'flex items-center cursor-pointer hover:bg-hover': row['result'] == 'positivo', 'flex items-center ': row['document_path'] == ''}" [matTooltip]="row['result'] == 'positivo'?'Ver Documento':''">
+                            <mat-icon  class="w-10 h-10 rounded text-blue-800 bg-blue-100 dark:text-blue-50 dark:bg-blue-500" *ngIf="row['testtype'] == ''" [svgIcon]="'mat_solid:edit_calendar'"></mat-icon>
+                            <mat-icon  class="w-10 h-10 rounded text-green-800 bg-green-100 dark:text-green-50 dark:bg-green-500" *ngIf="row['result'] == 'negativo'" [svgIcon]="'mat_solid:check_circle'"></mat-icon>
+                            <mat-icon  class="w-10 h-10 rounded text-warn-800 bg-warn-100 dark:text-warn-50 dark:bg-warn-500" *ngIf="row['result'] == 'positivo'" [svgIcon]="'mat_solid:check_circle'"></mat-icon>
+                        </div>
+
+
+                    </mat-cell>
+                </ng-container>
+
+                <ng-container *ngFor="let col of cols; let i = index" matColumnDef="{{col.field}}">
+                    <mat-header-cell *matHeaderCellDef mat-sort-header class="{{col.width}}">  {{col.header}} </mat-header-cell>
+                    <mat-cell *matCellDef="let row"
+                              class="{{col.width}}"
+                              (click)="selectedOfficial = row" [ngClass]="{ 'text-primary-800 bg-primary-100 dark:text-primary-50 dark:bg-primary-500': row === selectedOfficial }">
+                        {{['fecha_reg','fecha_mod','testdate'].includes(col.field) ? (row[col.field] | date:'dd/M/yyyy') :  row[col.field]}}
+                    </mat-cell>
+                </ng-container>
+
+                <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+            </table>
+        </div>
+
+    </div>
+    <mat-paginator
+        class="sm:absolute sm:inset-x-0 sm:bottom-0 border-b sm:border-t sm:border-b-0 z-10 bg-gray-50 dark:bg-transparent"
+        [ngClass]="{'pointer-events-none': isLoading}"
+        [length]="pagination.length"
+        [pageIndex]="pagination.page"
+        [pageSize]="7"
+        [showFirstLastButtons]="true"
+        [pageSizeOptions]="[7, 10, 25, 50, 100]"></mat-paginator>
+
+
+</div>
+

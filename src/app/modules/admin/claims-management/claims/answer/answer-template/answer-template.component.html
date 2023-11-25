@@ -1,0 +1,29 @@
+<div class="sm:col-span-2 md:col-span-4 lg:col-span-2 flex flex-col flex-auto p-1 bg-card shadow rounded-2xl bg-blue-0 dark:bg-transparent">
+    <div class="grid divide-x -m-6">
+        <div class="flex flex-col items-center justify-center p-6 sm:p-8">
+            <div class="text-5xl font-semibold leading-none">
+                <editor
+                    apiKey="80ttz6cwbzbd7rb1b5eogko76rqaxlphz776mtmtthsylohd"
+                    [(ngModel)]="content"
+                    [init]="{
+                            base_url: '/tinymce',
+                            suffix: '.min',
+                            menubar: true,
+                            statusbar : false,
+                            language_url: 'assets/langs/es.js',
+                            language: 'es',
+                            promotion: false,
+                            plugins: [
+                                'accordion','advlist','anchor','autolink','lists','link','image','charmap','preview','anchor','searchreplace',
+                                'visualblocks','code','fullscreen','insertdatetime','media','table','help','wordcount','save','template',
+                                'emoticons','quickbars','autoresize'
+                            ],
+                            toolbar: 'undo redo searchreplace | blocks fontfamily fontsize | formatselect | bold italic forecolor backcolor | align lineheight checklist bullist numlist | outdent indent table | removeformat',
+                            font_size_formats: '8px 9px 10px 11px 12px 14px 16px 18px 20px 22px 24px 26px 28px 36px 48px 56px 72px',
+                            font_size_input_default_unit: 'px'
+                          }">
+                </editor>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,185 @@
+
+<div mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle class="flex flex-0 items-center justify-between h-16 pr-3 sm:pr-5 pl-6 sm:pl-8 bg-primary text-on-primary">
+    <div class="text-lg font-medium">Nueva Respuesta</div>
+    <button
+        mat-icon-button
+        (click)="Close()"
+        [tabIndex]="-1">
+        <mat-icon
+            class="text-current"
+            [svgIcon]="'heroicons_outline:x'"></mat-icon>
+    </button>
+</div>
+
+
+<mat-dialog-content [formGroup]="RespuestaForm">
+
+    <div class="bg-card shadow rounded">
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 w-full min-w-0">
+            <div class="sm:col-span-3 flex flex-col flex-auto p-2 bg-card rounded-2xl bg-blue-0 dark:bg-transparent">
+
+                <mat-form-field class="w-full boby-mat-dense flex-auto">
+                    <mat-label>Plantilla Respuesta</mat-label>
+                    <mat-icon
+                        matPrefix
+                        class="hidden sm:flex icon-size-5"
+                        [svgIcon]="'heroicons_solid:office-building'"></mat-icon>
+                    <input type="text"
+                           matInput
+                           [matAutocomplete]="template"
+                           (keyup)="filterByQueryTemplate($event.target.value)"
+                           placeholder="Lista Plantillas ...."
+                           [formControlName]="'id_template'">
+                    <mat-autocomplete autoActiveFirstOption
+                                      #template="matAutocomplete"
+                                      [displayWith]="getTemplateAnswer.bind(this)"
+                                      (optionSelected)="optionSelected($event)">
+                        <mat-option (onSelectionChange)="selectionChange(list)" *ngFor="let list of listTemplate" [value]="list.id_template">
+                            <mat-icon svgIcon="mat_solid:document_scanner"></mat-icon>
+                            <span>{{parse(list.json_template).name}}</span>
+                        </mat-option>
+                    </mat-autocomplete>
+                </mat-form-field>
+
+                <mat-form-field class="w-full boby-mat-dense flex-auto text-on-primary">
+                    <mat-label>Nro. de Cite</mat-label>
+                    <mat-icon
+                        matPrefix
+                        class="hidden sm:flex icon-size-5"
+                        [svgIcon]="'heroicons_solid:credit-card'"></mat-icon>
+                    <input matInput #citeNumber
+                           [formControlName]="'nro_cite'">
+                </mat-form-field>
+
+                <mat-form-field class="w-full boby-mat-dense flex-auto">
+                    <mat-label>Cliente</mat-label>
+                    <mat-icon
+                        matPrefix
+                        class="hidden sm:flex icon-size-5"
+                        [svgIcon]="'heroicons_solid:user-circle'"></mat-icon>
+                    <input matInput
+                           [formControlName]="'destinatario'">
+                </mat-form-field>
+
+                <mat-form-field class="w-full boby-mat-dense flex-auto">
+                    <mat-label>Correos</mat-label>
+                    <mat-icon
+                        matPrefix
+                        class="hidden sm:flex icon-size-5"
+                        [svgIcon]="'heroicons_solid:mail'"></mat-icon>
+                    <input matInput
+                           [formControlName]="'correos'">
+                </mat-form-field>
+
+                <mat-form-field class="boby-mat-dense w-full flex-auto">
+                    <mat-label>Fecha Respuesta</mat-label>
+                    <mat-icon
+                        matPrefix
+                        class="hidden sm:flex icon-size-5"
+                        [svgIcon]="'heroicons_solid:calendar'"></mat-icon>
+                    <input
+                        matInput
+                        [matDatepicker]="dateInf"
+                        [placeholder]="'Fecha Respuesta'"
+                        [formControlName]="'fecha_respuesta'">
+                    <mat-datepicker-toggle
+                        matSuffix
+                        [for]="dateInf"></mat-datepicker-toggle>
+                    <mat-datepicker #dateInf></mat-datepicker>
+                </mat-form-field>
+
+                <mat-form-field class="w-full boby-mat-textarea flex-auto">
+                    <mat-label>Referencia/Asunto</mat-label>
+                    <mat-icon
+                        matPrefix
+                        class="hidden sm:flex icon-size-5"
+                        [svgIcon]="'heroicons_solid:chat'"></mat-icon>
+                    <textarea
+                        matInput
+                        [rows]="2"
+                        [formControlName]="'asunto'"></textarea>
+                </mat-form-field>
+
+                <mat-form-field class="w-full boby-mat-textarea flex-auto">
+                    <mat-label>Recomendación para Evitar Futuros Reclamos</mat-label>
+                    <mat-icon
+                        matPrefix
+                        class="hidden sm:flex icon-size-5"
+                        [svgIcon]="'heroicons_solid:chat'"></mat-icon>
+                    <textarea
+                        matInput
+                        [rows]="2"
+                        [formControlName]="'recomendaciones'"></textarea>
+                </mat-form-field>
+
+                <mat-form-field class="boby-mat-dense w-full flex-auto">
+                    <mat-label>Procedente</mat-label>
+                    <mat-icon
+                        class="icon-size-5"
+                        [svgIcon]="'heroicons_solid:thumb-up'"
+                        matPrefix></mat-icon>
+                    <mat-select [placeholder]="'Seleccione si procede....'" [formControlName]="'procedente'">
+                        <mat-option [value]="'NO'">NO</mat-option>
+                        <mat-option [value]="'SI'">SI</mat-option>
+                        <mat-option [value]="'NINGUNO'">NINGUNO</mat-option>
+                    </mat-select>
+                </mat-form-field>
+
+                <mat-form-field class="boby-mat-dense w-full flex-auto">
+                    <mat-label>Tipo Respuesta</mat-label>
+                    <mat-icon
+                        class="icon-size-5"
+                        [svgIcon]="'heroicons_solid:pencil-alt'"
+                        matPrefix></mat-icon>
+                    <mat-select [placeholder]="'Seleccione tipo respuesta....'"
+                                [formControlName]="'tipo_respuesta'">
+                        <mat-option [value]="'respuesta_final'">respuesta_final</mat-option>
+                        <mat-option [value]="'respuesta_parcial'">respuesta_parcial</mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+
+            <div class="sm:col-span-9 flex flex-col flex-auto p-2 bg-card rounded-2xl bg-blue-0 dark:bg-transparent">
+                <editor [formControlName]="'respuesta'" class="bg-card"
+                        apiKey="80ttz6cwbzbd7rb1b5eogko76rqaxlphz776mtmtthsylohd"
+                        [init]="{
+                            base_url: '/tinymce',
+                            suffix: '.min',
+                            menubar: true,
+                            statusbar : false,
+                            language_url: 'assets/langs/es.js',
+                            language: 'es',
+                            promotion: false,
+                            plugins: [
+                                'accordion','advlist','anchor','autolink','lists','link','image','charmap','preview','anchor','searchreplace',
+                                'visualblocks','code','fullscreen','insertdatetime','media','table','help','wordcount','save','template',
+                                'emoticons','quickbars','autoresize'
+                            ],
+                            toolbar: 'undo redo searchreplace | blocks fontfamily fontsize | formatselect | bold italic forecolor backcolor | align lineheight checklist bullist numlist | outdent indent table | removeformat',
+                            font_size_formats: '8px 9px 10px 11px 12px 14px 16px 18px 20px 22px 24px 26px 28px 36px 48px 56px 72px',
+                            font_size_input_default_unit: 'px'
+                          }"></editor>
+            </div>
+        </div>
+    </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button
+        class="ml-auto rounded-lg"
+        mat-button
+        [matTooltip]="'Cancelar'"
+        (click)="Close()">
+        Cancelar
+    </button>
+    <!-- Save -->
+    <button
+        class="ml-2 rounded-lg"
+        mat-flat-button
+        [color]="'primary'"
+        [disabled]="RespuestaForm.invalid"
+        [matTooltip]="'Guardar'"
+        (click)="createRespuesta()">
+        Guardar
+    </button>
+</mat-dialog-actions>

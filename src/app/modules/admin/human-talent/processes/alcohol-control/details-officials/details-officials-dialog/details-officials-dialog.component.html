@@ -1,0 +1,139 @@
+<div mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle class="flex flex-0 items-center justify-between h-16 pr-3 sm:pr-5 pl-6 sm:pl-8 bg-primary text-on-primary">
+    <div class="text-lg font-medium">DETALLE PRUEBA</div>
+    <button
+        mat-icon-button
+        (click)="Close()"
+        [tabIndex]="-1">
+        <mat-icon
+            class="text-current"
+            [svgIcon]="'heroicons_outline:x'"></mat-icon>
+    </button>
+</div>
+
+<mat-dialog-content [formGroup]="TestForm">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 w-full min-w-0">
+        <div class="sm:col-span-2 md:col-span-4 lg:col-span-2 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden bg-blue-0 dark:bg-transparent">
+            <div class="grid divide-x -m-6 ">
+                <div class="flex flex-col items-left justify-left p-6 sm:p-8">
+                    <div class="text-5xl font-semibold leading-none tracking-tighter">
+
+                        <mat-form-field appearance="fill" class="w-full flex-auto">
+                            <mat-label>Fecha Prueba</mat-label>
+
+                            <input
+                                matInput
+                                [matDatepicker]="testDate"
+                                [formControlName]="'testdate'">
+                            <mat-datepicker-toggle
+                                matIconSuffix
+                                [for]="testDate"></mat-datepicker-toggle>
+                            <mat-datepicker #testDate disabled="false"></mat-datepicker>
+                        </mat-form-field>
+
+
+                        <mat-form-field class="w-full boby-mat-dense flex-auto" appearance="fill">
+                            <mat-label>Tipo Prueba</mat-label>
+                            <mat-icon
+                                matPrefix
+                                class="hidden sm:flex icon-size-5"
+                                [svgIcon]="'heroicons_solid:tag'"></mat-icon>
+                            <mat-select [formControlName]="'testtype'">
+                                <mat-option *ngFor="let test of testTypeList" [value]="test.nombre">
+                                    {{test.nombre}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sm:col-span-2 md:col-span-4 lg:col-span-2 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden bg-blue-0 dark:bg-transparent">
+            <div class="grid divide-x -m-6">
+                <div class="flex flex-col items-left justify-left p-6 sm:p-8">
+                    <div class="text-5xl font-semibold leading-none">
+
+                        <mat-form-field class="w-full fuse-mat-dense flex-auto">
+                            <mat-label>Resultado</mat-label>
+                            <mat-icon
+                                matPrefix
+                                class="hidden sm:flex icon-size-5"
+                                [svgIcon]="'heroicons_solid:check-circle'"></mat-icon>
+                            <mat-select [formControlName]="'result'"
+                                        (selectionChange)="onSelectionChange($event)">
+                                <mat-option [value]="'positivo'">positivo</mat-option>
+                                <mat-option [value]="'negativo'">negativo</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                        <!--<mat-form-field *ngIf="selectionChange == 'positivo'" class="w-full fuse-mat-dense flex-auto">
+                            <mat-label >Archivo</mat-label>
+                            <input [formControlName]="'fileTest'"
+                                   id="{{_data.selectedOfficial.ci}}"
+                                   type="file"
+                                   [multiple]="false"
+                                   [accept]="'application/pdf, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'"
+                                   (change)="onFileChange(fileInput.files)"
+                                   #fileInput>
+                        </mat-form-field>-->
+
+                        <div *ngIf="selectionChange == 'positivo'" class="w-full fuse-mat-dense flex-auto">
+                            <input
+                                   id="{{_data.selectedOfficial.ci}}"
+                                   class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                   type="file"
+                                   [multiple]="false"
+                                   [accept]="'application/pdf, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'"
+                                   (change)="onFileChange(fileInput.files)"
+                                   #fileInput>
+                            <label
+                                class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
+                                for="{{_data.selectedOfficial.ci}}"
+                                matRipple>
+                                <mat-icon
+                                    [matTooltip]="'Subir Documento'"
+                                    [svgIcon]="'heroicons_outline:upload'"></mat-icon>
+                            </label>
+                        </div>
+
+                        <mat-form-field class="w-full fuse-mat-dense flex-auto">
+                            <mat-label>Prueba Confirmatoria</mat-label>
+                            <mat-icon
+                                matPrefix
+                                class="hidden sm:flex icon-size-5"
+                                [svgIcon]="'heroicons_solid:check-circle'"></mat-icon>
+                            <mat-select [formControlName]="'testconfirm'">
+                                <mat-option [value]="'positivo'">positivo</mat-option>
+                                <mat-option [value]="'negativo'">negativo</mat-option>
+                                <mat-option [value]="'No se realizo'" selected>No se realizo</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <!-- Cancel -->
+    <button
+        class="ml-auto rounded-lg"
+        mat-button
+        [matTooltip]="'Cancelar'"
+        (click)="Close()">
+        Cancelar
+    </button>
+    <!-- Save -->
+    <button
+        class="ml-2 rounded-lg"
+        mat-flat-button
+        [color]="'primary'"
+        [disabled]="TestForm.invalid"
+        [matTooltip]="'Guardar'"
+        (click)="completeDetail()">
+        Guardar
+    </button>
+</mat-dialog-actions>

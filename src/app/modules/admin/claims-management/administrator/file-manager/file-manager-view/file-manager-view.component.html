@@ -1,0 +1,35 @@
+<div mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle class="flex flex-0 items-center justify-between h-8 pr-3 sm:pr-5 pl-6 sm:pl-8 bg-primary text-on-primary">
+    <div class="text-lg font-medium">{{title}}</div>
+    <button
+        mat-icon-button
+        (click)="Close()"
+        [tabIndex]="-1">
+        <mat-icon
+            class="text-current"
+            [svgIcon]="'heroicons_outline:x'"></mat-icon>
+    </button>
+</div>
+<mat-dialog-content>
+    <editor
+        [formControl]="searchInputControl"
+        [(ngModel)]="content"
+        apiKey="80ttz6cwbzbd7rb1b5eogko76rqaxlphz776mtmtthsylohd"
+        [init]="{
+        base_url: '/tinymce',
+        suffix: '.min',
+        menubar: true,
+        statusbar : false,
+        language_url: 'assets/langs/es.js',
+        language: 'es',
+        promotion: false,
+        plugins: [
+            'accordion','advlist','anchor','autolink','lists','link','image','charmap','preview','anchor','searchreplace',
+            'visualblocks','code','fullscreen','insertdatetime','media','table','help','wordcount','save','template',
+            'emoticons','quickbars','autoresize'
+        ],
+        toolbar: 'undo redo searchreplace | blocks fontfamily fontsize | formatselect | bold italic forecolor backcolor | align lineheight checklist bullist numlist | outdent indent table | removeformat',
+        font_size_formats: '8px 9px 10px 11px 12px 14px 16px 18px 20px 22px 24px 26px 28px 36px 48px 56px 72px',
+        font_size_input_default_unit: 'px'
+      }"
+    ></editor>
+</mat-dialog-content>

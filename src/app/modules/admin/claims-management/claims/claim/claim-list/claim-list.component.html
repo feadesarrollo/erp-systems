@@ -1,0 +1,446 @@
+<div class="absolute inset-0 flex flex-col min-w-0 overflow-y-auto" cdkScrollable>
+
+    <!-- Menu -->
+    <div class="flex flex-col shadow bg-card">
+        <div class="flex flex-col flex-0 lg:flex-row items-center max-w-5xl w-full mx-auto px-8 lg:h-18 bg-card">
+            <div class="flex items-center mt-8 mb-4 lg:m-0 lg:ml-auto space-x-6">
+
+                <button mat-button [color]="'primary'" class="sm:inline-block text-secondary rounded-lg" [matMenuTriggerFor]="controlMenu">Inicio</button>
+                <mat-menu #controlMenu="matMenu" [xPosition]="'after'">
+                    <button mat-menu-item (click)="openDialogRipat()">
+                        <mat-icon [svgIcon]="'mat_solid:mark_email_read'"></mat-icon>Reclamos Ripat
+                    </button>
+                </mat-menu>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div class="flex flex-auto p-3 sm:p-5">
+        <div class="flex flex-col flex-auto w-full max-w-xs sm:max-w-5xl mx-auto">
+            <!-- Filters -->
+            <div  [formGroup]="FilterForm" class="flex flex-col sm:flex-row items-center justify-between w-full max-w-xs sm:max-w-none">
+
+                <!-- Gestion -->
+                <mat-form-field class="boby-mat-no-subscript boby-mat-dense w-full sm:w-32 mt-2" [matTooltip]="'Seleccione GESTIÓN'">
+                    <mat-icon
+                        matPrefix
+                        class="hidden sm:flex icon-size-5"
+                        [svgIcon]="'heroicons_solid:calendar'"></mat-icon>
+                    <mat-select [formControlName]="'year'"
+                                (selectionChange)="onGestionChange($event)"
+                                [placeholder]="'Gestión'">
+                        <mat-option *ngFor="let year of listYear" [value]="year.id_gestion">
+                            {{year.gestion}}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+
+                <mat-form-field class="boby-mat-no-subscript boby-mat-dense w-full sm:w-64 mt-2 ml-1" [matTooltip]="'Seleccione ESTADO'">
+                    <mat-select
+                        [formControlName]="'state'"
+                        [value]="'borrador'"
+                        (selectionChange)="filterByState($event)">
+                        <ng-container *ngFor="let state of statesByOfficial; trackBy: trackByFn">
+                            <mat-option [value]="state.id">{{state.nombre}}</mat-option>
+                        </ng-container>
+                    </mat-select>
+                </mat-form-field>
+
+                <mat-form-field class="boby-mat-no-subscript boby-mat-dense w-full sm:w-96 mt-2 ml-1"
+                                [floatLabel]="'always'">
+                    <mat-icon
+                        matPrefix
+                        class="icon-size-5"
+                        [svgIcon]="'heroicons_solid:search'"></mat-icon>
+                    <input
+                        [formControlName]="'query'"
+                        placeholder="Buscar por frd, cliente, numero tramite."
+                        matInput
+                        #query>
+                </mat-form-field>
+
+
+                <div class="relative flex flex-col sm:justify-between mt-2">
+                    <div class="flex shrink-0 items-end sm:ml-4">
+                        <button
+                            class="mt-0 sm:mt-0 sm:ml-auto rounded-lg"
+                            mat-flat-button
+                            [color]="'primary'"
+                            [matTooltip]="'Nuevo Reclamo'"
+                            (click)="createReclamo()"
+                            *ngIf=" selectedState == 'borrador' && this.rolesAllowed.includes('create')">
+                            <mat-icon [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
+                            <!--<span class="ml-2">Nuevo</span>-->
+                        </button>
+
+                        <button
+                            class="ml-2 rounded-lg"
+                            mat-flat-button
+                            [color]="'primary'"
+                            [matTooltip]="'Actualizar'"
+                            (click)="reloadReclamo()">
+                            <mat-icon [svgIcon]="'heroicons_outline:refresh'"></mat-icon>
+                            <!--<span class="ml-2">Actualizar</span>-->
+                        </button>
+
+                        <mat-button-toggle-group #group="matButtonToggleGroup"
+                                                 class="ml-2"
+                                                 (change)="toggleChange($event)">
+                            <mat-button-toggle value="grid" aria-label="Vista Tarjeta"
+                                               [matTooltip]="'Ver Tarjeta'"
+                                               [ngClass]="{'text-primary bg-primary dark:text-primary dark:bg-primary': ['grid'].includes(viewer)}">
+                                <mat-icon>grid_view</mat-icon>
+                            </mat-button-toggle>
+                            <mat-button-toggle value="list" aria-label="Vista Listado"
+                                               [matTooltip]="'Ver Listado'"
+                                               [ngClass]="{'text-primary bg-primary dark:text-primary dark:bg-primary': ['list'].includes(viewer)}">
+                                <mat-icon>view_list</mat-icon>
+                            </mat-button-toggle>
+                        </mat-button-toggle-group>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Claims -->
+            <ng-container *ngIf="this.filteredReclamos.length; else noReclamos">
+                <div *ngIf="viewer=='grid'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-4 sm:mt-5">
+                    <ng-container *ngFor="let rec of filteredReclamos; trackBy: trackByFn">
+                        <!-- Claim -->
+                        <div class="flex flex-col h-96 shadow rounded-2xl overflow-hidden bg-card">
+                             <!--[ngClass]="{'text-primary-800 bg-primary-100 dark:text-primary-50 dark:bg-primary-500': selectedClaim.id_reclamo == rec.id_reclamo}"-->
+                            <div class="flex flex-col p-6">
+                                <div class="flex items-center justify-between -mt-3">
+                                    <!-- Reclamo estado -->
+                                    <ng-container *ngIf="rec.estado">
+                                        <div
+                                            class="py-0.5 px-3 rounded-full text-sm font-semibold"
+                                            [ngClass]="{'text-blue-800 bg-blue-100 dark:text-blue-50 dark:bg-blue-500': ['borrador','anulado','pendiente_asignacion','formulacion_cargos','contencioso_administrativo'].includes(rec.estado),
+                                                        'text-green-800 bg-green-100 dark:text-green-50 dark:bg-green-500': ['pendiente_revision','derivado','respuesta_registrado_ripat','resolucion_administrativa','respuesta_parcial'].includes(rec.estado),
+                                                        'text-pink-800 bg-pink-100 dark:text-pink-50 dark:bg-pink-500': ['registrado_ripat','pendiente_respuesta','archivado_concluido','recurso_revocatorio'].includes(rec.estado),
+                                                        'text-amber-800 bg-amber-100 dark:text-amber-50 dark:bg-amber-500': ['pendiente_informacion','archivo_con_respuesta','en_avenimiento','recurso_jerarquico'].includes(rec.estado)}">
+                                            {{rec.estado}}
+                                        </div>
+                                    </ng-container>
+                                    <!-- Completed at least once -->
+                                    <div class="flex items-center -mr-3">
+                                        <button
+                                            mat-icon-button
+                                            [matMenuTriggerFor]="actionMenu">
+                                            <mat-icon class="icon-size-5" [svgIcon]="'heroicons_solid:dots-vertical'"></mat-icon>
+
+                                            <mat-menu #actionMenu>
+                                                <!--[routerLink]="['./', rec.id_reclamo]"-->
+                                                <button mat-menu-item
+                                                        (click)="executeCommand('update', rec)"
+                                                        [disabled]="!this.rolesAllowed.includes('update')">
+                                                    <mat-icon class="icon-size-5">{{'edit'}}</mat-icon>
+                                                    Editar Reclamo
+                                                </button>
+
+                                                <button mat-menu-item
+                                                        (click)="executeCommand('delete', rec)"
+                                                        [disabled]="!this.rolesAllowed.includes('delete')">
+                                                    <mat-icon class="icon-size-5">{{'delete'}}</mat-icon>
+                                                    Eliminar Reclamo
+                                                </button>
+
+                                                <!--<button mat-menu-item
+                                                        (click)="executeCommand('log', rec)">
+                                                    <mat-icon class="icon-size-5" [svgIcon]="'heroicons_solid:cog'"></mat-icon>
+                                                    Consulta Log Registro
+                                                </button>-->
+
+                                                <button mat-menu-item (click)="executeCommand('informe', rec)">
+                                                    <mat-icon class="text-current">{{'assignment'}}</mat-icon>
+                                                    Consulta Informe
+                                                </button>
+
+                                                <button mat-menu-item (click)="executeCommand('respuesta', rec)">
+                                                    <mat-icon class="text-current">{{'contact_mail'}}</mat-icon>
+                                                    Consulta Respuesta
+                                                </button>
+
+                                                <button mat-menu-item (click)="executeCommand('documento', rec)">
+                                                    <mat-icon class="text-current">{{'folder_shared'}}</mat-icon>
+                                                    Consulta Documentos
+                                                </button>
+
+                                                <button mat-menu-item (click)="executeCommand('gantt', rec)">
+                                                    <mat-icon class="text-current">{{'account_tree'}}</mat-icon>
+                                                    Consulta Gantt
+                                                </button>
+
+                                                <button mat-menu-item *ngIf="rec.json_attachment.length == 0" (click)="executeCommand('derive', rec)">
+                                                    <mat-icon class="text-current">{{'sync_alt'}}</mat-icon>
+                                                    Derivar Reclamo
+                                                </button>
+                                            </mat-menu>
+                                        </button>
+                                        <!--<ng-container *ngIf="['archivo_con_respuesta','respuesta_registrado_ripat'].includes(rec.estado)">
+                                            <mat-icon
+                                                class="icon-size-5 text-green-600"
+                                                [svgIcon]="'heroicons_solid:dots-vertical'"
+                                                [matTooltip]="'El reclamo ya se respondio.'"></mat-icon>
+                                        </ng-container>
+                                        <ng-container *ngIf="!['archivo_con_respuesta','respuesta_registrado_ripat'].includes(rec.estado)">
+                                            <mat-icon
+                                                class="icon-size-5 text-red-600"
+                                                [svgIcon]="'heroicons_solid:badge-check'"
+                                                [matTooltip]="'Reclamo pendiente de respuesta.'"></mat-icon>
+                                        </ng-container>-->
+
+                                    </div>
+                                </div>
+
+                                <!-- Reclamo title & description -->
+                                <div class="mt-2 text-lg font-medium">{{rec.nro_tramite}}</div>
+                                <!--<div class="mt-0.5 line-clamp-2">{{rec.desc_nom_cliente}}</div>-->
+                                <div [ngClass]="{'mt-0.5 line-clamp-2': rec.desc_nom_cliente.length}">{{rec.desc_nom_cliente}}</div>
+
+                                <div class="cursor-pointer" [routerLink]="[rec.id_reclamo]" [matTooltip]="['archivo_con_respuesta','respuesta_registrado_ripat'].includes(rec.estado) ? 'El reclamo ya se respondio.' : 'Reclamo pendiente de respuesta.'">
+                                    <div class="w-12 h-1 my-2 border-t-2"></div>
+                                    <!-- Informe time -->
+                                    <div class="flex items-center leading-5 text-md">
+                                        <mat-icon
+                                            class="icon-size-5"
+                                            [ngClass]="{'text-green-600': rec.dias_informe == 3 && rec.id_informe == null,'text-amber-600': rec.dias_informe == 2 && rec.id_informe == null,'text-warn-600': rec.dias_informe <= 1 && rec.id_informe == null,'text-hint': rec.id_informe != null}"
+                                            [svgIcon]="'heroicons_solid:clock'"></mat-icon>
+                                        <div class="ml-1.5" *ngIf="rec.id_informe != null">Plazo Informe: Con Informe</div>
+                                        <div class="ml-1.5" *ngIf="rec.id_informe == null">Plazo Informe: {{rec.dias_informe > 0 ? rec.dias_informe : ''}} {{rec.dias_informe > 1 ? 'Dias' : rec.dias_informe == 1 ? 'Dia' : 'Vencido'}} </div>
+                                    </div>
+
+                                    <!-- Respuesta time -->
+                                    <div class="flex items-center leading-5 text-md">
+                                        <mat-icon
+                                            class="icon-size-5"
+                                            [ngClass]="{'text-green-600': [10,9,8,7,6,5].includes(+rec.dias_respuesta) && rec.id_respuesta == null,'text-amber-600': [4,3,2].includes(+rec.dias_respuesta) && rec.id_respuesta == null,'text-warn-600': [1,0].includes(+rec.dias_respuesta) && rec.id_respuesta == null,'text-hint': rec.id_respuesta != null}"
+                                            [svgIcon]="'heroicons_solid:clock'"></mat-icon>
+                                        <div class="ml-1.5" *ngIf="rec.id_respuesta != null">Plazo Respuesta: Con Respuesta</div>
+                                        <div class="ml-1.5" *ngIf="rec.id_respuesta == null">Plazo Respuesta: {{rec.dias_respuesta>-1?rec.dias_respuesta:''}} {{rec.dias_respuesta>1 ? 'Dias' : rec.dias_respuesta == 1 ? 'Dia' : 'Vencido'}} </div>
+                                    </div>
+
+                                    <!-- Fecha Limite Respuesta -->
+                                    <div class="flex items-center leading-5 text-md">
+                                        <mat-icon
+                                            class="icon-size-5 text-hint"
+                                            [svgIcon]="'heroicons_solid:calendar'"></mat-icon>
+                                        <div class="ml-1.5">Fecha Respuesta: {{rec.fecha_limite_respuesta | date:'dd/MM/yyyy'}} </div>
+                                    </div>
+
+                                    <!-- Preimpreso -->
+                                    <div class="flex items-center leading-5 text-md">
+                                        <mat-icon
+                                            class="icon-size-5 text-hint"
+                                            [svgIcon]="'heroicons_solid:table'"></mat-icon>
+                                        <div class="ml-1.5">Nro Preimpreso: {{rec.correlativo_preimpreso_frd}} </div>
+                                    </div>
+                                    <!-- FRD -->
+                                    <div class="flex items-center leading-5 text-md">
+                                        <mat-icon
+                                            class="icon-size-5 text-hint"
+                                            [svgIcon]="'heroicons_solid:credit-card'"></mat-icon>
+                                        <div class="ml-1.5">Nro FRD: {{rec.nro_frd}} </div>
+                                    </div>
+
+                                    <!-- USER REG -->
+                                    <div class="flex items-center leading-5 text-md">
+                                        <mat-icon
+                                            class="icon-size-5 text-hint"
+                                            [svgIcon]="'heroicons_solid:user-circle'"></mat-icon>
+                                        <div class="ml-1.5">Creado por: {{rec.usr_reg}} </div>
+                                    </div>
+                                    <!-- FECHA REG -->
+                                    <div class="flex items-center leading-5 text-md">
+                                        <mat-icon
+                                            class="icon-size-5 text-hint"
+                                            [svgIcon]="'heroicons_solid:calendar'"></mat-icon>
+                                        <div class="ml-1.5">Fecha Creación: {{rec.fecha_reg | date:'dd/MM/yyyy'}} </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Footer -->
+                            <div class="flex flex-col w-full mt-auto">
+                                <!-- Course progress -->
+                                <div class="relative h-0.5">
+                                    <div
+                                        class="z-10 absolute inset-x-0 h-6 -mt-3"
+                                        [matTooltip]="100 / 100 | percent"
+                                        [matTooltipPosition]="'above'"
+                                        [matTooltipClass]="'-mb-0.5'"></div>
+                                    <mat-progress-bar
+                                        class="h-0.5"
+                                        [value]="(100 * 100) / 100"></mat-progress-bar>
+                                </div>
+
+                                <!-- Reclamo launch button -->
+                                <div class="z-10 sticky lg:flex bottom-4  py-4">
+                                    <div class="flex items-center justify-center mx-auto  rounded-full shadow-sm">
+                                        <button
+                                            class="flex-0"
+                                            mat-button
+                                            (click)="rec.estado != 'borrador' && goToAnterior(rec)">
+                                            <mat-icon
+                                                class="mr-2"
+                                                [svgIcon]="'heroicons_outline:chevron-double-left'"></mat-icon>
+                                            <span class="mr-1">Anterior</span>
+                                        </button>
+                                        <div class="flex items-center justify-center mx-2.5 font-medium leading-5">
+                                            <!--<span>{{rec.reclamos.estado}}</span>-->
+                                        </div>
+                                        <button
+                                            class="flex-0"
+                                            mat-button
+                                            (click)="goToSiguiente(rec)">
+                                            <span class="ml-1">Siguiente</span>
+                                            <mat-icon
+                                                class="ml-2"
+                                                [svgIcon]="'heroicons_outline:chevron-double-right'"></mat-icon>
+                                        </button>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </ng-container>
+                </div>
+
+                <div *ngIf="viewer=='list'" class="sm:inset-0 flex flex-col flex-auto min-w-0 sm:overflow-hidden bg-card dark:bg-transparent mt-4 sm:mt-5">
+
+                    <div class="flex flex-auto overflow-auto">
+                        <div class="flex flex-col flex-auto overflow-auto sm:overflow-y-auto">
+                            <table mat-table [dataSource]="filteredReclamos" matSort (matSortChange)="sortData($event)" matTableExporter  #exporter="matTableExporter" [hiddenColumns]="[0]">
+
+                                <ng-container matColumnDef="accion">
+                                    <mat-header-cell *matHeaderCellDef aria-label="row actions" class="min-w-32">
+                                        <div class="pr-2">
+                                            <button
+                                                class="-mr-4"
+                                                mat-icon-button
+                                                [matMenuTriggerFor]="options">
+                                                <mat-icon [svgIcon]="'arrow_drop_down_circle'"></mat-icon>
+                                                <!--<mat-icon svgIcon="heroicons_outline:arrow-circle-down"></mat-icon>-->
+                                                <mat-menu #options>
+                                                    <button mat-menu-item [matMenuTriggerFor]="columns">
+                                                        <mat-icon [svgIcon]="'view_column'"></mat-icon>
+                                                        columnas
+                                                    </button>
+                                                </mat-menu>
+                                            </button>
+                                            <mat-menu #columns="matMenu">
+                                                <mat-checkbox value="{{lc.field}}" [checked]="lc.checked" (change)="showOptions($event)"  class="mat-menu-item" *ngFor="let lc of listCheck">{{lc.header}}</mat-checkbox>
+                                            </mat-menu>
+                                        </div>
+                                        Acciones
+                                    </mat-header-cell>
+                                    <mat-cell (click)="selectedClaim = row" *matCellDef="let row" [ngClass]="{ 'text-primary-800 bg-primary-100 dark:text-primary-50 dark:bg-primary-500': row === selectedClaim }">
+                                        <button
+                                            mat-icon-button
+                                            [matMenuTriggerFor]="actionMenu">
+                                            <mat-icon class="icon-size-5" [svgIcon]="'heroicons_solid:dots-vertical'"></mat-icon>
+
+                                            <mat-menu #actionMenu>
+                                                <button mat-menu-item
+                                                        [routerLink]="[row.id_reclamo]">
+                                                    <mat-icon class="icon-size-5" [svgIcon]="'heroicons_solid:cog'"></mat-icon>
+                                                    Consulta Detalles
+                                                </button>
+
+                                                <button mat-menu-item
+                                                        (click)="executeCommand('update', row)"
+                                                        [disabled]="!this.rolesAllowed.includes('update')">
+                                                    <mat-icon class="icon-size-5">{{'edit'}}</mat-icon>
+                                                    Editar Reclamo
+                                                </button>
+
+                                                <button mat-menu-item
+                                                        (click)="executeCommand('delete', row)"
+                                                        [disabled]="!this.rolesAllowed.includes('delete')">
+                                                    <mat-icon class="icon-size-5">{{'delete'}}</mat-icon>
+                                                    Eliminar Reclamo
+                                                </button>
+
+                                                <button mat-menu-item (click)="executeCommand('informe', row)">
+                                                    <mat-icon class="text-current">{{'assignment'}}</mat-icon>
+                                                    Consulta Informe
+                                                </button>
+
+                                                <button mat-menu-item (click)="executeCommand('respuesta', row)">
+                                                    <mat-icon class="text-current">{{'contact_mail'}}</mat-icon>
+                                                    Consulta Respuesta
+                                                </button>
+
+                                                <button mat-menu-item (click)="executeCommand('documento', row)">
+                                                    <mat-icon class="text-current">{{'folder_shared'}}</mat-icon>
+                                                    Consulta Documentos
+                                                </button>
+
+                                                <button mat-menu-item (click)="executeCommand('gantt', row)">
+                                                    <mat-icon class="text-current">{{'account_tree'}}</mat-icon>
+                                                    Consulta Gantt
+                                                </button>
+
+                                                <button mat-menu-item *ngIf="row.json_attachment.length == 0" (click)="executeCommand('derive', row)">
+                                                    <mat-icon class="text-current">{{'sync_alt'}}</mat-icon>
+                                                    Derivar Reclamo
+                                                </button>
+                                            </mat-menu>
+                                        </button>
+
+                                    </mat-cell>
+                                </ng-container>
+
+                                <ng-container *ngFor="let col of cols; let i = index" matColumnDef="{{col.field}}">
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header class="{{col.width}}">{{col.header}}</mat-header-cell>
+                                    <mat-cell *matCellDef="let row"
+                                              class="{{col.width}}"
+                                              (click)="selectedClaim = row" [ngClass]="{ 'text-primary-800 bg-primary-100 dark:text-primary-50 dark:bg-primary-500': row === selectedClaim }">
+                                        {{['fecha_reg','fecha_mod','fecha_hora_vuelo','fecha_hora_incidente','fecha_hora_recepcion'].includes(col.field) ? (row[col.field] | date:'d/M/yyyy H:mm') : row[col.field] }}
+                                    </mat-cell>
+                                </ng-container>
+
+                                <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                                <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+                            </table>
+                        </div>
+                    </div>
+                    <mat-paginator *ngIf="viewer=='list'"
+                        class="sm:inset-x-0 sm:bottom-0 border-b sm:border-t sm:border-b-0 z-10 bg-gray-50 dark:bg-transparent"
+                        [ngClass]="{'pointer-events-npaginatorone': isLoading}"
+                        [length]="totalRows"
+                        [pageIndex]="currentPage"
+                        [pageSize]="pageSize"
+                        [pageSizeOptions]="pageSizeOptions"
+                        [showFirstLastButtons]="true"
+                        (page)="pageChanged($event)"
+                        aria-label="Select page"></mat-paginator>
+                </div>
+
+            </ng-container>
+
+            <!-- No Reclamos -->
+            <ng-template #noReclamos>
+                <div class="flex flex-auto flex-col items-center justify-center bg-gray-100 dark:bg-transparent">
+                    <mat-icon
+                        class="icon-size-20"
+                        [svgIcon]="'iconsmind:file_search'"></mat-icon>
+                    <div class="mt-6 text-2xl font-semibold tracking-tight text-secondary">No hay reclamos!</div>
+                </div>
+            </ng-template>
+        </div>
+
+    </div>
+
+    <mat-paginator *ngIf="viewer=='grid'"
+                   [length]="totalRows"
+                   [pageIndex]="currentPage"
+                   [pageSize]="pageSize"
+                   [pageSizeOptions]="pageSizeOptions"
+                   [showFirstLastButtons]="true"
+                   (page)="pageChanged($event)"
+                   aria-label="Select page">
+    </mat-paginator>
+
+</div>

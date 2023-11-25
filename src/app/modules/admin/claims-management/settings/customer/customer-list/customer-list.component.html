@@ -1,0 +1,151 @@
+<div class="sm:absolute sm:inset-0 flex flex-col flex-auto min-w-0 sm:overflow-hidden bg-card dark:bg-transparent">
+
+    <mat-drawer-container
+        class="flex-auto h-full bg-card dark:bg-transparent"
+        (backdropClick)="onBackdropClicked()">
+
+        <!-- Drawer -->
+        <mat-drawer
+            class="w-full md:w-160 dark:bg-gray-900"
+            [mode]="drawerMode"
+            [opened]="false"
+            [position]="'end'"
+            [disableClose]="true"
+            #matDrawer>
+            <router-outlet></router-outlet>
+        </mat-drawer>
+        <mat-drawer-content class="flex flex-col">
+            <div class="relative flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between py-8 px-6 md:px-8 border-b">
+                <!-- Actions -->
+                <div class="flex shrink-0 items-center mt-50 sm:mt-0 sm:ml-4">
+
+                    <p-toast position="center"></p-toast>
+
+                    <!-- Search -->
+                    <!--<mat-form-field class="boby-mat-dense boby-mat-no-subscript boby-mat-rounded min-w-64">
+                        <mat-icon
+                            class="icon-size-5"
+                            matPrefix
+                            [svgIcon]="'heroicons_solid:search'"></mat-icon>
+                        <input
+                            matInput
+                            [formControl]="searchInputControl"
+                            [autocomplete]="'off'"
+                            [placeholder]="'Buscar clientes'">
+                    </mat-form-field>-->
+                    <mat-form-field class="boby-mat-dense boby-mat-no-subscript boby-mat-rounded min-w-64" [floatLabel]="'always'">
+                        <mat-icon
+                            matPrefix
+                            class="icon-size-5"
+                            [svgIcon]="'heroicons_solid:search'"></mat-icon>
+                        <input
+                            [formControl]="searchInputControl"
+                            (input)="filterByQuery(query.value)"
+                            placeholder="Buscar clientes."
+                            matInput
+                            #query>
+                    </mat-form-field>
+                    <!-- Add New Customer (click)="showNewCustomerDialog()" [routerLink]="['./', 0]" -->
+                    <button
+                        class="ml-4 rounded-lg"
+                        mat-flat-button
+                        [color]="'primary'"
+                        [matTooltip]="'Nuevo Cliente'"
+                        (click)="createCustomer()">
+                        <mat-icon [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
+                        <!--<span class="ml-2 mr-1">Nuevo</span>-->
+                    </button>
+                    <button
+                        class="sm:inline-flex ml-2 rounded-lg"
+                        mat-flat-button
+                        [color]="'primary'"
+                        [matTooltip]="'Exportar Registros'"
+                        (click)="exporter.exportTable('xlsx', {fileName:'Registros de Clientes'})">
+                        <mat-icon class="icon-size-1" [svgIcon]="'iconsmind:file_excel'"></mat-icon>
+                    </button>
+                    <button
+                        class="ml-4 rounded-lg"
+                        mat-flat-button
+                        [color]="'primary'"
+                        [matTooltip]="'Actualizar'"
+                        (click)="refreshCliente()">
+                        <mat-icon [svgIcon]="'heroicons_outline:refresh'"></mat-icon>
+                        <!--<span class="ml-2">Actualizar</span>-->
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex flex-auto overflow-auto">
+                <div class="flex flex-col flex-auto sm:mb-18 overflow-auto sm:overflow-y-auto">
+                    <table mat-table [dataSource]="customers" matSort matTableExporter  #exporter="matTableExporter" [hiddenColumns]="[]">
+
+                        <ng-container matColumnDef="accion" sticky>
+                            <mat-header-cell *matHeaderCellDef aria-label="row actions" class="min-w-32">Acciones</mat-header-cell>
+                            <!--selectedCliente = row-->
+                            <mat-cell (click)="redirect(row)" *matCellDef="let row" [ngClass]="{ 'text-primary-800 bg-primary-100 dark:text-primary-50 dark:bg-primary-500': row === selectedCliente }" class="min-w-32">
+                                <button
+                                    class="ml-1 -mr-4"
+                                    mat-icon-button
+                                    [matMenuTriggerFor]="chatsHeaderMenu">
+                                    <mat-icon [svgIcon]="'heroicons_outline:dots-vertical'"></mat-icon>
+
+                                    <mat-menu #chatsHeaderMenu>
+                                        <!--<button mat-menu-item
+                                                (click)="executeCommand('editar')">
+                                            <mat-icon [svgIcon]="'heroicons_outline:pencil-alt'"></mat-icon>
+                                            Editar Cliente
+                                        </button>-->
+                                        <button mat-menu-item
+                                                (click)="executeCommand('eliminar')">
+                                            <mat-icon [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                            Eliminar Cliente
+                                        </button>
+                                        <!--<button mat-menu-item
+                                                (click)="executeCommand('exportar')">
+                                            <mat-icon [svgIcon]="'heroicons_outline:cog'"></mat-icon>
+                                            Exportar Cliente
+                                        </button>-->
+                                    </mat-menu>
+
+                                </button>
+                            </mat-cell>
+                        </ng-container>
+
+                        <ng-container *ngFor="let col of cols; let i = index" matColumnDef="{{col.field}}">
+                            <mat-header-cell *matHeaderCellDef mat-sort-header class="{{col.width}}">  {{col.header}} </mat-header-cell>
+                            <!--selectedCliente = row-->
+                            <mat-cell *matCellDef="let row"
+                                      class="{{col.width}}"
+                                      (click)="redirect(row)" [ngClass]="{ 'text-primary-800 bg-primary-100 dark:text-primary-50 dark:bg-primary-500': row === selectedCliente }"
+                            >
+                                {{['fecha_reg','fecha_mod'].includes(col.field) ? (row[col.field] | date:'d/M/yyyy H:mm') : row[col.field] }}
+                            </mat-cell>
+                        </ng-container>
+
+                        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                        <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+                    </table>
+                </div>
+            </div>
+            <!--<mat-paginator
+                class="sm:absolute sm:inset-x-0 sm:bottom-0 border-b sm:border-t sm:border-b-0 z-10 bg-gray-50 dark:bg-transparent"
+                [ngClass]="{'pointer-events-none': isLoading}"
+                [length]="totalRows"
+                [pageIndex]="currentPage"
+                [pageSize]="pageSize"
+                [showFirstLastButtons]="true"
+                [pageSizeOptions]="pageSizeOptions"
+                (page)="pageChanged($event)"></mat-paginator>-->
+            <mat-paginator
+                class="sm:absolute sm:inset-x-0 sm:bottom-0 border-b sm:border-t sm:border-b-0 z-10 bg-gray-50 dark:bg-transparent"
+                [ngClass]="{'pointer-events-none': isLoading}"
+                [length]="pagination.length"
+                [pageIndex]="pagination.page"
+                [pageSize]="pagination.size"
+                [pageSizeOptions]="[10, 25, 50, 100]"
+                [showFirstLastButtons]="true"></mat-paginator>
+        </mat-drawer-content>
+
+    </mat-drawer-container>
+
+</div>

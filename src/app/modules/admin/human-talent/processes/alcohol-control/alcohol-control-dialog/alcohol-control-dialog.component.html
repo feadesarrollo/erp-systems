@@ -1,0 +1,225 @@
+<div mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle class="flex flex-0 items-center justify-between h-16 pr-3 sm:pr-5 pl-6 sm:pl-8 bg-primary text-on-primary">
+    <div class="text-lg font-medium">SORTEAR CONTROL PSICOACTIVO</div>
+    <button
+        mat-icon-button
+        (click)="Close()"
+        [tabIndex]="-1">
+        <mat-icon
+            class="text-current"
+            [svgIcon]="'heroicons_outline:x'"></mat-icon>
+    </button>
+</div>
+
+<mat-dialog-content [formGroup]="ControlForm">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 w-full min-w-0">
+        <div class="sm:col-span-2 md:col-span-4 lg:col-span-2 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden bg-blue-0 dark:bg-transparent">
+            <div class="grid divide-x -m-6 ">
+                <div class="flex flex-col items-left justify-left p-6 sm:p-8">
+                    <div class="font-semibold leading-none tracking-tighter">
+
+                        <!-- Days and Percents -->
+
+                        <ng-container *ngFor="let dayAndPercent of ControlForm.get('daysAndPercents')['controls']; let i = index; let first = first; let last = last; trackBy: trackByFn">
+                            <div class="flex">
+
+                                <mat-form-field class="boby-mat-no-subscript flex-auto">
+                                    <mat-label *ngIf="first">Dia</mat-label>
+                                    <mat-icon
+                                        matPrefix
+                                        class="hidden sm:flex icon-size-5"
+                                        [svgIcon]="'heroicons_solid:tag'"></mat-icon>
+                                    <mat-select [placeholder]="'Seleccione los estados del permiso ...'"
+                                                [formControl]="dayAndPercent.get('day')">
+                                        <mat-option *ngFor="let day of listDays" [value]="day.value">
+                                            {{day.name}}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+
+
+                                <mat-form-field class="fuse-mat-no-subscript flex-auto sm:ml-4">
+                                    <mat-label *ngIf="first">Porcentaje ({{overallPercentage}} %)</mat-label>
+                                    <input
+                                        matInput
+                                        type="number"
+                                        maxlength="2"
+                                        [formControl]="dayAndPercent.get('percent')"
+                                        (keyup)="valueChange($event)"
+                                        [placeholder]="'Porcentaje'">
+
+                                </mat-form-field>
+
+                                <!-- Remove day and percent -->
+                                <ng-container *ngIf="!(first && last)">
+                                    <div
+                                        class="flex items-center w-10 pl-2"
+                                        [ngClass]="{'mt-6': first}">
+                                        <button
+                                            class="w-8 h-8 min-h-8"
+                                            mat-icon-button
+                                            (click)="removeDayAndPercentField(i)"
+                                            matTooltip="Eliminar">
+                                            <mat-icon
+                                                class="icon-size-5"
+                                                [svgIcon]="'heroicons_solid:trash'"></mat-icon>
+                                        </button>
+                                    </div>
+                                </ng-container>
+                            </div>
+                        </ng-container>
+
+                        <div
+                            class="group inline-flex items-center mt-2 -ml-4 py-2 px-4 rounded cursor-pointer"
+                            (click)="addDayAndPercentField()">
+                            <mat-icon
+                                class="icon-size-5"
+                                [svgIcon]="'heroicons_solid:plus-circle'"></mat-icon>
+                            <span class="ml-2 font-medium text-secondary group-hover:underline">Añadir Dia y Porcentaje</span>
+                        </div>
+
+                        <!--<ng-container>
+                            <div class="relative flex">
+
+                                <mat-form-field class="fuse-mat-no-subscript flex-auto w-full max-w-24 sm:max-w-40 ml-2 sm:ml-4">
+                                    <mat-label >Dia</mat-label>
+                                    <mat-icon
+                                        matPrefix
+                                        class="hidden sm:flex icon-size-5"
+                                        [svgIcon]="'heroicons_solid:tag'"></mat-icon>
+                                    <input
+                                        matInput
+                                        [formControl]="ControlForm.get('daysAndPercents').get('day')"
+                                        [placeholder]="'Dia'">
+                                </mat-form-field>
+
+                                <mat-form-field class="fuse-mat-no-subscript flex-auto">
+                                    <mat-label>Porcentaje</mat-label>
+                                    <input
+                                        matInput
+                                        [formControl]="ControlForm.get('daysAndPercents').get('percent')"
+                                        [placeholder]="'Porcentaje'">
+
+                                </mat-form-field>
+
+                            </div>
+                        </ng-container>-->
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="sm:col-span-2 md:col-span-4 lg:col-span-2 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden bg-blue-0 dark:bg-transparent">
+            <div class="grid divide-x -m-6">
+                <div class="flex flex-col items-left justify-left p-6 sm:p-8">
+                    <div class="text-5xl font-semibold leading-none">
+
+                        <!--<mat-form-field appearance="fill" class="w-full flex-auto">
+                            <mat-label>Fecha Generación</mat-label>
+                            <input
+                                matInput
+                                [matDatepicker]="generateDate"
+                                [formControlName]="'generationDate'"
+                                (dateChange)="selectGenerateDate($event.value)">
+                            <mat-datepicker-toggle
+                                matIconSuffix
+                                [for]="generateDate"></mat-datepicker-toggle>
+                            <mat-datepicker #generateDate disabled="false"></mat-datepicker>
+                        </mat-form-field>-->
+
+                        <mat-form-field class="w-full boby-mat-dense flex-auto" appearance="fill">
+                            <mat-label>Periodo</mat-label>
+                            <mat-icon
+                                matPrefix
+                                class="hidden sm:flex icon-size-5"
+                                [svgIcon]="'heroicons_solid:tag'"></mat-icon>
+                            <mat-select [formControlName]="'generationDate'"
+                                        (selectionChange)="selectGenerateDate($event)">
+                                <mat-option *ngFor="let period of listPeriods" [value]="period.literal">
+                                    {{period.literal}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="fill" class="w-full flex-auto">
+                            <mat-label>Rango de Sorteo</mat-label>
+                            <mat-date-range-input [rangePicker]="pickerRange" [disabled]="true">
+                                <input matStartDate placeholder="Fecha Inicio" [formControlName]="'startRange'">
+                                <input matEndDate placeholder="Fecha Fin" [formControlName]="'endRange'">
+                            </mat-date-range-input>
+                            <!--<mat-hint>DD/MM/YYYY – DD/MM/YYYY</mat-hint>-->
+                            <mat-datepicker-toggle matIconSuffix [for]="pickerRange"></mat-datepicker-toggle>
+                            <mat-date-range-picker #pickerRange></mat-date-range-picker>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="fill" class="w-full boby-mat-dense flex-auto">
+                            <mat-label>Dias a Sortear (Lunes-Viernes)</mat-label>
+                            <mat-icon
+                                matPrefix
+                                class="hidden sm:flex icon-size-5"
+                                [svgIcon]="'heroicons_solid:credit-card'"></mat-icon>
+                            <input matInput
+                                   type="number"
+                                   [formControlName]="'weekDays'" min="1" max="20">
+                        </mat-form-field>
+
+                        <mat-form-field appearance="fill" class="w-full boby-mat-dense flex-auto">
+                            <mat-label>Dias a Sortear (Sabado, Domingo, Feriado)</mat-label>
+                            <mat-icon
+                                matPrefix
+                                class="hidden sm:flex icon-size-5"
+                                [svgIcon]="'heroicons_solid:credit-card'"></mat-icon>
+                            <input matInput
+                                   type="number"
+                                   [formControlName]="'weekEndDays'" min="0" max="8">
+                        </mat-form-field>
+
+                        <mat-form-field class="flex-auto w-full" appearance="fill">
+                            <mat-label>Funcionario</mat-label>
+                            <mat-icon
+                                matPrefix
+                                class="hidden sm:flex icon-size-5"
+                                [svgIcon]="'heroicons_solid:user-circle'"></mat-icon>
+                            <input type="text"
+                                   matInput
+                                   [matAutocomplete]="official"
+                                   (keyup)="searchOfficial($event.target.value, 'search')"
+                                   placeholder="Funcionario Recepción ...."
+                                   [formControlName]="'official'">
+                            <mat-autocomplete autoActiveFirstOption
+                                              #official="matAutocomplete"
+                                              [displayWith]="getFuncRecepcion.bind(this)">
+                                <mat-option *ngFor="let oficial of listOfficials" [value]="oficial.id_funcionario">
+                                    {{oficial.desc_funcionario2}}
+                                </mat-option>
+                            </mat-autocomplete>
+                        </mat-form-field>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <!-- Cancel -->
+    <button
+        class="ml-auto rounded-lg"
+        mat-button
+        [matTooltip]="'Cancelar'"
+        (click)="Close()">
+        Cancelar
+    </button>
+    <!-- Save -->
+    <button
+        class="ml-2 rounded-lg"
+        mat-flat-button
+        [color]="'primary'"
+        [disabled]="ControlForm.invalid || overallPercentage != 100"
+        [matTooltip]="'Guardar'"
+        (click)="generateLottery()">
+        Guardar
+    </button>
+</mat-dialog-actions>

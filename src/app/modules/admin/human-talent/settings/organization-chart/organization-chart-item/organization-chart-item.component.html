@@ -1,0 +1,194 @@
+<div class="relative inset-0 flex flex-col min-w-0 overflow-y-auto" cdkScrollable>
+    <!-- Main -->
+    <div class="flex flex-auto p-6 sm:p-10">
+        <div class="flex flex-col flex-auto w-full max-w-xs sm:max-w-5xl mx-auto">
+
+            <!-- Claims -->
+            <ng-container *ngIf="this.items.length; else noReclamos">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-8 sm:mt-10">
+                    <ng-container *ngFor="let item of items; trackBy: trackByFn">
+                        <!-- Claim -->
+                        <div class="flex flex-col h-96 shadow rounded-2xl overflow-hidden bg-card">
+                            <!--[ngClass]="{'text-primary-800 bg-primary-100 dark:text-primary-50 dark:bg-primary-500': selectedClaim.id_reclamo == rec.id_reclamo}"-->
+                            <div class="flex flex-col p-6">
+                                <div class="flex items-center justify-between -mt-3">
+                                    <!-- Reclamo estado -->
+                                    <ng-container *ngIf="item.codigo">
+                                        <div
+                                            class="py-0.5 px-3 rounded-full text-sm font-semibold"
+                                            [ngClass]="{'text-blue-800 bg-blue-100 dark:text-blue-50 dark:bg-blue-500': ['borrador','anulado','pendiente_asignacion','formulacion_cargos','contencioso_administrativo'].includes(item.estado),
+                                                        'text-green-800 bg-green-100 dark:text-green-50 dark:bg-green-500': ['pendiente_revision','derivado','respuesta_registrado_ripat','resolucion_administrativa','respuesta_parcial'].includes(item.estado),
+                                                        'text-pink-800 bg-pink-100 dark:text-pink-50 dark:bg-pink-500': ['registrado_ripat','pendiente_respuesta','archivado_concluido','recurso_revocatorio'].includes(item.estado),
+                                                        'text-amber-800 bg-amber-100 dark:text-amber-50 dark:bg-amber-500': ['pendiente_informacion','archivo_con_respuesta','en_avenimiento','recurso_jerarquico'].includes(item.estado)}">
+                                            {{item.estado}}
+                                        </div>
+                                    </ng-container>
+                                    <!-- Completed at least once -->
+                                    <div class="flex items-center -mr-3">
+                                        <button
+                                            mat-icon-button
+                                            [matMenuTriggerFor]="actionMenu">
+                                            <mat-icon class="icon-size-5" [svgIcon]="'heroicons_solid:dots-vertical'"></mat-icon>
+
+                                            <mat-menu #actionMenu>
+                                                <!--<button mat-menu-item
+                                                        (click)="executeCommand('update', rec)"
+                                                        [disabled]="!this.rolesAllowed.includes('update')">
+                                                    <mat-icon class="icon-size-5">{{'edit'}}</mat-icon>
+                                                    Editar Reclamo
+                                                </button>
+
+                                                <button mat-menu-item
+                                                        (click)="executeCommand('delete', rec)"
+                                                        [disabled]="!this.rolesAllowed.includes('delete')">
+                                                    <mat-icon class="icon-size-5">{{'delete'}}</mat-icon>
+                                                    Eliminar Reclamo
+                                                </button>
+
+                                                <button mat-menu-item (click)="executeCommand('informe', rec)">
+                                                    <mat-icon class="text-current">{{'assignment'}}</mat-icon>
+                                                    Consulta Informe
+                                                </button>
+
+                                                <button mat-menu-item (click)="executeCommand('respuesta', rec)">
+                                                    <mat-icon class="text-current">{{'contact_mail'}}</mat-icon>
+                                                    Consulta Respuesta
+                                                </button>
+
+                                                <button mat-menu-item (click)="executeCommand('documento', rec)">
+                                                    <mat-icon class="text-current">{{'folder_shared'}}</mat-icon>
+                                                    Consulta Documentos
+                                                </button>
+
+                                                <button mat-menu-item (click)="executeCommand('gantt', rec)">
+                                                    <mat-icon class="text-current">{{'account_tree'}}</mat-icon>
+                                                    Consulta Gantt
+                                                </button>
+
+                                                <button mat-menu-item (click)="executeCommand('derive', rec)">
+                                                    <mat-icon class="text-current">{{'sync_alt'}}</mat-icon>
+                                                    Derivar Reclamo
+                                                </button>-->
+                                            </mat-menu>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Reclamo title & description -->
+                                <div class="mt-4 text-lg font-medium">{{item.nombre}}</div>
+                                <div [ngClass]="{'mt-0.5 line-clamp-2': item.acefalo.length <= 31,'mt-0.5 line-clamp-2 text-base': item.acefalo.length > 31}">{{item.acefalo}}</div>
+
+                                <div class="cursor-pointer">
+                                    <div class="w-12 h-1 my-4 border-t-2"></div>
+
+                                    <div class="flex items-center leading-5 text-md">
+                                        <mat-icon
+                                            class="icon-size-5"
+                                            [svgIcon]="'heroicons_solid:clock'"></mat-icon>
+                                        <div class="ml-1.5" *ngIf="item.nombre_tipo_contrato">{{item.nombre_tipo_contrato}}</div>
+                                    </div>
+
+                                    <div class="flex items-center leading-5 text-md">
+                                        <mat-icon
+                                            class="icon-size-5"
+                                            [svgIcon]="'heroicons_solid:clock'"></mat-icon>
+                                        <div class="ml-1.5" *ngIf="item.nombre_oficina">{{item.nombre_oficina}}</div>
+                                    </div>
+
+                                    <div class="flex items-center leading-5 text-md">
+                                        <mat-icon
+                                            class="icon-size-5 text-hint"
+                                            [svgIcon]="'heroicons_solid:table'"></mat-icon>
+                                        <div class="ml-1.5">Escala: {{item.nombre_escala}} </div>
+                                    </div>
+
+                                    <div class="flex items-center leading-5 text-md">
+                                        <mat-icon
+                                            class="icon-size-5 text-hint"
+                                            [svgIcon]="'heroicons_solid:credit-card'"></mat-icon>
+                                        <div class="ml-1.5">Haber Basico: {{item.haber_basico}} </div>
+                                    </div>
+
+                                    <!-- USER REG -->
+                                    <div class="flex items-center leading-5 text-md">
+                                        <mat-icon
+                                            class="icon-size-5 text-hint"
+                                            [svgIcon]="'heroicons_solid:user-circle'"></mat-icon>
+                                        <div class="ml-1.5">Creado por: {{item.usr_reg}} </div>
+                                    </div>
+                                    <!-- FECHA REG -->
+                                    <div class="flex items-center leading-5 text-md">
+                                        <mat-icon
+                                            class="icon-size-5 text-hint"
+                                            [svgIcon]="'heroicons_solid:calendar'"></mat-icon>
+                                        <div class="ml-1.5">Fecha Creación: {{item.fecha_reg | date:'dd/MM/yyyy'}} </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Footer -->
+                            <div class="flex flex-col w-full mt-auto">
+                                <!-- Course progress -->
+                                <div class="relative h-0.5">
+                                    <div
+                                        class="z-10 absolute inset-x-0 h-6 -mt-3"
+                                        [matTooltip]="100 / 100 | percent"
+                                        [matTooltipPosition]="'above'"
+                                        [matTooltipClass]="'-mb-0.5'"></div>
+                                    <mat-progress-bar
+                                        class="h-0.5"
+                                        [value]="(100 * 100) / 100"></mat-progress-bar>
+                                </div>
+
+                                <!-- Reclamo launch button -->
+                                <div class="z-10 sticky lg:flex bottom-4  py-4">
+                                    <div class="flex items-center justify-center mx-auto  rounded-full shadow-sm">
+                                        <button
+                                            class="flex-0"
+                                            mat-button
+                                            >
+                                            <mat-icon
+                                                class="mr-2"
+                                                [svgIcon]="'heroicons_outline:chevron-double-left'"></mat-icon>
+                                            <span class="mr-1">Anterior</span>
+                                        </button>
+                                        <div class="flex items-center justify-center mx-2.5 font-medium leading-5">
+                                            <!--<span>{{rec.reclamos.estado}}</span>-->
+                                        </div>
+                                        <button
+                                            class="flex-0"
+                                            mat-button
+                                            >
+                                            <span class="ml-1">Siguiente</span>
+                                            <mat-icon
+                                                class="ml-2"
+                                                [svgIcon]="'heroicons_outline:chevron-double-right'"></mat-icon>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </ng-container>
+                </div>
+            </ng-container>
+
+            <!-- No Reclamos -->
+            <ng-template #noReclamos>
+                <div class="flex flex-auto flex-col items-center justify-center bg-gray-100 dark:bg-transparent">
+                    <mat-icon
+                        class="icon-size-20"
+                        [svgIcon]="'iconsmind:file_search'"></mat-icon>
+                    <div class="mt-6 text-2xl font-semibold tracking-tight text-secondary">No hay reclamos!</div>
+                </div>
+            </ng-template>
+        </div>
+    </div>
+
+    <mat-paginator
+        class="sm:relative sm:inset-x-0 sm:bottom-0 border-b sm:border-t sm:border-b-0 z-10 bg-gray-50 dark:bg-transparent"
+        [length]="pagination.length"
+        [pageIndex]="pagination.page"
+        [pageSize]="pagination.size"
+        [pageSizeOptions]="pageSizeOptions"
+        [showFirstLastButtons]="true">
+    </mat-paginator>
+</div>

@@ -1,0 +1,57 @@
+
+<!-- Header -->
+<div mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle class="flex flex-0 items-center justify-between h-16 pr-3 sm:pr-5 pl-6 sm:pl-8 bg-primary text-on-primary">
+    <div class="text-lg font-medium">ANTERIOR ESTADO WF</div>
+    <button
+        mat-icon-button
+        [tabIndex]="-1"
+        (click)="Close()">
+        <mat-icon
+            class="text-current"
+            [svgIcon]="'heroicons_outline:x'"></mat-icon>
+    </button>
+</div>
+
+<!-- Wizard form -->
+<mat-dialog-content [formGroup]="PreviousForm">
+
+    <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 gap-6 w-full min-w-0 mt-1 mb-1">
+        <div class="sm:col-span-2 md:col-span-4 lg:col-span-2 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden bg-blue-0 dark:bg-transparent">
+            <div class="grid divide-x -m-6 ">
+                <div class="flex flex-col items-left justify-left p-6 sm:p-8">
+                    <div class="text-5xl font-semibold leading-none tracking-tighter">
+                        <!-- Proveido -->
+                        <mat-form-field class="w-full fuse-mat-dense flex-auto">
+                            <mat-label>Proveido</mat-label>
+                            <textarea
+                                matInput
+                                [rows]="3"
+                                [formControlName]="'obs'"></textarea>
+                        </mat-form-field>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</mat-dialog-content>
+
+<!-- Actions -->
+<mat-dialog-actions align="end">
+        <!-- Cancelar -->
+        <button
+            class="sm:mx-3"
+            mat-stroked-button
+            (click)="Close()">
+            <span>Cancelar</span>
+        </button>
+        <!-- Guardar -->
+        <button
+            class="order-first sm:order-last"
+            mat-flat-button
+            [color]="'primary'"
+            [disabled]="PreviousForm.invalid"
+            (click)="onChangePrevious()">
+            Guardar
+        </button>
+</mat-dialog-actions>

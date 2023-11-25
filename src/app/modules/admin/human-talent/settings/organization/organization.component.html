@@ -1,0 +1,66 @@
+<div class="sm:absolute sm:inset-0 flex flex-col flex-auto min-w-0 sm:overflow-hidden bg-card dark:bg-transparent">
+    <!-- Menu -->
+    <div class="flex flex-col shadow bg-card">
+        <div class="flex flex-col flex-0 lg:flex-row items-center max-w-5xl w-full mx-auto px-8 lg:h-18 bg-card">
+            <div class="flex items-center mt-8 mb-4 lg:m-0 lg:ml-auto space-x-6">
+
+                <button mat-button [color]="'primary'" class="sm:inline-block text-secondary rounded-lg" [matMenuTriggerFor]="controlMenu">Inicio</button>
+                <mat-menu #controlMenu="matMenu" [xPosition]="'after'">
+                    <button mat-menu-item [routerLink]="['../../']">
+                        <mat-icon [svgIcon]="'mat_solid:menu_open'"></mat-icon>Volver al Menu Principal
+                    </button>
+                </mat-menu>
+
+            </div>
+        </div>
+    </div>
+    <div class="flex flex-auto overflow-auto mr-4">
+        <div class="flex flex-col flex-auto sm:mb-18 overflow-auto sm:overflow-y-auto sm:overflow-x-auto">
+            <p-tree [value]="orga"
+                    [draggableNodes]="true"
+                    [droppableNodes]="true"
+                    draggableScope="self"
+                    droppableScope="self"
+                    [loading]="loading"
+                    (onNodeExpand)="onNodeExpand($event)"
+                    (onNodeDrop)="onDrop($event)"
+                    class="tree-list mt-4 ml-4 tree-box">
+
+                <ng-template let-node pTemplate="default" class="w-100 drag-content">
+                    <b>{{node.data.codigo !== '' && node.data.codigo !== null ? '('+node.data.codigo+') - ' : ''}}{{node.data.nombre_unidad}} Orden:
+
+                        <ng-container class="text-green-800 bg-green-100 dark:text-green-50 dark:bg-green-500" *ngIf="!node.data.editar">
+                            {{node.data.orden}}
+                        </ng-container>
+
+
+
+                        <ng-container *ngIf="node.data.editar">
+                            <mat-form-field class="boby-mat-dense boby-mat-no-subscript w-16">
+                                <input
+                                    matInput
+                                    maxlength="3"
+                                    [value]="node.data.orden"
+                                    (input)="updateOrder(node.data,$event)">
+                            </mat-form-field>
+                        </ng-container>
+
+                        <button
+                            class="ml-3 w-8 h-8 min-h-8"
+                            mat-icon-button
+                            (click)="toggleOrdenEditMode(node.data)">
+                            <mat-icon
+                                *ngIf="!node.data.editar"
+                                class="icon-size-5"
+                                [svgIcon]="'heroicons_solid:pencil-alt'"></mat-icon>
+                            <mat-icon
+                                *ngIf="node.data.editar"
+                                class="icon-size-5"
+                                [svgIcon]="'heroicons_solid:check'"></mat-icon>
+                        </button>
+                    </b>
+                </ng-template>
+            </p-tree>
+        </div>
+    </div>
+</div>

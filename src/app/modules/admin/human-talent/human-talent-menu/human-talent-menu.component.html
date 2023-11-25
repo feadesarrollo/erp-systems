@@ -1,0 +1,148 @@
+<div class="flex flex-col flex-auto min-w-0">
+
+    <!-- Header -->
+    <!--<erp-headboard [tray]="'menu'"></erp-headboard>-->
+    <!--<div class="bg-card">
+        <div class="flex flex-col w-full max-w-screen-xl mx-auto px-6 sm:px-8">
+            <div class="flex flex-col sm:flex-row flex-auto sm:items-center min-w-0 my-8 sm:my-12">
+                &lt;!&ndash; Avatar and name &ndash;&gt;
+                <div class="flex flex-auto items-center min-w-0">
+                    <div class="flex-0 w-16 h-16 rounded-full overflow-hidden">
+                        <img
+                            class="w-full h-full object-cover"
+                            src="{{avatar}}">
+                    </div>
+                    <div class="flex flex-col min-w-0 ml-4">
+                        <ng-container>
+                            <div class="text-2xl md:text-5xl font-semibold tracking-tight leading-7 md:leading-snug truncate">Bienvenido, {{name}}!</div>
+                        </ng-container>
+                        <div class="flex items-center">
+                            <mat-icon
+                                class="icon-size-5"
+                                [svgIcon]="'heroicons_solid:bell'"></mat-icon>
+                            <div class="ml-1.5 leading-6 truncate text-secondary">Tienes 2 mensajes nuevos y 15 tareas nuevas.</div>
+                        </div>
+                    </div>
+                </div>
+                &lt;!&ndash; Actions &ndash;&gt;
+                <div class="flex items-center mt-6 sm:mt-0 sm:ml-2 space-x-3">
+                    <button
+                        class="boby-mat-button-rounded bg-accent-700"
+                        mat-flat-button
+                        [color]="'accent'">
+                        <mat-icon
+                            class="icon-size-5"
+                            [svgIcon]="'heroicons_solid:mail'"></mat-icon>
+                        <span class="ml-2">Mensajes</span>
+                    </button>
+                    <button
+                        class="boby-mat-button-rounded"
+                        mat-flat-button
+                        [color]="'primary'">
+                        <mat-icon
+                            class="icon-size-5"
+                            [svgIcon]="'heroicons_solid:cog'"></mat-icon>
+                        <span class="ml-2">Settings</span>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>-->
+
+    <!-- Main -->
+    <!--<div class="flex-auto border-t -mt-px pt-4 sm:pt-6">-->
+    <div class="flex flex-auto p-6">
+        <!--<div class="w-full max-w-screen-xl mx-auto">-->
+        <!--<div class="flex flex-col flex-auto w-full max-w-xs sm:max-w-6xl mx-auto">-->
+            <!-- Tabs -->
+            <mat-tab-group
+                class="flex flex-col flex-auto w-full justify-items-center max-w-xs sm:max-w-5xl mx-auto"
+                [animationDuration]="'0'"
+                mat-stretch-tabs="false" mat-align-tabs="center">
+
+                <!-- Home -->
+                <mat-tab label="PARAMETROS">
+                    <ng-template matTabContent>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 sm:justify-items-center md:grid-cols-3 gap-6 w-full min-w-0">
+                            <!-- Settings -->
+                            <boby-card class="flex flex-col items-center max-w-80 w-full p-8 filter-info"
+                                       *ngFor="let process of parameterList; trackBy: trackByFn">
+                                <div class="flex items-center justify-center p-5 rounded-full bg-primary-100 dark:bg-gray-600">
+                                    <mat-icon
+                                        class="icon-size-10 text-primary-500 dark:text-primary-300"
+                                        [svgIcon]="'mat_outline:switch_account'"></mat-icon>
+                                </div>
+                                <div class="text-2xl font-semibold leading-tight text-center mt-6">{{process.title}}</div>
+                                <div class="text-center text-secondary mt-3">{{process.description}}</div>
+                                <button
+                                    class="px-6 mt-8"
+                                    mat-flat-button
+                                    [color]="'primary'"
+                                    [routerLink]="[process.url]">
+                                    Ver Modulo
+                                </button>
+                            </boby-card>
+                        </div>
+
+                    </ng-template>
+                </mat-tab>
+
+                <!-- Process -->
+                <mat-tab label="PROCESOS">
+                    <ng-template matTabContent>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 sm:justify-items-center md:grid-cols-3 gap-6 w-full min-w-0">
+                            <!-- Processes -->
+                            <boby-card class="flex flex-col items-center max-w-80 w-full p-8 filter-info"
+                                       *ngFor="let process of processList; trackBy: trackByFn">
+                                <div class="flex items-center justify-center p-5 rounded-full bg-primary-100 dark:bg-gray-600">
+                                    <mat-icon
+                                        class="icon-size-10 text-primary-500 dark:text-primary-300"
+                                        [svgIcon]="'mat_outline:switch_account'"></mat-icon>
+                                </div>
+                                <div class="text-2xl font-semibold leading-tight text-center mt-6">{{process.title}}</div>
+                                <div class="text-center text-secondary mt-3">{{process.description}}</div>
+                                <button
+                                    class="px-6 mt-8"
+                                    mat-flat-button
+                                    [color]="'primary'"
+                                    [routerLink]="[process.url]">
+                                    Ver Modulo
+                                </button>
+                            </boby-card>
+                        </div>
+                    </ng-template>
+                </mat-tab>
+
+                <!-- Reports -->
+                <mat-tab label="REPORTES">
+                    <ng-template matTabContent>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 sm:justify-items-center md:grid-cols-3 gap-6 w-full min-w-0">
+                            <!-- Reports -->
+                            <boby-card class="flex flex-col items-center max-w-80 w-full p-8 filter-info"
+                                       *ngFor="let process of reportList; trackBy: trackByFn">
+                                <div class="flex items-center justify-center p-5 rounded-full bg-primary-100 dark:bg-gray-600">
+                                    <mat-icon
+                                        class="icon-size-10 text-primary-500 dark:text-primary-300"
+                                        [svgIcon]="'mat_outline:switch_account'"></mat-icon>
+                                </div>
+                                <div class="text-2xl font-semibold leading-tight text-center mt-6">{{process.title}}</div>
+                                <div class="text-center text-secondary mt-3">{{process.description}}</div>
+                                <button
+                                    class="px-6 mt-8"
+                                    mat-flat-button
+                                    [color]="'primary'"
+                                    [routerLink]="[process.url]">
+                                    Ver Modulo
+                                </button>
+                            </boby-card>
+                        </div>
+                    </ng-template>
+                </mat-tab>
+
+            </mat-tab-group>
+
+        <!--</div>-->
+    </div>
+</div>
+<!--<router-outlet></router-outlet>-->

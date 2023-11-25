@@ -1,0 +1,458 @@
+<div mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle class="flex flex-0 items-center justify-between h-16 pr-3 sm:pr-5 pl-6 sm:pl-8 bg-primary text-on-primary">
+    <div class="text-lg font-medium">RECLAMO</div>
+    <button
+        mat-icon-button
+        (click)="Close()"
+        [tabIndex]="-1">
+        <mat-icon
+            class="text-current"
+            [svgIcon]="'heroicons_outline:x'"></mat-icon>
+    </button>
+</div>
+
+<mat-dialog-content [formGroup]="ReclamoForm">
+    <div class="bg-card shadow rounded overflow-hidden">
+        <mat-horizontal-stepper
+            [linear]="true"
+            #horizontalStepper>
+            <mat-step
+                [formGroupName]="'step1'"
+                [stepControl]="ReclamoForm.get('step1')"
+                #horizontalStepperStep1 >
+                <ng-template matStepLabel ><div [matTooltip]="'RECEPCIÓN'">RECEPCIÓN</div></ng-template>
+                <p class="my-2 font-medium">
+                    Información sobre los codigos de control
+                </p>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 w-full min-w-0 mt-1 mb-1">
+                    <div class="sm:col-span-2 md:col-span-4 lg:col-span-2 flex flex-col flex-auto p-6 bg-card rounded-2xl overflow-hidden bg-blue-0 dark:bg-transparent">
+                        <mat-form-field class="boby-mat-dense boby-mat-no-subscript flex-auto gt-xs:pr-3">
+                            <mat-label class="font-medium text-primary">Medio Reclamo</mat-label>
+                            <mat-select [placeholder]="'Seleccione Medio de Reclamo ....'"
+                                        [formControlName]="'id_medio_reclamo'"
+                                        [compareWith]="displayMedio">
+                                <mat-option *ngFor="let med of listaMedioReclamo" [value]="med.id_medio_reclamo">
+                                    {{med.nombre_medio}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                        <mat-form-field class="boby-mat-dense boby-mat-no-subscript flex-auto gt-xs:pl-3">
+                            <mat-label class="font-medium text-primary">Funcionario Recepción</mat-label>
+                            <mat-icon
+                                matPrefix
+                                class="hidden sm:flex icon-size-5"
+                                [svgIcon]="'heroicons_solid:user-circle'"></mat-icon>
+                            <input type="text"
+                                   matInput
+                                   [matAutocomplete]="recepcion"
+                                   (keyup)="searchFuncionario($event.target.value,'recepcion')"
+                                   placeholder="Funcionario Recepción ...."
+                                   [formControlName]="'id_funcionario_recepcion'">
+                            <mat-autocomplete autoActiveFirstOption
+                                              #recepcion="matAutocomplete"
+                                              [displayWith]="getFuncRecepcion.bind(this)">
+                                <mat-option *ngFor="let recep of listaRecepcion" [value]="recep.id_funcionario">
+                                    {{recep.desc_funcionario2}}
+                                </mat-option>
+                            </mat-autocomplete>
+                        </mat-form-field>
+
+                        <mat-form-field class="boby-mat-dense boby-mat-no-subscript flex-auto gt-xs:pr-3">
+                            <mat-label class="font-medium text-primary">Oficina Recepción</mat-label>
+                            <mat-icon
+                                matPrefix
+                                class="hidden sm:flex icon-size-5"
+                                [svgIcon]="'heroicons_solid:office-building'"></mat-icon>
+                            <input type="text"
+                                   matInput
+                                   [matAutocomplete]="oficina_rec"
+                                   (keyup)="searchOficina($event.target.value,'recepcion')"
+                                   placeholder="Oficina Recepción ...."
+                                   [formControlName]="'id_oficina_registro_incidente'">
+                            <mat-autocomplete autoActiveFirstOption
+                                              #oficina_rec="matAutocomplete"
+                                              [displayWith]="getOficinaRecepcion.bind(this)">
+                                <mat-option *ngFor="let ofi_rec of listaOficinaRecepcion" [value]="ofi_rec.id_oficina">
+                                    {{ofi_rec.nombre}}
+                                </mat-option>
+                            </mat-autocomplete>
+                        </mat-form-field>
+
+                    </div>
+                    <div class="sm:col-span-2 md:col-span-4 lg:col-span-2 flex flex-col flex-auto p-6 bg-card rounded-2xl overflow-hidden bg-blue-0 dark:bg-transparent">
+
+                        <mat-form-field class="boby-mat-dense boby-mat-no-subscript boby-mat-emphasized-affix flex-auto gt-xs:pr-3">
+                            <mat-label class="font-medium text-primary">Cliente</mat-label>
+                            <div
+                                class="text-secondary"
+                                matPrefix>
+                                <button
+                                    (click)="newClient()"
+                                    [matTooltip]="'Nuevo Cliente'">
+                                    <mat-icon
+                                        matPrefix
+                                        class="hidden sm:flex icon-size-5"
+                                        [svgIcon]="'heroicons_solid:user-group'"></mat-icon>
+                                </button>
+                            </div>
+
+                            <input type="text"
+                                   matInput
+                                   [matAutocomplete]="cliente"
+                                   (keyup)="searchCliente($event.target.value)"
+                                   placeholder="Cliente ...."
+                                   [formControlName]="'id_cliente'">
+                            <mat-autocomplete autoActiveFirstOption
+                                              #cliente="matAutocomplete"
+                                              [displayWith]="getCliente.bind(this)">
+                                <mat-option *ngFor="let cli of listaCliente" [value]="cli.id_cliente">
+                                    {{cli.nombre_completo2}}
+                                </mat-option>
+                            </mat-autocomplete>
+                        </mat-form-field>
+
+                        <mat-form-field class="boby-mat-dense boby-mat-no-subscript flex-auto gt-xs:pr-3">
+                            <mat-label class="font-medium text-primary">Fecha, Hora Recepción</mat-label>
+                            <input matInput [ngxMatDatetimePicker]="dateRecepcion" placeholder="Choose a date" [formControlName]="'fecha_hora_recepcion'"
+                                   [min]="minDate" [max]="maxDate" [disabled]="disabled">
+                            <mat-datepicker-toggle matSuffix [for]="dateRecepcion"></mat-datepicker-toggle>
+                            <ngx-mat-datetime-picker #dateRecepcion [showSpinners]="showSpinners" [showSeconds]="showSeconds"
+                                                     [stepHour]="stepHour" [stepMinute]="stepMinute" [stepSecond]="stepSecond"
+                                                     [touchUi]="touchUi" [color]="color" [enableMeridian]="enableMeridian"
+                                                     [disableMinute]="false" [hideTime]="false" [defaultTime]="defaultTime">
+                            </ngx-mat-datetime-picker>
+                        </mat-form-field>
+
+                        <mat-form-field class="boby-mat-dense boby-mat-no-subscript flex-auto gt-xs:pl-3">
+                            <mat-label class="font-medium text-primary">Nro. FRD</mat-label>
+                            <input matInput #numberFRD
+                                   type="number"
+                                   [formControlName]="'nro_frd'">
+                        </mat-form-field>
+
+                    </div>
+                </div>
+
+                <div class="flex justify-end">
+                    <button
+                        class="px-8"
+                        mat-flat-button
+                        [color]="'primary'"
+                        [disabled]="horizontalStepperStep1.stepControl.pristine || horizontalStepperStep1.stepControl.invalid"
+                        type="button"
+                        matStepperNext>
+                        Siguiente
+                    </button>
+                </div>
+            </mat-step>
+
+            <mat-step
+                [formGroupName]="'step2'"
+                [stepControl]="ReclamoForm.get('step2')">
+                <ng-template matStepLabel><div [matTooltip]="'SERVICIO'">SERVICIO</div></ng-template>
+                <p class="my-2 font-medium">
+                    Información sobre el servicio prestado
+                </p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 w-full min-w-0 mt-1 mb-1">
+                    <div class="sm:col-span-2 md:col-span-4 lg:col-span-2 flex flex-col flex-auto p-6 bg-card rounded-2xl overflow-hidden bg-blue-0 dark:bg-transparent">
+                        <mat-form-field class="boby-mat-dense boby-mat-no-subscript flex-auto">
+                            <mat-label class="font-medium text-primary">Nro. Vuelo</mat-label>
+                            <input matInput
+                                   [formControlName]="'nro_vuelo'">
+                        </mat-form-field>
+                        <mat-form-field class="boby-mat-dense boby-mat-no-subscript flex-auto gt-xs:pr-3">
+                            <mat-label class="font-medium text-primary">PNR / Nro. Boleto</mat-label>
+                            <input type="number"
+                                   matInput
+                                   [formControlName]="'pnr'">
+                        </mat-form-field>
+                        <mat-form-field class="boby-mat-dense boby-mat-no-subscript flex-auto gt-xs:pr-3">
+                            <mat-label class="font-medium text-primary">Fecha, Hora Vuelo</mat-label>
+                            <input matInput [ngxMatDatetimePicker]="vuelo" placeholder="Choose a date" [formControlName]="'fecha_hora_vuelo'"
+                                   [min]="minDate" [max]="maxDate" [disabled]="disabled">
+                            <mat-datepicker-toggle matSuffix [for]="vuelo"></mat-datepicker-toggle>
+                            <ngx-mat-datetime-picker #vuelo [showSpinners]="showSpinners" [showSeconds]="showSeconds"
+                                                     [stepHour]="stepHour" [stepMinute]="stepMinute" [stepSecond]="stepSecond"
+                                                     [touchUi]="touchUi" [color]="color" [enableMeridian]="enableMeridian"
+                                                     [disableMinute]="false" [hideTime]="false" [defaultTime]="defaultTime">
+                            </ngx-mat-datetime-picker>
+                        </mat-form-field>
+                    </div>
+                    <div class="sm:col-span-2 md:col-span-4 lg:col-span-2 flex flex-col flex-auto p-6 bg-card rounded-2xl overflow-hidden bg-blue-0 dark:bg-transparent">
+                        <mat-form-field class="boby-mat-dense boby-mat-no-subscript flex-auto gt-xs:pr-3">
+                            <mat-label class="font-medium text-primary">Origen</mat-label>
+                            <mat-icon
+                                matPrefix
+                                class="hidden sm:flex icon-size-5"
+                                [svgIcon]="'heroicons_solid:location-marker'"></mat-icon>
+                            <input type="text"
+                                   matInput
+                                   [matAutocomplete]="origen"
+                                   (keyup)="searchLugar($event.target.value,'origen')"
+                                   placeholder="Buscar Origen ..."
+                                   [formControlName]="'origen'">
+                            <mat-autocomplete autoActiveFirstOption #origen="matAutocomplete" >
+                                <mat-option *ngFor="let origen of listaOrigen" [value]="origen.nombre">
+                                    {{origen.nombre}}
+                                </mat-option>
+                            </mat-autocomplete>
+                        </mat-form-field>
+                        <mat-form-field class="boby-mat-dense boby-mat-no-subscript flex-auto gt-xs:pr-3">
+                            <mat-label class="font-medium text-primary">Transito</mat-label>
+                            <mat-icon
+                                matPrefix
+                                class="hidden sm:flex icon-size-5"
+                                [svgIcon]="'heroicons_solid:location-marker'"></mat-icon>
+                            <input type="text"
+                                   matInput
+                                   [matAutocomplete]="transito"
+                                   (keyup)="searchLugar($event.target.value,'transito')"
+                                   placeholder="Buscar Transito ..."
+                                   [formControlName]="'transito'">
+                            <mat-autocomplete autoActiveFirstOption #transito="matAutocomplete" >
+                                <mat-option *ngFor="let transito of listaTransito" [value]="transito.nombre">
+                                    {{transito.nombre}}
+                                </mat-option>
+                            </mat-autocomplete>
+                        </mat-form-field>
+                        <mat-form-field class="boby-mat-dense boby-mat-no-subscript flex-auto gt-xs:pr-3">
+                            <mat-label class="font-medium text-primary">Destino</mat-label>
+                            <mat-icon
+                                matPrefix
+                                class="hidden sm:flex icon-size-5"
+                                [svgIcon]="'heroicons_solid:location-marker'"></mat-icon>
+                            <input type="text"
+                                   matInput
+                                   [matAutocomplete]="destino"
+                                   (keyup)="searchLugar($event.target.value,'destino')"
+                                   placeholder="Buscar Destino ..."
+                                   [formControlName]="'destino'">
+                            <mat-autocomplete autoActiveFirstOption #destino="matAutocomplete" >
+                                <mat-option *ngFor="let destino of listaDestino" [value]="destino.nombre">
+                                    {{destino.nombre}}
+                                </mat-option>
+                            </mat-autocomplete>
+                        </mat-form-field>
+
+                    </div>
+                </div>
+                <div class="flex justify-end mt-8">
+                    <button
+                        class="px-8 mr-2"
+                        mat-flat-button
+                        [color]="'accent'"
+                        type="button"
+                        matStepperPrevious>
+                        Volver
+                    </button>
+                    <button
+                        class="px-8"
+                        mat-flat-button
+                        [color]="'primary'"
+                        type="button"
+                        matStepperNext>
+                        Siguiente
+                    </button>
+                </div>
+            </mat-step>
+
+            <mat-step
+                [formGroupName]="'step3'"
+                [stepControl]="ReclamoForm.get('step3')"
+                #horizontalStepperStep2>
+                <ng-template matStepLabel><div [matTooltip]="'INCIDENTE'">INCIDENTE</div></ng-template>
+                <p class="my-2 font-medium">
+                    Información sobre el incidente suscitado con el cliente
+                </p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 w-full min-w-0 mt-1 mb-1">
+                    <div class="sm:col-span-2 md:col-span-4 lg:col-span-2 flex flex-col flex-auto p-6 bg-card rounded-2xl overflow-hidden bg-blue-0 dark:bg-transparent">
+                        <mat-form-field class="boby-mat-dense boby-mat-no-subscript flex-auto gt-xs:pr-3">
+                            <mat-label class="font-medium text-primary">Tipo Incidente</mat-label>
+                            <mat-select (selectionChange)="onTipoIncidenteChange($event)"
+                                        [placeholder]="'Seleccione tipo incidente....'"
+                                        [formControlName]="'id_tipo_incidente'"
+                                        [compareWith]="displayIncidente">
+                                <mat-option *ngFor="let inc of listaTipoIncidente" [value]="inc.id_tipo_incidente">
+                                    {{inc.nombre_incidente}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        <mat-form-field class="boby-mat-dense boby-mat-no-subscript flex-auto gt-xs:pr-3">
+                            <mat-label class="font-medium text-primary">Subtipo Incidente</mat-label>
+                            <mat-select
+                                        [formControlName]="'id_subtipo_incidente'"
+                                        [compareWith]="displaySubIncidente">
+                                <mat-option *ngFor="let sub of listaSubTipoIncidente" [value]="sub.id_tipo_incidente">
+                                    {{sub.nombre_incidente}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        <mat-form-field class="boby-mat-dense boby-mat-no-subscript flex-auto gt-xs:pr-3">
+                            <mat-label class="font-medium text-primary">Oficina del Incidente</mat-label>
+                            <mat-icon
+                                matPrefix
+                                class="hidden sm:flex icon-size-5"
+                                [svgIcon]="'heroicons_solid:office-building'"></mat-icon>
+                            <input type="text"
+                                   matInput
+                                   [matAutocomplete]="oficina_inc"
+                                   (keyup)="searchOficina($event.target.value,'incidente')"
+                                   placeholder="Oficina Recepción ...."
+                                   [formControlName]="'id_oficina_incidente'">
+                            <mat-autocomplete autoActiveFirstOption
+                                              #oficina_inc="matAutocomplete"
+                                              [displayWith]="getOficinaIncidente.bind(this)">
+                                <mat-option *ngFor="let ofi_inc of listaOficinaIncidente" [value]="ofi_inc.id_oficina">
+                                    {{ofi_inc.nombre}}
+                                </mat-option>
+                            </mat-autocomplete>
+                        </mat-form-field>
+                        <mat-form-field class="boby-mat-dense boby-mat-no-subscript flex-auto gt-xs:pr-3">
+                            <mat-label class="font-medium text-primary">Fecha, Hora Incidente</mat-label>
+                            <input matInput [ngxMatDatetimePicker]="incidente" placeholder="Choose a date" [formControlName]="'fecha_hora_incidente'"
+                                   [min]="minDate" [max]="maxDate" [disabled]="disabled">
+                            <mat-datepicker-toggle matSuffix [for]="incidente"></mat-datepicker-toggle>
+                            <ngx-mat-datetime-picker #incidente [showSpinners]="showSpinners" [showSeconds]="showSeconds"
+                                                     [stepHour]="stepHour" [stepMinute]="stepMinute" [stepSecond]="stepSecond"
+                                                     [touchUi]="touchUi" [color]="color" [enableMeridian]="enableMeridian"
+                                                     [disableMinute]="false" [hideTime]="false" [defaultTime]="defaultTime">
+                            </ngx-mat-datetime-picker>
+                        </mat-form-field>
+                    </div>
+                    <div class="sm:col-span-2 md:col-span-4 lg:col-span-2 flex flex-col flex-auto p-6 bg-card rounded-2xl overflow-hidden bg-blue-0 dark:bg-transparent">
+                        <mat-form-field class="boby-mat-dense boby-mat-no-subscript flex-auto gt-xs:pr-3">
+                            <mat-label class="font-medium text-primary">Detalle Incidente</mat-label>
+                            <textarea
+                                matInput
+                                [rows]="2"
+                                [formControlName]="'detalle_incidente'"></textarea>
+                        </mat-form-field>
+
+                        <mat-form-field class="boby-mat-dense boby-mat-no-subscript flex-auto gt-xs:pl-3">
+                            <mat-label class="font-medium text-primary">Observación Incidente</mat-label>
+                            <textarea
+                                matInput
+                                [rows]="2"
+                                [formControlName]="'observaciones_incidente'"></textarea>
+                        </mat-form-field>
+                    </div>
+                </div>
+                <div class="flex justify-end">
+                    <button
+                        class="px-8 mr-2"
+                        mat-flat-button
+                        [color]="'accent'"
+                        type="button"
+                        matStepperPrevious>
+                        Volver
+                    </button>
+                    <button
+                        class="px-8"
+                        mat-flat-button
+                        [color]="'primary'"
+                        [disabled]="horizontalStepperStep2.stepControl.pristine || horizontalStepperStep2.stepControl.invalid"
+                        type="button"
+                        matStepperNext>
+                        Siguiente
+                    </button>
+                </div>
+            </mat-step>
+
+            <mat-step
+                [formGroupName]="'step4'"
+                [stepControl]="ReclamoForm.get('step4')">
+                <ng-template matStepLabel><div [matTooltip]="'N° CONTROL'">N° CONTROL</div></ng-template>
+                <p class="my-2 font-medium">
+                    Información sobre el punto de atención y responsable de la recepción.
+                </p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 w-full min-w-0 mt-1 mb-1">
+                    <div class="sm:col-span-2 md:col-span-4 lg:col-span-2 flex flex-col flex-auto p-6 bg-card rounded-2xl overflow-hidden bg-blue-0 dark:bg-transparent">
+
+                        <mat-form-field class="boby-mat-dense boby-mat-no-subscript flex-auto gt-xs:pr-3">
+                            <mat-label class="font-medium text-primary">Nro. Preimpreso FRD</mat-label>
+                            <input type="number"
+                                   matInput
+                                   [formControlName]="'correlativo_preimpreso_frd'">
+                        </mat-form-field>
+
+                        <mat-form-field class="w-full boby-mat-dense flex-auto" appearance="fill">
+                            <mat-label>Categoria Reclamo</mat-label>
+                            <mat-icon
+                                matPrefix
+                                class="hidden sm:flex icon-size-5"
+                                [svgIcon]="'heroicons_solid:information-circle'"></mat-icon>
+                            <mat-select [placeholder]="'Seleccione la categoria del reclamo....'"
+                                        [formControlName]="'category'"
+                                        multiple>
+                                <mat-option *ngFor="let category of categoryList" [value]="category.id">
+                                    {{category.title}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                    </div>
+                    <div class="sm:col-span-2 md:col-span-4 lg:col-span-2 flex flex-col flex-auto p-6 bg-card rounded-2xl overflow-hidden bg-blue-0 dark:bg-transparent">
+
+                        <mat-form-field class="boby-mat-dense boby-mat-no-subscript flex-auto gt-xs:pr-3">
+                            <mat-label class="font-medium text-primary">Nro. FRD ATT Canalizado</mat-label>
+                            <input type="number"
+                                   matInput
+                                   [formControlName]="'nro_att_canalizado'">
+                        </mat-form-field>
+                        <mat-form-field class="boby-mat-dense boby-mat-no-subscript flex-auto gt-xs:pl-3">
+                            <mat-label class="font-medium text-primary">Nro. RIPAT ATT</mat-label>
+                            <input matInput
+                                   type="number"
+                                   [formControlName]="'nro_ripat_att'">
+                        </mat-form-field>
+
+                    </div>
+                </div>
+                <div class="flex justify-end mt-8">
+                    <button
+                        class="px-8 mr-2"
+                        mat-flat-button
+                        [color]="'accent'"
+                        type="button"
+                        matStepperPrevious>
+                        Volver
+                    </button>
+                    <button
+                        class="px-8"
+                        mat-flat-button
+                        [color]="'primary'"
+                        type="button"
+                        matStepperNext>
+                        Siguiente
+                    </button>
+                </div>
+            </mat-step>
+
+            <mat-step>
+                <ng-template matStepLabel>CONFIRMAR</ng-template>
+                <p class="my-6 font-medium">
+                    Gracias por completar el formulario de registro reclamo! Puede guardar el reclamo o volver atras si desea cambiar información
+                </p>
+                <div class="flex justify-end mt-8">
+                    <button
+                        class="px-8 mr-2"
+                        mat-flat-button
+                        [color]="'accent'"
+                        type="button"
+                        matStepperPrevious>
+                        Volver
+                    </button>
+                    <button
+                        class="px-8"
+                        mat-flat-button
+                        [color]="'primary'"
+                        [matTooltip]="'Guardar'"
+                        (click)="guardarReclamo()">
+                        Guardar
+                    </button>
+                </div>
+            </mat-step>
+        </mat-horizontal-stepper>
+    </div>
+</mat-dialog-content>

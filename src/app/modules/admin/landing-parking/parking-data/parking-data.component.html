@@ -1,0 +1,473 @@
+<div class="sm:absolute sm:inset-0 flex flex-col flex-auto min-w-0 sm:overflow-hidden bg-card dark:bg-transparent">
+
+    <div class="relative flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between py-4 px-6 md:px-8 border-b">
+        <!-- Actions -->
+        <div class="flex shrink-0 items-end mt-1 sm:mt-0 sm:ml-4">
+            <p-toast position="top-right"></p-toast>
+            <!-- Search -->
+            <mat-form-field class="boby-mat-dense boby-mat-no-subscript boby-mat-rounded min-w-64">
+                <mat-icon
+                    class="icon-size-5"
+                    matPrefix
+                    [svgIcon]="'heroicons_solid:search'"></mat-icon>
+                <input
+                    matInput
+                    [formControl]="searchInputControl"
+                    [autocomplete]="'off'"
+                    [placeholder]="'Buscar Datos Estacionamiento'">
+            </mat-form-field>
+
+            <button
+                class="ml-4 rounded-lg"
+                mat-flat-button
+                [color]="'primary'"
+                [matTooltip]="'Aplicar Filtros'"
+                (click)="openFilter()">
+                <mat-icon [svgIcon]="'filter_alt'"></mat-icon>
+                <span class="hidden sm:inline-block ml-2 mr-1">Filtros</span>
+            </button>
+
+            <button
+                class="ml-2 rounded-lg"
+                mat-flat-button
+                [color]="'primary'"
+                [matTooltip]="'Actualizar'"
+                (click)="refreshParking()"
+                [disabled]="ParkingForm.invalid">
+                <mat-icon [svgIcon]="'heroicons_outline:refresh'"></mat-icon>
+                <span class="hidden sm:inline-block ml-2 mr-1">Actualizar</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="flex flex-auto overflow-auto">
+        <div class="flex flex-col flex-auto sm:mb-18 overflow-auto sm:overflow-y-auto">
+            <table mat-table [dataSource]="dataSource" matSort matTableExporter  #exporter="matTableExporter" [hiddenColumns]="[0]">
+
+                <ng-container matColumnDef="accion">
+                    <mat-header-cell *matHeaderCellDef aria-label="row actions" class="min-w-32">Acciones</mat-header-cell>
+                    <mat-cell (click)="selectedParking = row"
+                              *matCellDef="let row"
+                              [ngClass]="{
+                              'text-blue-800 bg-blue-100 dark:text-blue-50 dark:bg-blue-500': row === selectedParking,
+                              'text-green-800 bg-green-100 dark:text-green-50 dark:bg-green-500': row['estado'] === 3,
+                              'text-pink-800 bg-pink-100 dark:text-pink-50 dark:bg-pink-500': row['estado'] === 2,
+                              'text-amber-800 bg-amber-100 dark:text-amber-50 dark:bg-amber-500': row['estado'] === 1}"
+                              class="min-w-32"
+                              bobyToolTip [contentTemplate]="template">
+                        <button
+                            class="ml-1 -mr-4"
+                            mat-icon-button
+                            [matMenuTriggerFor]="chatsHeaderMenu">
+                            <mat-icon [svgIcon]="'heroicons_outline:dots-vertical'"></mat-icon>
+
+                            <mat-menu #chatsHeaderMenu>
+                                <button mat-menu-item [matMenuTriggerFor]="formatos">
+                                    <mat-icon [svgIcon]="'heroicons_outline:cog'"></mat-icon>
+                                    Exportar Data Estacionamiento
+                                </button>
+
+                                <button mat-menu-item (click)="showConsolidated()">
+                                    <mat-icon [svgIcon]="'heroicons_outline:cog'" ></mat-icon>
+                                    Consulta Consolidado
+                                </button>
+                                <!--<button mat-menu-item
+                                        (click)="executeCommand('tarifa')">
+                                    <mat-icon [svgIcon]="'heroicons_outline:cog'"></mat-icon>
+                                    Consultar Tarifa Aterrizaje
+                                </button>-->
+                            </mat-menu>
+                        </button>
+                        <mat-menu #formatos="matMenu">
+                            <button mat-menu-item (click)="exporter.exportTable('xls', {fileName:'Datos Estacionamiento'})">XLS</button>
+                            <button mat-menu-item (click)="exporter.exportTable('xlsx', {fileName:'Datos Estacionamiento'})">XLSX</button>
+                            <button mat-menu-item (click)="exporter.exportTable('csv', {fileName:'Datos Estacionamiento'})">CSV</button>
+                            <button mat-menu-item (click)="exporter.exportTable('json', {fileName:'Datos Estacionamiento'})">TXT</button>
+                            <button mat-menu-item (click)="exporter.exportTable('txt', {fileName:'Datos Estacionamiento'})">JSON</button>
+                        </mat-menu>
+                    </mat-cell>
+
+                    <mat-footer-cell *matFooterCellDef class="min-w-32">
+                        TOTALES
+                    </mat-footer-cell>
+
+                </ng-container>
+
+                <ng-container *ngFor="let col of cols; let i = index" matColumnDef="{{col.field}}">
+                    <mat-header-cell *matHeaderCellDef mat-sort-header class="{{col.width}}">
+
+                        <div class="pr-2">
+                            <button
+                                class="ml-1 -mr-4"
+                                mat-icon-button
+                                [matMenuTriggerFor]="options">
+                                <mat-icon [svgIcon]="'arrow_drop_down_circle'"></mat-icon>
+                                <!--<mat-icon svgIcon="heroicons_outline:arrow-circle-down"></mat-icon>-->
+                                <mat-menu #options>
+                                    <button mat-menu-item [matMenuTriggerFor]="columns">
+                                        <mat-icon [svgIcon]="'view_column'"></mat-icon>
+                                        columnas
+                                    </button>
+                                </mat-menu>
+                            </button>
+                            <mat-menu #columns="matMenu">
+                                <mat-checkbox value="{{lc.field}}" [checked]="lc.checked" (change)="showOptions($event)"  class="mat-menu-item" *ngFor="let lc of listCheck">{{lc.header}}</mat-checkbox>
+                            </mat-menu>
+                        </div>
+
+                        {{col.header}}
+
+                    </mat-header-cell>
+                    <mat-cell *matCellDef="let row"
+                              class="{{col.width}}"
+                              (click)="selectedParking = row"
+                              [ngClass]="{
+                              'text-blue-800 bg-blue-100 dark:text-blue-50 dark:bg-blue-500': row === selectedParking,
+                              'text-green-800 bg-green-100 dark:text-green-50 dark:bg-green-500': row['estado'] === 3,
+                              'text-pink-800 bg-pink-100 dark:text-pink-50 dark:bg-pink-500': row['estado'] === 2,
+                              'text-amber-800 bg-amber-100 dark:text-amber-50 dark:bg-amber-500': row['estado'] === 1}"
+                              bobyToolTip [contentTemplate]="template">
+
+                        {{['fechaAterrizaje','fechaSalida','fechaLlegadaProv','fechaSalidaProv'].includes(col.field) ? (row[col.field] | date:'dd/MM/yyyy') : row[col.field] }}
+
+                        <mat-icon [svgIcon]="'heroicons_outline:eye'"
+                                  *ngIf="row['diferenciaMinParqueo'] !== 0 && col.field === 'diferenciaMinParqueo'"
+                                  class="text-pink-800 dark:text-pink-50"></mat-icon>
+                        <mat-icon [svgIcon]="'heroicons_outline:eye'"
+                                  *ngIf="row['observacion'] !== '' && col.field === 'estadoDes'"
+                                  class="text-pink-800 dark:text-pink-50"></mat-icon>
+                    </mat-cell>
+
+                    <mat-footer-cell *matFooterCellDef class="{{col.width}}">
+                        {{['matricula','mtow','atoLlegada','rutaLlegada','tipoTrafico','fechaAterrizaje','horaAterrizaje',
+                        'nroVueloAterrizaje','rutaSalida','fechaSalida','horaDespegueSalida','nroVueloSalida','minParqueo','oaciProcedenciaProv','fechaLlegadaProv',
+                        'horaLlegadaProv','oaciDestinoProv','fechaSalidaProv','horaDespegueSalidaProv','minParqueoProv','diferenciaMinParqueo','observacion'].includes(col.field) ? '' : '' }}
+                        {{ ['importeTotalAterrizaje'].includes(col.field) ? (totalImporteTotalAterrizaje | number:'1.0-2') : '' }}
+                        {{ ['importeEstacionamientos'].includes(col.field) ? (totalImporteEstacionamientos | number:'1.0-2' ): '' }}
+                    </mat-footer-cell>
+                </ng-container>
+
+                <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+                <mat-footer-row *matFooterRowDef="displayedColumns; sticky: true"></mat-footer-row>
+
+                <!-- Custom Template -->
+                <ng-template  #template>
+                    <div class="flex flex-col">
+                        <!-- Boa -->
+                        <div class="flex flex-col sm:flex-row sm:items-center -ml-0.5 mt-2 sm:mt-1 space-y-1 sm:space-y-0 sm:space-x-3">
+                            <ng-container>
+                                <div class="flex items-center">
+                                    <mat-icon
+                                        class="icon-size-5 text-hint text-amber-800 bg-amber-100 dark:text-amber-50 dark:bg-amber-500"
+                                        [svgIcon]="'local_airport'"></mat-icon>
+                                </div>
+                            </ng-container>
+                            <ng-container>
+                                <div class="flex items-center">
+                                    <div
+                                        class="py-0.5 px-3 rounded-full text-sm font-semibold text-amber-800 bg-amber-100 dark:text-amber-50 dark:bg-amber-500">
+                                        BOA
+                                    </div>
+                                </div>
+                            </ng-container>
+                        </div>
+                        <!-- Naabol -->
+                        <div class="flex flex-col sm:flex-row sm:items-center -ml-0.5 mt-2 sm:mt-1 space-y-1 sm:space-y-0 sm:space-x-3">
+                            <ng-container>
+                                <div class="flex items-center">
+                                    <mat-icon
+                                        class="icon-size-5 text-hint text-pink-800 bg-pink-100 dark:text-pink-50 dark:bg-pink-500"
+                                        [svgIcon]="'local_airport'"></mat-icon>
+                                </div>
+                            </ng-container>
+                            <ng-container>
+                                <div class="flex items-center">
+                                    <div
+                                        class="py-0.5 px-3 rounded-full text-sm font-semibold text-pink-800 bg-pink-100 dark:text-pink-50 dark:bg-pink-500">
+                                        NAABOL
+                                    </div>
+                                </div>
+                            </ng-container>
+                        </div>
+
+                        <!-- Ambos -->
+                        <div class="flex flex-col sm:flex-row sm:items-center -ml-0.5 mt-2 sm:mt-1 space-y-1 sm:space-y-0 sm:space-x-3">
+                            <ng-container>
+                                <div class="flex items-center">
+                                    <mat-icon
+                                        class="icon-size-5 text-hint text-green-800 bg-green-100 dark:text-green-50 dark:bg-green-500"
+                                        [svgIcon]="'local_airport'"></mat-icon>
+                                </div>
+                            </ng-container>
+                            <ng-container>
+                                <div class="flex items-center">
+                                    <div
+                                        class="py-0.5 px-3 rounded-full text-sm font-semibold text-green-800 bg-green-100 dark:text-green-50 dark:bg-green-500">
+                                        AMBOS
+                                    </div>
+                                </div>
+                            </ng-container>
+                        </div>
+
+                    </div>
+                </ng-template>
+                <!-- Custom Template -->
+            </table>
+        </div>
+    </div>
+    <mat-paginator
+        class="sm:absolute sm:inset-x-0 sm:bottom-0 border-b sm:border-t sm:border-b-0 z-10 bg-gray-50 dark:bg-transparent"
+        [ngClass]="{'pointer-events-none': isLoading}"
+        [length]="pagination.length"
+        [pageIndex]="pagination.page"
+        [pageSize]="10"
+        [showFirstLastButtons]="true"
+        [pageSizeOptions]="[5, 10, 25, 50, 100]"></mat-paginator>
+
+    <p-dialog [(visible)]="parkingDialog"
+              [style]="{width: '900px'}"
+              header="FILTROS"
+              [modal]="true"
+              class="p-fluid"
+              [maximizable]="true"
+              [formGroup]="ParkingForm">
+
+        <ng-template pTemplate="content">
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 w-full min-w-0">
+                <!-- FORMULARIO -->
+                <div class="sm:col-span-2 md:col-span-4 lg:col-span-2 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden bg-blue-0 dark:bg-transparent">
+                    <div class="grid border-t divide-x -m-6 ">
+                        <div class="flex flex-col items-left justify-left p-6 sm:p-8">
+                            <div class="text-5xl font-semibold leading-none tracking-tighter">
+
+                                <mat-form-field class="w-full boby-mat-dense flex-auto">
+                                    <mat-label class="text-primary">Aeropuerto</mat-label>
+                                    <mat-icon
+                                        matPrefix
+                                        class="hidden sm:flex icon-size-5"
+                                        [svgIcon]="'alt_route'"></mat-icon>
+                                    <input type="text"
+                                           matInput
+                                           [matAutocomplete]="ato"
+                                           (keyup)="searchAirport($event.target.value)"
+                                           placeholder="Buscar Aeropuerto ..."
+                                           [formControlName]="'ato'">
+                                    <mat-autocomplete autoActiveFirstOption
+                                                      #ato="matAutocomplete"
+                                                      [displayWith]="getAirPort.bind(this)">
+                                        <mat-option *ngFor="let ato of filteredAto" [value]="ato.codEstacion">
+                                            {{ato.nombreEstacion }} ({{ato.codEstacion}})
+                                        </mat-option>
+                                    </mat-autocomplete>
+                                </mat-form-field>
+
+                                <mat-form-field class="w-full  flex-auto boby-mat-dense">
+                                    <mat-label class="text-primary">Aeronave</mat-label>
+                                    <mat-icon
+                                        matPrefix
+                                        class="hidden sm:flex icon-size-5"
+                                        [svgIcon]="'airplanemode_active'"></mat-icon>
+                                    <input type="text"
+                                           matInput
+                                           [matAutocomplete]="air"
+                                           (keyup)="searchAircraft($event.target.value)"
+                                           placeholder="Buscar Aeronave ..."
+                                           [formControlName]="'aircraft'">
+                                    <mat-autocomplete autoActiveFirstOption
+                                                      #air="matAutocomplete"
+                                                      [displayWith]="getAircraft.bind(this)">
+                                        <mat-option *ngFor="let air of filteredAircraft" [value]="air.matricula">
+                                            {{air.matricula }} ({{air.modelo}})
+                                        </mat-option>
+                                    </mat-autocomplete>
+                                </mat-form-field>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="sm:col-span-2 md:col-span-4 lg:col-span-2 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden bg-blue-0 dark:bg-transparent">
+                    <div class="grid border-t divide-x -m-6">
+                        <div class="flex flex-col items-left justify-left p-6 sm:p-8">
+                            <div class="text-5xl font-semibold leading-none">
+
+                                <mat-form-field class="w-full flex-auto boby-mat-dense">
+                                    <mat-label class="text-primary">Fecha Inicio</mat-label>
+                                    <input
+                                        matInput
+                                        [matDatepicker]="startDate"
+                                        [formControlName]="'startDate'">
+                                    <mat-datepicker-toggle
+                                        matSuffix
+                                        [for]="startDate"></mat-datepicker-toggle>
+                                    <mat-datepicker #startDate disabled="false"></mat-datepicker>
+                                </mat-form-field>
+
+                                <mat-form-field class="w-full flex-auto boby-mat-dense">
+                                    <mat-label class="text-primary">Fecha Fin</mat-label>
+                                    <input
+                                        matInput
+                                        [matDatepicker]="endDate"
+                                        [formControlName]="'endDate'">
+                                    <mat-datepicker-toggle
+                                        matSuffix
+                                        [for]="endDate"></mat-datepicker-toggle>
+                                    <mat-datepicker #endDate disabled="false"></mat-datepicker>
+                                </mat-form-field>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </ng-template>
+
+        <ng-template pTemplate="footer">
+            <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+            <button pButton pRipple label="Aplicar" icon="pi pi-check" class="p-button-text" (click)="applyFilter()" [disabled]="ParkingForm.invalid"></button>
+        </ng-template>
+    </p-dialog>
+
+    <p-dialog [(visible)]="landingDataDialog"
+              [style]="{width: '900px'}"
+              header="TARIFA ATERRIZAJE"
+              [modal]="true"
+              class="p-fluid"
+              [maximizable]="true">
+
+
+        <ng-template pTemplate="content">
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 w-full min-w-0">
+                <table mat-table [dataSource]="dataSourceLD" matSort matTableExporter  #exporterD="matTableExporter" [hiddenColumns]="[0]">
+
+                    <ng-container matColumnDef="accion">
+                        <mat-header-cell *matHeaderCellDef aria-label="row actions" class="min-w-32">Acciones</mat-header-cell>
+                        <mat-cell *matCellDef="let row" [ngClass]="{ 'selected': row === selectedLandingData }" class="min-w-32">
+                            <button
+                                class="ml-1 -mr-4"
+                                mat-icon-button
+                                (click)="selectedLandingData = row"
+                                [matMenuTriggerFor]="chatsHeaderMenu">
+                                <mat-icon [svgIcon]="'heroicons_outline:dots-vertical'"></mat-icon>
+
+                                <mat-menu #chatsHeaderMenu>
+                                    <button mat-menu-item [matMenuTriggerFor]="formatos">
+                                        <mat-icon [svgIcon]="'heroicons_outline:cog'"></mat-icon>
+                                        Exportar Tarifa Aterrizaje
+                                    </button>
+                                </mat-menu>
+                            </button>
+                            <mat-menu #formatos="matMenu">
+                                <button mat-menu-item (click)="exporterD.exportTable('xls', {fileName:'Tarifa Aterrizaje'})">XLS</button>
+                                <button mat-menu-item (click)="exporterD.exportTable('xlsx', {fileName:'Tarifa Aterrizaje'})">XLSX</button>
+                                <button mat-menu-item (click)="exporterD.exportTable('csv', {fileName:'Tarifa Aterrizaje'})">CSV</button>
+                                <button mat-menu-item (click)="exporterD.exportTable('json', {fileName:'Tarifa Aterrizaje'})">TXT</button>
+                                <button mat-menu-item (click)="exporterD.exportTable('txt', {fileName:'Tarifa Aterrizaje'})">JSON</button>
+                            </mat-menu>
+                        </mat-cell>
+                    </ng-container>
+
+                    <ng-container *ngFor="let col of colsLD; let i = index" matColumnDef="{{col.field}}">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header class="{{col.width}}">  {{col.header}} </mat-header-cell>
+                        <mat-cell *matCellDef="let row"
+                                  class="{{col.width}}">
+                            {{['startDate_yyyyMMdd','endDate_yyyyMMdd'].includes(col.field) ? (row[col.field] | date:'dd/MM/yyyy') : row[col.field] }}
+                        </mat-cell>
+                    </ng-container>
+
+                    <mat-header-row *matHeaderRowDef="displayedColumnsLD"></mat-header-row>
+                    <mat-row *matRowDef="let row; columns: displayedColumnsLD;"></mat-row>
+                </table>
+            </div>
+        </ng-template>
+        <ng-template pTemplate="footer">
+        </ng-template>
+    </p-dialog>
+
+    <p-dialog [(visible)]="consolidatedDialog"
+              [style]="{width: '1024px'}"
+              header="CONSOLIDADO"
+              [modal]="true"
+              class="p-fluid"
+              [maximizable]="true">
+
+
+        <ng-template pTemplate="content">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 w-full min-w-0">
+                <!-- Summary -->
+                <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                    <div class="flex items-start justify-between">
+                        <div class="text-lg font-medium tracking-tight leading-6 truncate">TOTAL</div>
+                    </div>
+                    <div class="flex flex-col items-center mt-2">
+                        <div class="text-7xl font-bold tracking-tight leading-none text-blue-500">{{totalVuelos}}</div>
+                        <div class="text-lg font-medium text-blue-600 dark:text-blue-500">Vuelos</div>
+                        <div class="flex items-baseline justify-center w-full mt-5 text-secondary">
+                            <div class="text-md font-medium truncate">Operados</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Overdue -->
+                <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                    <div class="flex items-start justify-between">
+                        <div class="text-lg font-medium tracking-tight leading-6 truncate">IMPORTE</div>
+                    </div>
+                    <div class="flex flex-col items-center mt-2">
+                        <div class="text-7xl font-bold tracking-tight leading-none text-red-500">{{totalImporteTotalAterrizaje | number:'1.0-2'}}</div>
+                        <div class="text-lg font-medium text-red-600 dark:text-red-500">Aterrizaje</div>
+                        <div class="flex items-baseline justify-center w-full mt-5 text-secondary">
+                            <div class="text-md font-medium truncate">Expresado en Bs.</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Issues -->
+                <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                    <div class="flex items-start justify-between">
+                        <div class="text-lg font-medium tracking-tight leading-6 truncate">IMPORTE</div>
+                    </div>
+                    <div class="flex flex-col items-center mt-2">
+                        <div class="text-7xl font-bold tracking-tight leading-none text-amber-500">{{totalImporteEstacionamientos | number:'1.0-2'}}</div>
+                        <div class="text-lg font-medium text-amber-600 dark:text-amber-500">Estacionamiento</div>
+                        <div class="flex items-baseline justify-center w-full mt-5 text-secondary">
+                            <div class="text-md font-medium truncate">Expresado en Bs.</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Features -->
+                <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                    <div class="flex items-start justify-between">
+                        <div class="text-lg font-medium tracking-tight leading-6 truncate">TOTAL</div>
+                    </div>
+                    <div class="flex flex-col items-center mt-2">
+                        <div class="text-7xl font-bold tracking-tight leading-none text-green-500">{{totalVuelosDiferencia}}</div>
+                        <div class="text-lg font-medium text-green-600 dark:text-green-500">Vuelos</div>
+                        <div class="flex items-baseline justify-center w-full mt-5 text-secondary">
+                            <div class="text-md font-medium truncate">Diferencia Minutos Parqueo</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden">
+                    <div class="flex items-start justify-between">
+                        <div class="text-lg font-medium tracking-tight leading-6 truncate">TOTAL</div>
+                    </div>
+                    <div class="flex flex-col items-center mt-2">
+                        <div class="text-7xl font-bold tracking-tight leading-none text-green-500">{{totalVuelosObservacion}}</div>
+                        <div class="text-lg font-medium text-green-600 dark:text-green-500">Vuelos</div>
+                        <div class="flex items-baseline justify-center w-full mt-5 text-secondary">
+                            <div class="text-md font-medium truncate">Observados</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </ng-template>
+        <ng-template pTemplate="footer">
+        </ng-template>
+    </p-dialog>
+
+</div>

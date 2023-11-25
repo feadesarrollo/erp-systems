@@ -1,0 +1,59 @@
+<!-- Header -->
+<div class="bg-card">
+    <div class="flex flex-col w-full max-w-screen-xl mx-auto px-6 sm:px-8">
+        <div class="flex flex-col sm:flex-row flex-auto sm:items-center min-w-0 my-8 sm:my-12">
+            <!-- Avatar and name -->
+            <div class="flex flex-auto items-center min-w-0">
+                <div class="flex-0 w-16 h-16 rounded-full overflow-hidden">
+                    <img
+                        class="w-full h-full object-cover"
+                        src="{{avatar}}">
+                </div>
+                <div class="flex flex-col min-w-0 ml-4">
+                    <ng-container>
+                        <div class="text-2xl md:text-5xl font-semibold tracking-tight leading-7 md:leading-snug truncate">Bienvenido, {{name}}!</div>
+                    </ng-container>
+                    <div class="flex items-center">
+                        <mat-icon
+                            class="icon-size-5"
+                            [svgIcon]="'heroicons_solid:bell'"></mat-icon>
+                        <div class="ml-1.5 leading-6 truncate text-secondary">Tienes 2 mensajes nuevos y 15 tareas nuevas.</div>
+                    </div>
+                </div>
+            </div>
+            <!-- Actions -->
+            <div class="flex items-center mt-6 sm:mt-0 sm:ml-2 space-x-3">
+                <button
+                    class="boby-mat-button-rounded bg-accent-700"
+                    mat-flat-button
+                    [color]="'accent'">
+                    <mat-icon
+                        class="icon-size-5"
+                        [svgIcon]="'heroicons_solid:mail'"></mat-icon>
+                    <span class="ml-2">Mensajes</span>
+                </button>
+                <button
+                    class="boby-mat-button-rounded bg-accent-700"
+                    mat-flat-button
+                    [color]="'accent'">
+                    <mat-icon
+                        class="icon-size-5"
+                        [svgIcon]="'heroicons_solid:cog'"></mat-icon>
+                    <span class="ml-2">Tareas</span>
+                </button>
+                <button
+                    *ngIf=" tray != 'menu' "
+                    class="boby-mat-button-rounded bg-accent-700"
+                    mat-flat-button
+                    [color]="'accent'"
+                    [routerLink]="[path]">
+                    <!--path == '../' ?  'arrow_back' : 'menu'-->
+                    <mat-icon class="icon-size-5">{{icon}}</mat-icon>
+                    <!--{{path == '../' ? 'Atras' : 'Menu'}}-->
+                    <span class="ml-2">{{trayName}}</span>
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>

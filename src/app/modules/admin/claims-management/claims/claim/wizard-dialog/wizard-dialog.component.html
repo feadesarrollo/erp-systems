@@ -1,0 +1,216 @@
+
+
+<!-- Header -->
+<div mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle class="flex flex-0 items-center justify-between h-16 pr-3 sm:pr-5 pl-6 sm:pl-8 bg-primary text-on-primary">
+    <div class="text-lg font-medium">SIGUIENTE ESTADO WF</div>
+    <button
+        mat-icon-button
+        [tabIndex]="-1"
+        (click)="Close()">
+        <mat-icon
+            class="text-current"
+            [svgIcon]="'heroicons_outline:x'"></mat-icon>
+    </button>
+</div>
+
+<!-- Wizard form -->
+<mat-dialog-content [formGroup]="WizardForm">
+
+    <mat-horizontal-stepper
+        [linear]="true"
+        #horizontalStepper>
+
+        <mat-step
+            [formGroupName]="'estado'"
+            [stepControl]="WizardForm.get('estado')"
+            #horizontalStepperStep1 >
+            <ng-template matStepLabel ><div [matTooltip]="'ESTADO'">ESTADO</div></ng-template>
+            <p class="my-1 font-medium">
+                Información sobre los estados.
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 gap-6 w-full min-w-0 mt-1 mb-1">
+                <div class="sm:col-span-2 md:col-span-4 lg:col-span-2 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden bg-blue-0 dark:bg-transparent">
+                    <div class="grid divide-x -m-6 ">
+                        <div class="flex flex-col items-left justify-left p-3 sm:p-3">
+                            <div class="text-5xl font-semibold leading-none tracking-tighter">
+                                <!-- Estado -->
+                                <mat-form-field class="w-full boby-mat-dense flex-auto">
+                                    <mat-label>Estado</mat-label>
+                                    <mat-select (selectionChange)="changeSiguienteEstado($event)"
+                                                [placeholder]="'Seleccione tipo estado....'"
+                                                [formControlName]="'id_tipo_estado'">
+                                        <mat-option *ngFor="let estado of listaTipoEstado" [value]="estado.id_tipo_estado">
+                                            {{estado.codigo_estado}}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+
+                                <!-- Departamento -->
+                                <mat-form-field class="w-full boby-mat-dense flex-auto">
+                                    <mat-label>Departamento</mat-label>
+                                    <mat-select (selectionChange)="changeDepartamentoWf($event)"
+                                                [placeholder]="'Seleccione un departamento....'"
+                                                [formControlName]="'id_depto_wf'" [disabled]="!this.WizardForm.get('estado').get('id_depto_wf').getRawValue()">
+                                        <mat-option *ngFor="let depto of listaDepartamentoWf" [value]="depto.id_depto">
+                                            {{depto.nombre_depto}}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+
+                                <!-- Funcionario -->
+                                <mat-form-field class="w-full boby-mat-dense flex-auto">
+                                    <mat-label>Funcionario</mat-label>
+                                    <mat-select (selectionChange)="changeFuncionarioWf($event)"
+                                                [placeholder]="'Seleccione un funcionario....'"
+                                                [formControlName]="'id_funcionario_wf'" [disabled]="!this.WizardForm.get('estado').get('id_funcionario_wf').getRawValue()">
+                                        <mat-option *ngFor="let funcionario of listaFuncionarioWf" [value]="funcionario.id_funcionario">
+                                            {{funcionario.desc_funcionario}}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+
+                                <!-- Proveido -->
+                                <!--<mat-form-field class="w-full boby-mat-dense flex-auto">
+                                    <mat-label>Proveido</mat-label>
+                                    <textarea
+                                        matInput
+                                        [rows]="3"
+                                        [formControlName]="'obs'"></textarea>
+                                </mat-form-field>-->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end mt-1 mb-1">
+
+                <button
+                    class="order-first sm:order-last"
+                    mat-flat-button
+                    [color]="'primary'"
+                    [disabled]="WizardForm.get('estado').invalid"
+                    (click)="onChangeWizard('estado')"
+                    *ngIf="!showProcess">
+                    Guardar
+                </button>
+
+                <button
+                    class="px-8"
+                    mat-flat-button
+                    [color]="'primary'"
+                    [disabled]="horizontalStepperStep1.stepControl.pristine || horizontalStepperStep1.stepControl.invalid"
+                    type="button"
+                    matStepperNext
+                    *ngIf="showProcess">
+                    Siguiente
+                </button>
+            </div>
+        </mat-step>
+
+        <mat-step
+            [formGroupName]="'proceso'"
+            [stepControl]="WizardForm.get('proceso')"
+            #horizontalStepperStep2 *ngIf="showProcess">
+            <ng-template matStepLabel ><div [matTooltip]="'PROCESO '+processName">PROCESO {{processName}}</div></ng-template>
+            <p class="my-1 font-medium">
+                Información sobre el proceso siguiente.
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 gap-6 w-full min-w-0 mt-1 mb-1">
+                <div class="sm:col-span-2 md:col-span-4 lg:col-span-2 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden bg-blue-0 dark:bg-transparent">
+                    <div class="grid divide-x -m-6 ">
+                        <div class="flex flex-col items-left justify-left p-3 sm:p-3">
+                            <div class="text-5xl font-semibold leading-none tracking-tighter">
+                                <!-- Estado -->
+                                <mat-form-field class="w-full boby-mat-dense flex-auto">
+                                    <mat-label>Estado</mat-label>
+                                    <mat-select [placeholder]="'Seleccione tipo estado....'"
+                                                [formControlName]="'id_tipo_estado'" [disabled]="true">
+                                        <mat-option *ngFor="let estado of listaTipoEstadoP" [value]="estado.id_tipo_estado">
+                                            {{estado.codigo_estado}}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+
+                                <!-- Departamento -->
+                                <mat-form-field class="w-full boby-mat-dense flex-auto">
+                                    <mat-label>Departamento</mat-label>
+                                    <mat-select [placeholder]="'Seleccione un departamento....'"
+                                                [formControlName]="'id_depto_wf'" [disabled]="true">
+                                        <mat-option *ngFor="let depto of listaDepartamentoWfP" [value]="depto.id_depto">
+                                            {{depto.nombre_depto}}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+
+                                <!-- Funcionario -->
+                                <mat-form-field class="w-full boby-mat-dense flex-auto">
+                                    <mat-label>Funcionario</mat-label>
+                                    <mat-select [placeholder]="'Seleccione un funcionario....'"
+                                                [formControlName]="'id_funcionario_wf'" [disabled]="true">
+                                        <mat-option *ngFor="let funcionario of listaFuncionarioWfP" [value]="funcionario.id_funcionario">
+                                            {{funcionario.desc_funcionario}}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+
+                                <!-- Proveido -->
+                                <!--<mat-form-field class="w-full boby-mat-dense flex-auto">
+                                    <mat-label>Proveido</mat-label>
+                                    <textarea
+                                        matInput
+                                        [rows]="3"
+                                        [formControlName]="'obs'" [disabled]="true"></textarea>
+                                </mat-form-field>-->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end mt-1 mb-1">
+
+                <button
+                    class="order-first sm:order-last"
+                    mat-flat-button
+                    [color]="'primary'"
+                    [disabled]="WizardForm.get('proceso').invalid"
+                    (click)="onChangeWizard('proceso')">
+                    Guardar
+                </button>
+
+                <!--<button
+                    class="px-8"
+                    mat-flat-button
+                    [color]="'primary'"
+                    [disabled]="horizontalStepperStep2.stepControl.pristine || horizontalStepperStep2.stepControl.invalid"
+                    type="button"
+                    matStepperNext>
+                    Siguiente
+                </button>-->
+            </div>
+        </mat-step>
+
+    </mat-horizontal-stepper>
+
+</mat-dialog-content>
+
+<!-- Actions -->
+<!--<mat-dialog-actions align="end">
+        &lt;!&ndash; Cancelar &ndash;&gt;
+        <button
+            class="sm:mx-3"
+            mat-stroked-button
+            (click)="Close()">
+            <span>Cancelar</span>
+        </button>
+        &lt;!&ndash; Guardar &ndash;&gt;
+        <button
+            class="order-first sm:order-last"
+            mat-flat-button
+            [color]="'primary'"
+            [disabled]="WizardForm.invalid"
+            (click)="onChangeWizard()">
+            Guardar
+        </button>
+</mat-dialog-actions>-->

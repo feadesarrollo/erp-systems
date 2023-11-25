@@ -1,0 +1,127 @@
+
+<div mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle class="flex flex-0 items-center justify-between h-10 pr-3 sm:pr-5 pl-6 sm:pl-8 bg-primary text-on-primary">
+    <div class="text-lg font-medium">{{title}}</div>
+    <button
+        mat-icon-button
+        (click)="Close()"
+        [tabIndex]="-1">
+        <mat-icon
+            class="text-current"
+            [svgIcon]="'heroicons_outline:x'"></mat-icon>
+    </button>
+</div>
+
+
+<mat-dialog-content [formGroup]="InformeForm">
+    <div class="bg-card shadow rounded">
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 w-full min-w-0">
+            <div class="sm:col-span-3 p-2 bg-card rounded-2xl bg-blue-0 dark:bg-transparent">
+                <mat-form-field class="boby-mat-dense w-full flex-auto">
+                    <mat-label>Nro. de Informe</mat-label>
+                    <mat-icon
+                        matPrefix
+                        class="hidden sm:flex icon-size-5"
+                        [svgIcon]="'heroicons_solid:credit-card'"></mat-icon>
+                    <input matInput
+                           [formControlName]="'nro_informe'">
+                </mat-form-field>
+
+                <mat-form-field class="boby-mat-dense w-full flex-auto">
+                    <mat-label>Fecha Informe</mat-label>
+                    <mat-icon
+                        matPrefix
+                        class="hidden sm:flex icon-size-5"
+                        [svgIcon]="'heroicons_solid:calendar'"></mat-icon>
+                    <input
+                        matInput
+                        [matDatepicker]="dateInf"
+                        [placeholder]="'Fecha Informe'"
+                        [formControlName]="'fecha_informe'">
+                    <mat-datepicker-toggle
+                        matSuffix
+                        [for]="dateInf"></mat-datepicker-toggle>
+                    <mat-datepicker #dateInf></mat-datepicker>
+                </mat-form-field>
+
+
+                <mat-form-field class="boby-mat-dense w-full flex-auto">
+                    <mat-label>Funcionario Informe</mat-label>
+                    <mat-icon
+                        matPrefix
+                        class="hidden sm:flex icon-size-5"
+                        [svgIcon]="'heroicons_solid:user-circle'"></mat-icon>
+                    <input type="text"
+                           matInput
+                           [matAutocomplete]="funcInf"
+                           (keyup)="searchFuncionario($event.target.value,'informe')"
+                           placeholder="Funcionario Informe ..."
+                           [formControlName]="'id_funcionario'">
+                    <mat-autocomplete autoActiveFirstOption
+                                      #funcInf="matAutocomplete"
+                                      [displayWith]="getFuncInforme.bind(this)">
+                        <mat-option *ngFor="let funcInf of listaFuncInforme" [value]="funcInf.id_funcionario">
+                            {{funcInf.desc_funcionario2}}
+                        </mat-option>
+                    </mat-autocomplete>
+                </mat-form-field>
+
+                <mat-form-field class="boby-mat-dense w-full flex-auto">
+                    <mat-label>Lista de Compensaciones</mat-label>
+                    <mat-icon
+                        matPrefix
+                        class="hidden sm:flex icon-size-5"
+                        [svgIcon]="'heroicons_solid:information-circle'"></mat-icon>
+                    <mat-select [placeholder]="'Seleccione las compensaciones....'"
+                                [formControlName]="'lista_compensacion'"
+                                multiple>
+                        <mat-option *ngFor="let comp of listaCompensacion" [value]="comp.id_compensacion">
+                            {{comp.nombre}}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+
+            <div class="sm:col-span-9 flex flex-col flex-auto p-2 bg-card rounded-2xl bg-blue-0 dark:bg-transparent">
+                <editor [formControlName]="'content'"
+                        apiKey="80ttz6cwbzbd7rb1b5eogko76rqaxlphz776mtmtthsylohd"
+                        [init]="{
+                            base_url: '/tinymce',
+                            suffix: '.min',
+                            menubar: true,
+                            statusbar : false,
+                            language_url: 'assets/langs/es.js',
+                            language: 'es',
+                            promotion: false,
+                            plugins: [
+                                'accordion','advlist','anchor','autolink','lists','link','image','charmap','preview','anchor','searchreplace',
+                                'visualblocks','code','fullscreen','insertdatetime','media','table','help','wordcount','save','template',
+                                'emoticons','quickbars','autoresize'
+                            ],
+                            toolbar: 'undo redo searchreplace | blocks fontfamily fontsize | formatselect | bold italic forecolor backcolor | align lineheight checklist bullist numlist | outdent indent table | removeformat',
+                            font_size_formats: '8px 9px 10px 11px 12px 14px 16px 18px 20px 22px 24px 26px 28px 36px 48px 56px 72px',
+                            font_size_input_default_unit: 'px'
+                      }"></editor>
+            </div>
+        </div>
+    </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button
+        class="ml-auto rounded-lg"
+        mat-button
+        [matTooltip]="'Cancelar'"
+        (click)="Close()">
+        Cancelar
+    </button>
+    <!-- Save -->
+    <button
+        class="ml-2 rounded-lg"
+        mat-flat-button
+        [color]="'primary'"
+        [disabled]="InformeForm.invalid"
+        [matTooltip]="'Guardar'"
+        (click)="saveInforme()">
+        Guardar
+    </button>
+</mat-dialog-actions>

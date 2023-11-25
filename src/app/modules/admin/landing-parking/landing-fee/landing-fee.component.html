@@ -1,0 +1,171 @@
+<div class="sm:absolute sm:inset-0 flex flex-col flex-auto min-w-0 sm:overflow-hidden bg-card dark:bg-transparent">
+
+    <div class="relative flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between py-4 px-6 md:px-8 border-b">
+        <!-- Actions -->
+        <div class="flex shrink-0 items-end mt-1 sm:mt-0 sm:ml-4">
+            <p-toast position="top-right"></p-toast>
+            <!-- Search -->
+            <mat-form-field class="boby-mat-dense boby-mat-no-subscript boby-mat-rounded min-w-64">
+                <mat-icon
+                    class="icon-size-5"
+                    matPrefix
+                    [svgIcon]="'heroicons_solid:search'"></mat-icon>
+                <input
+                    matInput
+                    [formControl]="searchInputControl"
+                    [autocomplete]="'off'"
+                    [placeholder]="'Buscar Datos de Tarifa'">
+            </mat-form-field>
+
+            <button
+                class="ml-4 rounded-lg"
+                mat-flat-button
+                [color]="'primary'"
+                [matTooltip]="'Aplicar Filtros'"
+                (click)="openFilter()">
+                <mat-icon [svgIcon]="'filter_alt'"></mat-icon>
+                <span class="hidden sm:inline-block ml-2 mr-1">Filtros</span>
+            </button>
+
+            <button
+                class="ml-2 rounded-lg"
+                mat-flat-button
+                [color]="'primary'"
+                [matTooltip]="'Actualizar'"
+                (click)="refreshFee()"
+                [disabled]="FeeForm.invalid">
+                <mat-icon [svgIcon]="'heroicons_outline:refresh'"></mat-icon>
+                <span class="hidden sm:inline-block ml-2 mr-1">Actualizar</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="flex flex-auto overflow-auto">
+        <div class="flex flex-col flex-auto sm:mb-18 overflow-auto sm:overflow-y-auto">
+            <table mat-table [dataSource]="dataSource" matSort matTableExporter  #exporter="matTableExporter" [hiddenColumns]="[0]">
+
+                <ng-container matColumnDef="accion">
+                    <mat-header-cell *matHeaderCellDef aria-label="row actions" class="min-w-32">Acciones</mat-header-cell>
+                    <mat-cell (click)="selectedFee = row" *matCellDef="let row" [ngClass]="{ 'text-blue-800 bg-blue-100 dark:text-blue-50 dark:bg-blue-500': row === selectedFee }" class="min-w-32">
+                        <button
+                            class="ml-1 -mr-4"
+                            mat-icon-button
+                            [matMenuTriggerFor]="chatsHeaderMenu">
+                            <mat-icon [svgIcon]="'heroicons_outline:dots-vertical'"></mat-icon>
+
+                            <mat-menu #chatsHeaderMenu>
+                                <button mat-menu-item [matMenuTriggerFor]="formatos">
+                                    <mat-icon [svgIcon]="'heroicons_outline:cog'"></mat-icon>
+                                    Exportar Tarifa Aterrizaje
+                                </button>
+                            </mat-menu>
+                        </button>
+                        <mat-menu #formatos="matMenu">
+                            <button mat-menu-item (click)="exporter.exportTable('xls', {fileName:'Tarifa Aterrizaje'})">XLS</button>
+                            <button mat-menu-item (click)="exporter.exportTable('xlsx', {fileName:'Tarifa Aterrizaje'})">XLSX</button>
+                            <button mat-menu-item (click)="exporter.exportTable('csv', {fileName:'Tarifa Aterrizaje'})">CSV</button>
+                            <button mat-menu-item (click)="exporter.exportTable('json', {fileName:'Tarifa Aterrizaje'})">TXT</button>
+                            <button mat-menu-item (click)="exporter.exportTable('txt', {fileName:'Tarifa Aterrizaje'})">JSON</button>
+                        </mat-menu>
+                    </mat-cell>
+                </ng-container>
+
+                <ng-container *ngFor="let col of cols; let i = index" matColumnDef="{{col.field}}">
+                    <mat-header-cell *matHeaderCellDef mat-sort-header class="{{col.width}}">  {{col.header}} </mat-header-cell>
+                    <mat-cell *matCellDef="let row"
+                              class="{{col.width}}"
+                              (click)="selectedFee = row" [ngClass]="{ 'text-blue-800 bg-blue-100 dark:text-blue-50 dark:bg-blue-500': row === selectedFee }"
+                    >
+                        {{['fechaAterrizaje','fechaSalida','fechaLlegadaProv','fechaSalidaProv'].includes(col.field) ? (row[col.field] | date:'dd/MM/yyyy') : row[col.field] }}
+                    </mat-cell>
+                </ng-container>
+
+                <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+            </table>
+        </div>
+    </div>
+    <mat-paginator
+        class="sm:absolute sm:inset-x-0 sm:bottom-0 border-b sm:border-t sm:border-b-0 z-10 bg-gray-50 dark:bg-transparent"
+        [ngClass]="{'pointer-events-none': isLoading}"
+        [length]="pagination.length"
+        [pageIndex]="pagination.page"
+        [pageSize]="10"
+        [showFirstLastButtons]="true"
+        [pageSizeOptions]="[5, 10, 25, 50, 100]"></mat-paginator>
+
+    <p-dialog [(visible)]="feeDialog"
+              [style]="{width: '900px'}"
+              header="FILTROS"
+              [modal]="true"
+              class="p-fluid"
+              [maximizable]="true"
+              [formGroup]="FeeForm">
+
+        <ng-template pTemplate="content">
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 w-full min-w-0">
+                <!-- DATOS TECNICOS -->
+                <div class="sm:col-span-2 md:col-span-4 lg:col-span-2 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden bg-blue-0 dark:bg-transparent">
+                    <div class="grid border-t divide-x -m-6 ">
+                        <div class="flex flex-col items-left justify-left p-6 sm:p-8">
+                            <div class="text-5xl font-semibold leading-none tracking-tighter">
+
+                                <mat-form-field class="w-full boby-mat-dense flex-auto">
+                                    <mat-label class="text-primary">Tarifa Aterrizaje</mat-label>
+                                    <mat-icon
+                                        matSuffix
+                                        class="hidden sm:flex icon-size-5"
+                                        [svgIcon]="'heroicons_solid:airplanemode_active'"></mat-icon>
+                                    <input type="text"
+                                           matInput
+                                           [matAutocomplete]="rateLanding"
+                                           (keyup)="searchRateLanding($event.target.value)"
+                                           placeholder="Buscar Tarifa Aterrizaje ..."
+                                           [formControlName]="'landingId'">
+                                    <mat-autocomplete autoActiveFirstOption
+                                                      #rateLanding="matAutocomplete"
+                                                      [displayWith]="getRateLanding.bind(this)">
+                                        <mat-option *ngFor="let rateLanding of filteredRateLanding" [value]="rateLanding.id">
+                                            {{rateLanding.rateLanding}}
+                                        </mat-option>
+                                    </mat-autocomplete>
+                                </mat-form-field>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="sm:col-span-2 md:col-span-4 lg:col-span-2 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden bg-blue-0 dark:bg-transparent">
+                    <div class="grid border-t divide-x -m-6">
+                        <div class="flex flex-col items-left justify-left p-6 sm:p-8">
+                            <div class="text-5xl font-semibold leading-none">
+
+                                <mat-form-field class="w-full flex-auto boby-mat-dense">
+                                    <mat-label class="text-primary">Fecha</mat-label>
+                                    <input
+                                        matInput
+                                        [matDatepicker]="startDate"
+                                        [formControlName]="'date'">
+                                    <mat-datepicker-toggle
+                                        matSuffix
+                                        [for]="startDate"></mat-datepicker-toggle>
+                                    <mat-datepicker #startDate disabled="false"></mat-datepicker>
+                                </mat-form-field>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </ng-template>
+
+        <ng-template pTemplate="footer">
+            <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+            <button pButton pRipple label="Aplicar" icon="pi pi-check" class="p-button-text" (click)="applyFilter()" [disabled]="FeeForm.invalid"></button>
+        </ng-template>
+    </p-dialog>
+
+</div>

@@ -1,0 +1,629 @@
+<div class="flex flex-col w-full">
+
+    <!-- View mode -->
+    <ng-container *ngIf="!editMode">
+
+        <!-- Header -->
+        <div class="relative w-full h-40 sm:h-48 px-8 sm:px-12 bg-accent-100 dark:bg-accent-700">
+            <!-- Background -->
+            <!--<ng-container *ngIf="role.background">
+                <img
+                    class="absolute inset-0 object-cover w-full h-full"
+                    [src]="role.background">
+            </ng-container>-->
+            <!-- Close button -->
+            <div class="flex items-center justify-end w-full max-w-3xl mx-auto pt-6">
+                <button
+                    mat-icon-button
+                    [matTooltip]="'Cerrar'"
+                    [routerLink]="['../']">
+                    <mat-icon
+                        class="text-white"
+                        [svgIcon]="'heroicons_outline:x-circle'"></mat-icon>
+                </button>
+            </div>
+        </div>
+
+        <!-- Contact -->
+        <div class="relative flex flex-col flex-auto items-center p-6 pt-0 sm:p-12 sm:pt-0">
+            <div class="w-full max-w-3xl">
+
+                <!-- Avatar and actions -->
+                <div class="flex flex-auto items-end -mt-16">
+                    <!-- Avatar -->
+                    <div class="flex items-center justify-center w-32 h-32 rounded-full overflow-hidden ring-4 ring-bg-card">
+                        <!--<img
+                            class="object-cover w-full h-full"
+                            *ngIf="role.avatar"
+                            [src]="role.avatar">-->
+                        <div
+                            class="flex items-center justify-center w-full h-full rounded overflow-hidden uppercase text-8xl font-bold leading-none bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-200">
+                            {{role.name.charAt(0)}}
+                        </div>
+                    </div>
+                    <!-- Actions -->
+                    <div class="flex items-center ml-auto mb-1">
+                        <button
+                            mat-stroked-button
+                            (click)="toggleEditMode(true)">
+                            <mat-icon
+                                class="icon-size-5"
+                                [svgIcon]="'heroicons_solid:pencil-alt'"></mat-icon>
+                            <span class="ml-2">Editar</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Name -->
+                <div class="mt-3 text-4xl font-bold truncate">{{role.name}}</div>
+
+                <div class="flex flex-col mt-4 pt-6 border-t space-y-8">
+                    <!-- States -->
+                    <ng-container *ngIf="role.states.length">
+                        <div class="leading-6 font-bold " [matTooltip]="'Lista de estados que visualiza el rol.'">LISTA ESTADOS</div>
+                        <div class="flex">
+                            <mat-icon [svgIcon]="'heroicons_outline:tag'"></mat-icon>
+                            <div class="min-w-0 ml-6 space-y-1">
+                                <ng-container *ngFor="let state of this.roleForm.get('states').getRawValue(); trackBy: trackByFn">
+                                    <div class="flex items-center leading-6">
+                                        <a class="hover:underline text-primary-500">
+                                            {{state}}
+                                        </a>
+                                        <div
+                                            class="text-md truncate text-secondary"
+                                            *ngIf="state">
+                                            <span class="mx-2">&bull;</span>
+                                            <span class="font-medium">{{state}}</span>
+                                        </div>
+                                    </div>
+                                </ng-container>
+                            </div>
+                        </div>
+                    </ng-container>
+
+                    <!-- Officials -->
+                    <ng-container *ngIf="role.officials.length">
+                        <div class="leading-6 font-bold " [matTooltip]="'Lista de funcionarios que tienen asignado el rol.'">LISTA FUNCIONARIOS</div>
+                        <div class="flex">
+                            <mat-icon [svgIcon]="'heroicons_outline:user-group'"></mat-icon>
+                            <div class="min-w-0 ml-6 space-y-1">
+                                <ng-container *ngFor="let official of role.officials; trackBy: trackByFn">
+                                    <div class="flex items-center leading-6">
+                                        <a class="hover:underline text-primary-500">
+                                            {{official.desc_funcionario2}}
+                                        </a>
+                                        <div
+                                            class="text-md truncate text-secondary"
+                                            *ngIf="official.nombre_cargo">
+                                            <span class="mx-2">&bull;</span>
+                                            <span class="font-medium">{{official.nombre_cargo}}</span>
+                                        </div>
+                                    </div>
+                                </ng-container>
+                            </div>
+                        </div>
+                    </ng-container>
+
+                    <!-- Permissions Claim -->
+                    <ng-container *ngIf="role.officials.length">
+                        <div class="leading-6 font-bold " [matTooltip]="'Lista de permisos para reclamos.'">PERMISOS RECLAMO</div>
+                        <div class="flex">
+                            <mat-icon [svgIcon]="'heroicons_outline:tag'"></mat-icon>
+                            <div class="min-w-0 ml-6 space-y-1">
+                                <ng-container *ngFor="let permitsClaim of role.permitsClaim; trackBy: trackByFn">
+                                    <div class="flex items-center leading-6" *ngFor="let state of permitsClaim.states; trackBy: trackByFn">
+                                        <a class="hover:underline text-primary-500"  >
+                                            {{ state | uppercase }}
+                                        </a>
+                                        <div class="text-md truncate text-secondary"
+                                            *ngFor="let permission of permitsClaim.permission; trackBy: trackByFn">
+                                            <span class="mx-2">&bull;</span>
+                                            <span class="font-medium">{{permission | uppercase}}</span>
+                                        </div>
+                                    </div>
+                                </ng-container>
+                            </div>
+                        </div>
+                    </ng-container>
+
+                    <!-- Permissions Answer -->
+                    <ng-container *ngIf="role.officials.length">
+                        <div class="leading-6 font-bold " [matTooltip]="'Lista de permisos para respuestas.'">PERMISOS RESPUESTA</div>
+                        <div class="flex">
+                            <mat-icon [svgIcon]="'heroicons_outline:tag'"></mat-icon>
+                            <div class="min-w-0 ml-6 space-y-1">
+                                <ng-container *ngFor="let permitsAnswer of role.permitsAnswer; trackBy: trackByFn">
+                                    <div class="flex items-center leading-6" *ngFor="let state of permitsAnswer.states; trackBy: trackByFn">
+                                        <a class="hover:underline text-primary-500">
+                                            {{state | uppercase}}
+                                        </a>
+                                        <div
+                                            class="text-md truncate text-secondary"
+                                            *ngFor="let permission of permitsAnswer.permission; trackBy: trackByFn">
+                                            <span class="mx-2">&bull;</span>
+                                            <span class="font-medium">{{permission | uppercase}}</span>
+                                        </div>
+                                    </div>
+                                </ng-container>
+                            </div>
+                        </div>
+                    </ng-container>
+
+                    <!-- Permissions Report -->
+                    <ng-container *ngIf="role.officials.length">
+                        <div class="leading-6 font-bold " [matTooltip]="'Lista de permisos para informes.'">PERMISOS INFORME</div>
+                        <div class="flex">
+                            <mat-icon [svgIcon]="'heroicons_outline:tag'"></mat-icon>
+                            <div class="min-w-0 ml-6 space-y-1">
+                                <ng-container *ngFor="let permitsReport of role.permitsReport; trackBy: trackByFn">
+                                    <div class="flex items-center leading-6" *ngFor="let state of permitsReport.states; trackBy: trackByFn">
+                                        <a class="hover:underline text-primary-500">
+                                            {{state | uppercase}}
+                                        </a>
+                                        <div
+                                            class="text-md truncate text-secondary"
+                                            *ngFor="let permission of permitsReport.permission; trackBy: trackByFn">
+                                            <span class="mx-2">&bull;</span>
+                                            <span class="font-medium">{{permission | uppercase}}</span>
+                                        </div>
+                                    </div>
+                                </ng-container>
+                            </div>
+                        </div>
+                    </ng-container>
+
+                    <!-- Roles -->
+                    <ng-container *ngIf="role.roles.length">
+                        <div class="leading-6 font-bold " [matTooltip]="'Lista de roles adicionales que tiene el rol.'">Roles</div>
+                        <div class="flex">
+                            <mat-icon [svgIcon]="'heroicons_outline:user-circle'"></mat-icon>
+                            <div class="min-w-0 ml-6 space-y-1">
+                                <ng-container *ngFor="let role of role.roles; trackBy: trackByFn">
+                                    <div class="flex items-center leading-6">
+                                        <a
+                                            class="hover:underline text-primary-500"
+                                            [href]="'mailto:' + role.name"
+                                            target="_blank">
+                                            {{role.name}}
+                                        </a>
+
+                                    </div>
+                                </ng-container>
+                            </div>
+                        </div>
+                    </ng-container>
+
+                    <!-- Notes -->
+                    <ng-container *ngIf="role.notes">
+                        <div class="leading-6 font-bold " [matTooltip]="'Comentario sobre el rol.'">Comentario</div>
+                        <div class="flex">
+                            <mat-icon [svgIcon]="'heroicons_outline:menu-alt-2'"></mat-icon>
+                            <div
+                                class="max-w-none ml-6 prose prose-sm"
+                                [innerHTML]="role.notes"></div>
+                        </div>
+                    </ng-container>
+                </div>
+
+            </div>
+        </div>
+    </ng-container>
+
+    <!-- Edit mode -->
+    <ng-container *ngIf="editMode">
+
+        <!-- Header -->
+        <div class="relative w-full h-40 sm:h-48 px-8 sm:px-12 bg-accent-100 dark:bg-accent-700">
+            <!-- Background -->
+            <!--<ng-container *ngIf="role.background">
+                <img
+                    class="absolute inset-0 object-cover w-full h-full"
+                    [src]="role.background">
+            </ng-container>-->
+            <!-- Close button -->
+            <div class="flex items-center justify-end w-full max-w-3xl mx-auto pt-6">
+                <button
+                    mat-icon-button
+                    [matTooltip]="'Cerrar'"
+                    [color]="'primary'"
+                    [routerLink]="['../']">
+                    <mat-icon
+                        class="text-white"
+                        [svgIcon]="'heroicons_outline:x'"></mat-icon>
+                </button>
+            </div>
+        </div>
+
+        <!-- Contact form -->
+        <div class="relative flex flex-col flex-auto items-center px-6 sm:px-12">
+            <div class="w-full max-w-3xl">
+                <form [formGroup]="roleForm">
+
+                    <!-- Avatar -->
+                    <!--<div class="flex flex-auto items-end -mt-16">
+                        <div class="relative flex items-center justify-center w-32 h-32 rounded-full overflow-hidden ring-4 ring-bg-card">
+                            &lt;!&ndash; Upload / Remove avatar &ndash;&gt;
+                            <div class="absolute inset-0 bg-black bg-opacity-50 z-10"></div>
+                            <div class="absolute inset-0 flex items-center justify-center z-20">
+                                <div>
+                                    <input
+                                        id="avatar-file-input"
+                                        class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                        type="file"
+                                        [multiple]="false"
+                                        [accept]="'image/jpeg, image/png'"
+                                        (change)="uploadAvatar(avatarFileInput.files)"
+                                        #avatarFileInput>
+                                    <label
+                                        class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
+                                        for="avatar-file-input"
+                                        matRipple>
+                                        <mat-icon
+                                            class="text-white"
+                                            [svgIcon]="'heroicons_outline:camera'"></mat-icon>
+                                    </label>
+                                </div>
+                                <div>
+                                    <button
+                                        mat-icon-button
+                                        (click)="removeAvatar()">
+                                        <mat-icon
+                                            class="text-white"
+                                            [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                    </button>
+                                </div>
+                            </div>
+                            &lt;!&ndash; Image/Letter &ndash;&gt;
+                            <img
+                                class="object-cover w-full h-full"
+                                *ngIf="role.avatar"
+                                [src]="role.avatar">
+                            <div
+                                class="flex items-center justify-center w-full h-full rounded overflow-hidden uppercase text-8xl font-bold leading-none bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-200"
+                                *ngIf="!role.avatar">
+                                {{role.name.charAt(0)}}
+                            </div>
+                        </div>
+                    </div>-->
+
+                    <!-- Name -->
+                    <div class="mt-8">
+                        <mat-form-field class="boby-mat-no-subscript w-full">
+                            <mat-label>Nombre</mat-label>
+                            <mat-icon
+                                matPrefix
+                                class="hidden sm:flex icon-size-5"
+                                [svgIcon]="'heroicons_solid:user-circle'"></mat-icon>
+                            <input
+                                matInput
+                                [formControlName]="'name'"
+                                [placeholder]="'Nombre Rol'"
+                                [spellcheck]="false">
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Officials -->
+                    <div class="mt-8">
+                        <mat-form-field class="boby-mat-no-subscript w-full">
+                            <mat-label>Funcionarios</mat-label>
+                            <mat-icon
+                                matPrefix
+                                class="hidden sm:flex icon-size-5"
+                                [svgIcon]="'heroicons_solid:user-group'"></mat-icon>
+
+                            <input type="text"
+                                   matInput
+                                   (keyup)="searchFuncionario($event.target.value)"
+                                   placeholder="Seleccione Funcionarios"
+                                   [matAutocomplete]="autoOfficials"
+                                   [formControlName]="'officials'">
+                            <!--<mat-hint>Ingrese texto para buscar funcionarios</mat-hint>-->
+                        </mat-form-field>
+
+                        <mat-autocomplete #autoOfficials="matAutocomplete" [displayWith]="displayFn">
+                            <mat-option *ngFor="let func of officialList" [value]="func">
+                                <div (click)="optionClicked($event, func)">
+                                    <mat-checkbox [checked]="checkedOption(func)" (change)="toggleSelection(func)" (click)="$event.stopPropagation()">
+                                        {{ func.desc_funcionario2 }}
+                                    </mat-checkbox>
+                                </div>
+                            </mat-option>
+                        </mat-autocomplete>
+                    </div>
+                    <!-- Status -->
+                    <div class="mt-8">
+                        <mat-form-field class="w-full boby-mat-dense flex-auto" appearance="fill">
+                            <mat-label>Estados</mat-label>
+                            <mat-icon
+                                matPrefix
+                                class="hidden sm:flex icon-size-5"
+                                [svgIcon]="'heroicons_solid:tag'"></mat-icon>
+                            <mat-select [placeholder]="'Seleccione los estados....'"
+                                        [formControlName]="'states'"
+                                        multiple>
+                                <mat-option *ngFor="let status of claimStatusList" [value]="status.codigo">
+                                    {{status.nombre_estado}} - ({{status.codigo}})
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Permissions Claim -->
+                    <div class="mt-8">
+                        <div class="space-y-4">
+                            <div class="leading-6 font-bold " [matTooltip]="'Lista de permisos para reclamos.'">PERMISO RECLAMO</div>
+                            <ng-container *ngFor="let permitsC of roleForm.get('permitsClaim')['controls']; let i = index; let first = first; let last = last; trackBy: trackByFn">
+                                <div class="flex">
+
+                                    <mat-form-field class="boby-mat-no-subscript flex-auto w-full max-w-24 sm:max-w-40 ml-2 sm:ml-4">
+                                        <mat-label *ngIf="first">Permisos</mat-label>
+                                        <mat-select [formControl]="permitsC.get('permission')"
+                                                    [panelClass]="'w-72 min-w-72 max-w-72 h-auto max-h-none'"
+                                                    #roleSelect="matSelect" multiple>
+                                            <mat-select-trigger class="text-md">
+                                                <span>Permiso:</span>
+                                                <span class="ml-1 font-medium">{{ roleSelect.value }}</span>
+                                            </mat-select-trigger>
+
+                                            <mat-option class="h-auto py-4 leading-none" *ngFor="let permission of permissionsList" [value]="permission.id">
+                                                <div class="font-medium">{{ permission.id | uppercase }}</div>
+                                                <div class="mt-1.5 text-sm whitespace-normal leading-normal text-secondary">{{permission.name}}</div>
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+
+                                    <mat-form-field class="boby-mat-no-subscript flex-auto">
+                                        <mat-label *ngIf="first">Estados</mat-label>
+                                        <mat-icon
+                                            matPrefix
+                                            class="hidden sm:flex icon-size-5"
+                                            [svgIcon]="'heroicons_solid:tag'"></mat-icon>
+                                        <mat-select [placeholder]="'Seleccione los estados del permiso ...'"
+                                                    [formControl]="permitsC.get('states')"
+                                                    multiple>
+                                            <mat-option *ngFor="let status of claimStatusList" [value]="status.codigo">
+                                                {{status.nombre_estado}} - ({{status.codigo}})
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+
+                                    <!-- Remove Permissions -->
+                                    <ng-container *ngIf="!(first && last)">
+                                        <div
+                                            class="flex items-center w-10 pl-2"
+                                            [ngClass]="{'mt-6': first}">
+                                            <button
+                                                class="w-8 h-8 min-h-8"
+                                                mat-icon-button
+                                                (click)="removePermitsClaimField(i)"
+                                                matTooltip="Remove">
+                                                <mat-icon
+                                                    class="icon-size-5"
+                                                    [svgIcon]="'heroicons_solid:trash'"></mat-icon>
+                                            </button>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </ng-container>
+                        </div>
+
+                        <div
+                            class="group inline-flex items-center mt-2 -ml-4 py-2 px-4 rounded cursor-pointer"
+                            (click)="addPermitsClaimField()">
+                            <mat-icon
+                                class="icon-size-5"
+                                [svgIcon]="'heroicons_solid:plus-circle'"></mat-icon>
+                            <span class="ml-2 font-medium text-secondary group-hover:underline">Añadir Permiso Reclamo</span>
+                        </div>
+                    </div>
+
+                    <!-- Permissions Answer -->
+                    <div class="mt-8">
+                        <div class="space-y-4">
+                            <div class="leading-6 font-bold " [matTooltip]="'Lista de permisos para respuestas.'">PERMISO RESPUESTA</div>
+                            <ng-container *ngFor="let permitsA of roleForm.get('permitsAnswer')['controls']; let i = index; let first = first; let last = last; trackBy: trackByFn">
+                                <div class="flex">
+
+                                    <mat-form-field class="boby-mat-no-subscript flex-auto w-full max-w-24 sm:max-w-40 ml-2 sm:ml-4">
+                                        <mat-label *ngIf="first">Permisos</mat-label>
+                                        <mat-select [formControl]="permitsA.get('permission')"
+                                                    [panelClass]="'w-72 min-w-72 max-w-72 h-auto max-h-none'"
+                                                    #roleSelect="matSelect" multiple>
+                                            <mat-select-trigger class="text-md">
+                                                <span>Permiso:</span>
+                                                <span class="ml-1 font-medium">{{ roleSelect.value }}</span>
+                                            </mat-select-trigger>
+
+                                            <mat-option class="h-auto py-4 leading-none" *ngFor="let permission of permissionsList" [value]="permission.id">
+                                                <div class="font-medium">{{ permission.id | uppercase }}</div>
+                                                <div class="mt-1.5 text-sm whitespace-normal leading-normal text-secondary">{{permission.name}}</div>
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+
+                                    <mat-form-field class="boby-mat-no-subscript flex-auto">
+                                        <mat-label *ngIf="first">Estados</mat-label>
+                                        <mat-icon
+                                            matPrefix
+                                            class="hidden sm:flex icon-size-5"
+                                            [svgIcon]="'heroicons_solid:tag'"></mat-icon>
+                                        <mat-select [placeholder]="'Seleccione los estados del permiso ...'"
+                                                    [formControl]="permitsA.get('states')"
+                                                    multiple>
+                                            <mat-option *ngFor="let status of answerStatusList" [value]="status.codigo">
+                                                {{status.nombre_estado}} - ({{status.codigo}})
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+
+                                    <!-- Remove Permissions -->
+                                    <ng-container *ngIf="!(first && last)">
+                                        <div
+                                            class="flex items-center w-10 pl-2"
+                                            [ngClass]="{'mt-6': first}">
+                                            <button
+                                                class="w-8 h-8 min-h-8"
+                                                mat-icon-button
+                                                (click)="removePermitsAnswerField(i)"
+                                                matTooltip="Remove">
+                                                <mat-icon
+                                                    class="icon-size-5"
+                                                    [svgIcon]="'heroicons_solid:trash'"></mat-icon>
+                                            </button>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </ng-container>
+                        </div>
+
+                        <div
+                            class="group inline-flex items-center mt-2 -ml-4 py-2 px-4 rounded cursor-pointer"
+                            (click)="addPermitsAnswerField()">
+                            <mat-icon
+                                class="icon-size-5"
+                                [svgIcon]="'heroicons_solid:plus-circle'"></mat-icon>
+                            <span class="ml-2 font-medium text-secondary group-hover:underline">Añadir Permiso Respuesta</span>
+                        </div>
+                    </div>
+
+                    <!-- Permissions Report -->
+                    <div class="mt-8">
+                        <div class="space-y-4">
+                            <div class="leading-6 font-bold " [matTooltip]="'Lista de permisos para informes.'">PERMISO INFORME</div>
+                            <ng-container *ngFor="let permitsR of roleForm.get('permitsReport')['controls']; let i = index; let first = first; let last = last; trackBy: trackByFn">
+                                <div class="flex">
+
+                                    <mat-form-field class="boby-mat-no-subscript flex-auto w-full max-w-24 sm:max-w-40 ml-2 sm:ml-4">
+                                        <mat-label *ngIf="first">Permisos</mat-label>
+                                        <mat-select [formControl]="permitsR.get('permission')"
+                                                    [panelClass]="'w-72 min-w-72 max-w-72 h-auto max-h-none'"
+                                                    #roleSelect="matSelect" multiple>
+                                            <mat-select-trigger class="text-md">
+                                                <span>Permiso:</span>
+                                                <span class="ml-1 font-medium">{{ roleSelect.value }}</span>
+                                            </mat-select-trigger>
+
+                                            <mat-option class="h-auto py-4 leading-none" *ngFor="let permission of permissionsList" [value]="permission.id">
+                                                <div class="font-medium">{{ permission.id | uppercase }}</div>
+                                                <div class="mt-1.5 text-sm whitespace-normal leading-normal text-secondary">{{permission.name}}</div>
+                                            </mat-option>
+
+                                        </mat-select>
+                                    </mat-form-field>
+
+                                    <mat-form-field class="boby-mat-no-subscript flex-auto">
+                                        <mat-label *ngIf="first">Estados</mat-label>
+                                        <mat-icon
+                                            matPrefix
+                                            class="hidden sm:flex icon-size-5"
+                                            [svgIcon]="'heroicons_solid:tag'"></mat-icon>
+                                        <mat-select [placeholder]="'Seleccione los estados del permiso ...'"
+                                                    [formControl]="permitsR.get('states')"
+                                                    multiple>
+                                            <mat-option *ngFor="let status of claimStatusList" [value]="status.codigo">
+                                                {{status.nombre_estado}} - ({{status.codigo}})
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+
+                                    <!-- Remove Permissions -->
+                                    <ng-container *ngIf="!(first && last)">
+                                        <div
+                                            class="flex items-center w-10 pl-2"
+                                            [ngClass]="{'mt-6': first}">
+                                            <button
+                                                class="w-8 h-8 min-h-8"
+                                                mat-icon-button
+                                                (click)="removePermitsReportField(i)"
+                                                matTooltip="Remove">
+                                                <mat-icon
+                                                    class="icon-size-5"
+                                                    [svgIcon]="'heroicons_solid:trash'"></mat-icon>
+                                            </button>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </ng-container>
+                        </div>
+
+                        <div
+                            class="group inline-flex items-center mt-2 -ml-4 py-2 px-4 rounded cursor-pointer"
+                            (click)="addPermitsReportField()">
+                            <mat-icon
+                                class="icon-size-5"
+                                [svgIcon]="'heroicons_solid:plus-circle'"></mat-icon>
+                            <span class="ml-2 font-medium text-secondary group-hover:underline">Añadir Permiso Informe</span>
+                        </div>
+                    </div>
+
+                    <!-- Roles -->
+                    <div class="mt-8">
+                        <mat-form-field class="w-full boby-mat-dense flex-auto" appearance="fill">
+                            <mat-label>Roles</mat-label>
+                            <mat-icon
+                                matPrefix
+                                class="hidden sm:flex icon-size-5"
+                                [svgIcon]="'heroicons_solid:user-circle'"></mat-icon>
+                            <mat-select [placeholder]="'Seleccione los roles....'"
+                                        [formControlName]="'roles'"
+                                        multiple>
+                                <mat-option *ngFor="let role of rolesList" [value]="role.id">
+                                    {{role.name}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="mt-8">
+                        <mat-form-field class="boby-mat-textarea boby-mat-no-subscript w-full">
+                            <mat-label>Comentario</mat-label>
+                            <mat-icon
+                                matPrefix
+                                class="hidden sm:flex icon-size-5"
+                                [svgIcon]="'heroicons_solid:menu-alt-2'"></mat-icon>
+                            <textarea
+                                matInput
+                                [formControlName]="'notes'"
+                                [placeholder]="'Comentario'"
+                                [rows]="5"
+                                [spellcheck]="false"
+                                matTextareaAutosize></textarea>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex items-center mt-10 -mx-6 sm:-mx-12 py-4 pr-4 pl-1 sm:pr-12 sm:pl-7 border-t bg-gray-50 dark:bg-transparent">
+                        <!-- Delete -->
+                        <button
+                            mat-button
+                            [color]="'warn'"
+                            [matTooltip]="'Eliminar'"
+                            (click)="deleteRole()">
+                            Eliminar
+                        </button>
+                        <!-- Cancel -->
+                        <button
+                            class="ml-auto"
+                            mat-button
+                            [matTooltip]="'Cancelar'"
+                            (click)="toggleEditMode(false)">
+                            Cancelar
+                        </button>
+                        <!-- Save -->
+                        <button
+                            class="ml-2"
+                            mat-flat-button
+                            [color]="'primary'"
+                            [disabled]="roleForm.invalid"
+                            [matTooltip]="'Guardar'"
+                            (click)="updateRole()">
+                            Guardar
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </ng-container>
+</div>

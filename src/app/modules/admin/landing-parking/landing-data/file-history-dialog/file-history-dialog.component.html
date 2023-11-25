@@ -1,0 +1,71 @@
+<div mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle class="flex flex-0 items-center justify-between h-16 pr-3 sm:pr-5 pl-6 sm:pl-8 bg-primary text-on-primary">
+    <div class="text-lg font-medium">Archivos</div>
+    <button
+        mat-icon-button
+        (click)="Close()"
+        [tabIndex]="-1">
+        <mat-icon
+            class="text-current"
+            [svgIcon]="'heroicons_outline:x'"></mat-icon>
+    </button>
+</div>
+
+<mat-dialog-content>
+    <div class="bg-card shadow rounded overflow-hidden">
+
+        <!-- Actions -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between mt-4 sm:mt-6">
+                <input
+                    id="{{1}}"
+                    class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                    type="file"
+                    [multiple]="false"
+                    [accept]="'audio/*, video/*, image/*, application/pdf, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'"
+                    (change)="onUploadFile(avatarFileInput.files, {id:1})"
+                    #avatarFileInput >
+                <label
+                    class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
+                    for="{{1}}"
+                    matRipple>
+                    <mat-icon
+                        [matTooltip]="'Documento, Audio y Video'"
+                        [svgIcon]="'heroicons_solid:paper-clip'"></mat-icon>
+                </label>
+        </div>
+
+        <ng-container>
+            <div class="font-medium">Lista de Archivos</div>
+            <div class="flex flex-wrap -m-2 mt-2">
+                <ng-container *ngFor="let file of []; trackBy:trackByFn">
+                    <a class="flex flex-col w-40 h-40 m-2 p-4 shadow rounded-2xl cursor-pointer bg-card"
+                       (click)="fileAction('print', file)">
+                        <div class="aspect-w-9 aspect-h-6">
+                            <div class="flex items-center justify-center">
+                                <!-- Icons -->
+                                <div class="relative">
+                                    <mat-icon
+                                        class="icon-size-14 text-hint"
+                                        [svgIcon]="'iconsmind:file'"></mat-icon>
+                                    <div
+                                        class="absolute left-0 bottom-0 px-1.5 rounded text-sm font-semibold leading-5 text-white"
+                                        [class.bg-red-600]="['pdf'].includes(file.extension)"
+                                        [class.bg-blue-600]="['doc','docx'].includes(file.extension)"
+                                        [class.bg-green-600]="['xls','xlsx'].includes(file.extension)"
+                                        [class.bg-gray-600]="['mp3','mp4','mpeg','webm','x-msvideo','midi','x-midi','x-wav'].includes(file.extension)"
+                                        [class.bg-amber-600]="['png','jpeg','jpg','gif','webp'].includes(file.extension)">
+                                        {{file.extension.toUpperCase()}}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex flex-col flex-auto justify-center text-center text-sm font-medium">
+                            <div
+                                class="truncate"
+                                [matTooltip]="file.name">{{file.name}}</div>
+                        </div>
+                    </a>
+                </ng-container>
+            </div>
+        </ng-container>
+    </div>
+</mat-dialog-content>

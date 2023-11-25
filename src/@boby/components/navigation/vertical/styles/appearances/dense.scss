@@ -1,0 +1,194 @@
+/* Variables */
+:root {
+    --boby-vertical-navigation-width: 280px;
+    --boby-vertical-navigation-dense-width: 80px;
+}
+
+boby-vertical-navigation {
+
+    /* Dense appearance overrides */
+    &.boby-vertical-navigation-appearance-dense {
+
+        &:not(.boby-vertical-navigation-mode-over) {
+            width: var(--boby-vertical-navigation-dense-width);
+            min-width: var(--boby-vertical-navigation-dense-width);
+            max-width: var(--boby-vertical-navigation-dense-width);
+
+            /* Left positioned */
+            &.boby-vertical-navigation-position-left {
+
+                /* Side mode */
+                &.boby-vertical-navigation-mode-side {
+                    margin-left: calc(var(--boby-vertical-navigation-dense-width) * -1);
+                }
+
+                /* Opened */
+                &.boby-vertical-navigation-opened {
+                    margin-left: 0;
+                }
+            }
+
+            /* Right positioned */
+            &.boby-vertical-navigation-position-right {
+
+                /* Side mode */
+                &.boby-vertical-navigation-mode-side {
+                    margin-right: calc(var(--boby-vertical-navigation-dense-width) * -1);
+                }
+
+                /* Opened */
+                &.boby-vertical-navigation-opened {
+                    margin-right: 0;
+                }
+
+                /* Aside wrapper */
+                .boby-vertical-navigation-aside-wrapper {
+                    left: auto;
+                    right: var(--boby-vertical-navigation-dense-width);
+                }
+
+                &.boby-vertical-navigation-hover {
+
+                    .boby-vertical-navigation-aside-wrapper {
+                        left: auto;
+                        right: var(--boby-vertical-navigation-width);
+                    }
+                }
+            }
+        }
+
+        /* Wrapper */
+        .boby-vertical-navigation-wrapper {
+
+            /* Content */
+            .boby-vertical-navigation-content {
+
+                boby-vertical-navigation-aside-item,
+                boby-vertical-navigation-basic-item,
+                boby-vertical-navigation-collapsable-item,
+                boby-vertical-navigation-group-item {
+
+                    .boby-vertical-navigation-item-wrapper {
+
+                        .boby-vertical-navigation-item {
+                            width: calc(var(--boby-vertical-navigation-dense-width) - 24px);
+                            min-width: calc(var(--boby-vertical-navigation-dense-width) - 24px);
+                            max-width: calc(var(--boby-vertical-navigation-dense-width) - 24px);
+
+                            .boby-vertical-navigation-item-arrow,
+                            .boby-vertical-navigation-item-badge,
+                            .boby-vertical-navigation-item-title-wrapper {
+                                transition: opacity 400ms cubic-bezier(0.25, 0.8, 0.25, 1);
+                            }
+                        }
+                    }
+                }
+
+                boby-vertical-navigation-group-item {
+
+                    &:first-of-type {
+                        margin-top: 0;
+                    }
+                }
+            }
+        }
+
+        &:not(.boby-vertical-navigation-hover):not(.boby-vertical-navigation-mode-over) {
+
+            /* Wrapper */
+            .boby-vertical-navigation-wrapper {
+
+                /* Content */
+                .boby-vertical-navigation-content {
+
+                    .boby-vertical-navigation-item-wrapper {
+
+                        .boby-vertical-navigation-item {
+                            padding: 10px 16px;
+
+                            .boby-vertical-navigation-item-arrow,
+                            .boby-vertical-navigation-item-badge,
+                            .boby-vertical-navigation-item-title-wrapper {
+                                white-space: nowrap;
+                                opacity: 0;
+                            }
+                        }
+                    }
+
+                    boby-vertical-navigation-collapsable-item {
+
+                        .boby-vertical-navigation-item-children {
+                            display: none;
+                        }
+                    }
+
+                    boby-vertical-navigation-group-item {
+
+                        > .boby-vertical-navigation-item-wrapper {
+
+                            .boby-vertical-navigation-item {
+
+                                &:before {
+                                    content: '';
+                                    position: absolute;
+                                    top: 20px;
+                                    width: 23px;
+                                    border-top-width: 2px;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        /* Aside wrapper */
+        .boby-vertical-navigation-aside-wrapper {
+            left: var(--boby-vertical-navigation-dense-width);
+        }
+
+        /* Hover */
+        &.boby-vertical-navigation-hover {
+
+            .boby-vertical-navigation-wrapper {
+                width: var(--boby-vertical-navigation-width);
+
+                .boby-vertical-navigation-content {
+
+                    .boby-vertical-navigation-item-wrapper {
+
+                        .boby-vertical-navigation-item {
+                            width: calc(var(--boby-vertical-navigation-width) - 24px);
+                            min-width: calc(var(--boby-vertical-navigation-width) - 24px);
+                            max-width: calc(var(--boby-vertical-navigation-width) - 24px);
+
+                            .boby-vertical-navigation-item-arrow,
+                            .boby-vertical-navigation-item-badge,
+                            .boby-vertical-navigation-item-title-wrapper {
+                                white-space: nowrap;
+                                animation: removeWhiteSpaceNoWrap 1ms linear 350ms;
+                                animation-fill-mode: forwards;
+                            }
+                        }
+                    }
+                }
+            }
+
+            .boby-vertical-navigation-aside-wrapper {
+                left: var(--boby-vertical-navigation-width);
+            }
+        }
+    }
+}
+
+@keyframes removeWhiteSpaceNoWrap {
+    0% {
+        white-space: nowrap
+    }
+    99% {
+        white-space: nowrap
+    }
+    100% {
+        white-space: normal;
+    }
+}

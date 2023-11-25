@@ -1,0 +1,77 @@
+<div mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle class="flex flex-0 items-center justify-between h-10 pr-3 sm:pr-5 pl-6 sm:pl-8 bg-primary text-on-primary">
+    <div class="text-lg font-medium">CLASIFICADOR</div>
+    <button
+        mat-icon-button
+        (click)="Close()"
+        [tabIndex]="-1">
+        <mat-icon
+            class="text-current"
+            [svgIcon]="'heroicons_outline:x'"></mat-icon>
+    </button>
+</div>
+
+<mat-dialog-content [formGroup]="parameterForm">
+
+    <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 gap-6 w-full min-w-0">
+        <div class="sm:col-span-2 md:col-span-4 lg:col-span-2 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden bg-blue-0 dark:bg-transparent">
+            <div class="grid divide-x -m-6 ">
+                <div class="flex flex-col items-left justify-left p-6 sm:p-8">
+                    <div class="text-5xl font-semibold leading-none tracking-tighter">
+
+                        <mat-form-field class="w-full boby-mat-dense flex-auto">
+                            <mat-label>Icono</mat-label>
+                            <mat-icon
+                                matPrefix
+                                class="hidden sm:flex icon-size-5"
+                                [svgIcon]="'mat_solid:image'"></mat-icon>
+                            <input matInput [formControlName]="'icon'">
+                        </mat-form-field>
+
+                        <mat-form-field class="w-full boby-mat-dense flex-auto">
+                            <mat-label>Titulo</mat-label>
+                            <mat-icon
+                                matPrefix
+                                class="hidden sm:flex icon-size-5"
+                                [svgIcon]="'mat_solid:title'"></mat-icon>
+                            <input matInput [formControlName]="'title'">
+                        </mat-form-field>
+
+                        <mat-form-field class="w-full boby-mat-dense flex-auto">
+                            <mat-label>Descripción</mat-label>
+                            <mat-icon
+                                matPrefix
+                                class="hidden sm:flex icon-size-5"
+                                [svgIcon]="'mat_solid:description'"></mat-icon>
+                            <textarea
+                                matInput
+                                [rows]="2"
+                                [formControlName]="'description'"></textarea>
+                        </mat-form-field>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <!-- Cancel -->
+    <button
+        class="ml-auto rounded-lg"
+        mat-button
+        [matTooltip]="'Cancelar'"
+        (click)="Close()">
+        Cancelar
+    </button>
+    <!-- Save -->
+    <button
+        class="ml-2 rounded-lg"
+        mat-flat-button
+        [color]="'primary'"
+        [disabled]="parameterForm.invalid"
+        [matTooltip]="'Guardar'"
+        (click)="saveParameter()">
+        Guardar
+    </button>
+</mat-dialog-actions>

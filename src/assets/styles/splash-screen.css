@@ -1,0 +1,88 @@
+body boby-splash-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #0F172A;
+    color: #F9FAFB;
+    z-index: 999999;
+    pointer-events: none;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body boby-splash-screen img {
+    width: 120px;
+    max-width: 120px;
+}
+
+body boby-splash-screen .spinner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 40px;
+    width: 56px;
+}
+
+body boby-splash-screen .spinner > div {
+    width: 18px;
+    height: 18px;
+//background-color: #eeaa88;
+    border-radius: 100%;
+    display: inline-block;
+    -webkit-animation: boby-bouncedelay 1s infinite ease-in-out both;
+    animation: boby-bouncedelay 1s infinite ease-in-out both;
+}
+
+body boby-splash-screen .spinner .bounce1 {
+    -webkit-animation-delay: -0.48s;
+    animation-delay: -0.48s;
+    background-color: #B2242B;
+}
+
+body boby-splash-screen .spinner .bounce2 {
+    -webkit-animation-delay: -0.32s;
+    animation-delay: -0.32s;
+    background-color: #F5A002;
+}
+
+body boby-splash-screen .spinner .bounce3 {
+    -webkit-animation-delay: -0.16s;
+    animation-delay: -0.16s;
+    background-color: #AAA416;
+}
+
+@-webkit-keyframes boby-bouncedelay {
+    0%, 80%, 100% {
+        -webkit-transform: scale(0)
+    }
+    40% {
+        -webkit-transform: scale(1.0)
+    }
+}
+
+@keyframes boby-bouncedelay {
+    0%, 80%, 100% {
+        -webkit-transform: scale(0);
+        transform: scale(0);
+    }
+    40% {
+        -webkit-transform: scale(1.0);
+        transform: scale(1.0);
+    }
+}
+
+body:not(.boby-splash-screen-hidden) {
+    overflow: hidden;
+}
+
+body.boby-splash-screen-hidden boby-splash-screen {
+    visibility: hidden;
+    opacity: 0;
+}

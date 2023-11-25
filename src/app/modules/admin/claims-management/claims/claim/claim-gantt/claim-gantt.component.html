@@ -1,0 +1,165 @@
+<div class="mt-8"
+     infiniteScroll
+     [infiniteScrollDistance]="2"
+     [infiniteScrollThrottle]="1000"
+     (scrolled)="onScrollDown()">
+
+    <div class="flex flex-col min-w-0 ml-4">
+        <ng-container>
+            <div class="text-2xl md:text-5xl font-semibold tracking-tight leading-7 md:leading-snug truncate">DIAGRAMA GANTT</div>
+        </ng-container>
+        <div class="flex items-center">
+            <mat-icon
+                class="icon-size-5"
+                [svgIcon]="'heroicons_solid:bell'"></mat-icon>
+            <div class="ml-1.5 leading-6 truncate text-secondary">Detalle de la evolución de su Proceso.</div>
+        </div>
+    </div>
+
+    <ol>
+        <!-- Procesos -->
+        <ng-container *ngFor="let proc of processes; let i = index; let first = first; let last = last; trackBy: trackByFn">
+
+            <!-- Date separator -->
+            <ng-container *ngIf="proc.tipo == 'proceso' || !(proc.codigo === processes[i - 1].codigo)">
+                <li class="relative flex py-7">
+                    <div class="relative py-2 px-8 text-md font-medium leading-5 rounded bg-primary text-on-primary">
+                        {{proc.nombre}} - {{proc.descripcion}}
+                    </div>
+                </li>
+            </ng-container>
+
+            <!-- Proceso -->
+            <li *ngIf="proc.tipo != 'proceso'" class="relative flex py-7">
+                <!-- Line -->
+                <ng-container *ngIf="!last && (proc.codigo === processes[i + 1].codigo)">
+
+                    <div class="absolute top-7 left-5 w-0.5 h-full -ml-px bg-gray-300 dark:bg-gray-600"></div>
+                </ng-container>
+
+                <div class="relative flex flex-auto">
+                    <!-- Icon -->
+                    <ng-container *ngIf="proc.image_type =='departamento'">
+                        <div class="flex shrink-0 items-center justify-center w-10 h-10 mr-4 rounded-full bg-gray-400">
+                            <mat-icon
+                                class="icon-size-5 text-white"
+                                [svgIcon]="'mat_outline:home_work'">
+                            </mat-icon>
+                        </div>
+                    </ng-container>
+
+                    <!-- Image -->
+                    <ng-container *ngIf="proc.image_type =='funcionario'">
+                        <img
+                            class="shrink-0 w-10 h-10 mr-4 rounded-full overflow-hidden object-cover object-center"
+                            [src]="proc.image_url"
+                            [alt]="'Funcionario o Departamento'">
+                    </ng-container>
+
+                    <!-- Content -->
+                    <div class="flex flex-col flex-auto items-start">
+                        <!-- Description -->
+                        <ng-container *ngIf="proc.nombre">
+                            <div
+                                [innerHTML]="proc.nombre"></div>
+
+                        </ng-container>
+                        <div class="flex flex-col sm:flex-row sm:items-center mt-2 sm:mt-1 sm:space-x-2 text-md leading-5">
+                            <!-- Date -->
+                            <div class="text-secondary">
+                                {{proc.fecha_ini | date:'d/M/yyyy H:mm'}}
+                            </div>
+                            <!-- Linked content -->
+                            <ng-container *ngIf="proc.funcionario">
+                                <div class="hidden sm:block">&bull;</div>
+                                <!-- Internal link -->
+                                <ng-container *ngIf="proc.funcionario">
+                                    <a
+                                        class="cursor-pointer text-primary"
+                                        [routerLink]="">
+                                        {{proc.funcionario}}
+                                    </a>
+
+                                </ng-container>
+                            </ng-container>
+                        </div>
+                        <!-- Extra content -->
+                        <ng-container >
+                            <div *ngIf="proc.descripcion != ''"
+                                class="mt-4 py-4 px-5 rounded-lg bg-gray-200 dark:bg-gray-800"
+                                [innerHTML]="proc.descripcion"></div>
+
+                            <!-- Actions -->
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between mt-4 sm:mt-6">
+                                <div class="-ml-2">
+
+                                        <input
+                                            id="{{proc.etapa}}"
+                                            class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                            type="file"
+                                            [multiple]="false"
+                                            [accept]="'audio/*, video/*, image/*, application/pdf, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'"
+                                            (change)="onUploadFile(avatarFileInput.files, proc)"
+                                            #avatarFileInput >
+                                        <label
+                                            class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
+                                            for="{{proc.etapa}}"
+                                            matRipple>
+                                            <mat-icon
+                                                [matTooltip]="'Documento, Audio y Video'"
+                                                [svgIcon]="'heroicons_solid:paper-clip'"></mat-icon>
+                                        </label>
+                                </div>
+                            </div>
+
+                            <ng-container *ngIf="parseJson(proc.json_file_state).length > 0 ">
+                                <div>
+                                    <div class="font-medium">ARCHIVOS</div>
+                                    <div
+                                        class="flex flex-wrap -m-2 mt-2">
+
+                                        <ng-container *ngFor="let file of parseJson(proc.json_file_state); trackBy:trackByFn">
+                                            <!--[routerLink]="['./details/', file.id]"-->
+                                            <a class="flex flex-col w-40 h-40 m-2 p-4 shadow rounded-2xl cursor-pointer bg-card"
+                                               (click)="fileAction('print', file)">
+                                                <div class="aspect-w-9 aspect-h-6">
+                                                    <div class="flex items-center justify-center">
+                                                        <!-- Icons -->
+                                                        <div class="relative">
+                                                            <mat-icon
+                                                                class="icon-size-14 text-hint"
+                                                                [svgIcon]="'iconsmind:file'"></mat-icon>
+                                                            <div
+                                                                class="absolute left-0 bottom-0 px-1.5 rounded text-sm font-semibold leading-5 text-white"
+                                                                [class.bg-red-600]="['pdf'].includes(file.extension)"
+                                                                [class.bg-blue-600]="['doc','docx'].includes(file.extension)"
+                                                                [class.bg-green-600]="['xls','xlsx'].includes(file.extension)"
+                                                                [class.bg-gray-600]="['mp3','mp4','mpeg','webm','x-msvideo','midi','x-midi','x-wav'].includes(file.extension)"
+                                                                [class.bg-amber-600]="['png','jpeg','jpg','gif','webp'].includes(file.extension)">
+                                                                {{file.extension.toUpperCase()}}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="flex flex-col flex-auto justify-center text-center text-sm font-medium">
+                                                    <div
+                                                        class="truncate"
+                                                        [matTooltip]="file.name">{{file.name}}</div>
+                                                </div>
+                                            </a>
+                                        </ng-container>
+                                    </div>
+                                </div>
+                            </ng-container>
+
+                        </ng-container>
+                    </div>
+                </div>
+
+            </li>
+        </ng-container>
+
+    </ol>
+</div>
+
+<button *ngIf="showButton" (click)="onScrollTop()" class="button-start"><mat-icon class="text-current icon-size-10">{{'arrow_circle_up'}}</mat-icon></button>

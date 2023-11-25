@@ -1,0 +1,138 @@
+<router-outlet></router-outlet>
+<!--<div class="sm:absolute sm:inset-0 flex flex-col flex-auto min-w-0 sm:overflow-hidden bg-card dark:bg-transparent">
+    &lt;!&ndash;<erp-headboard [trayName]="'Menu'" [icon]="'menu'" [tray]="'organization'" [path]="'../../'"></erp-headboard>&ndash;&gt;
+    <div class="relative flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between py-4 px-6 md:px-8 border-b">
+        &lt;!&ndash; Actions &ndash;&gt;
+        <div class="flex shrink-0 items-end mt-1 sm:mt-0 sm:ml-4">
+
+            <p-toast></p-toast>
+
+            &lt;!&ndash; Search &ndash;&gt;
+            <mat-form-field class="boby-mat-dense boby-mat-no-subscript boby-mat-rounded min-w-72" [matTooltip]="'Filtro por nombre cargo, item, nombre funcionario'">
+                <mat-icon
+                    class="icon-size-5"
+                    matPrefix
+                    [svgIcon]="'heroicons_solid:search'"></mat-icon>
+                <input
+                    matInput
+                    [formControl]="searchInputControl"
+                    [autocomplete]="'off'"
+                    [placeholder]="'Buscar Unidad'">
+            </mat-form-field>
+
+            <button
+                class="ml-4 rounded-lg"
+                mat-flat-button
+                [color]="'primary'"
+                [matTooltip]="'Nueva Unidad'"
+                [routerLink]="['./', 0]">
+                <mat-icon [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
+            </button>
+
+        </div>
+    </div>
+    <div class="flex flex-auto overflow-auto">
+        <div class="flex flex-col flex-auto sm:mb-18 overflow-auto sm:overflow-y-auto">
+            <mat-table #table
+                       [dataSource]="dataSource"
+
+                       cdkDropList
+                       (cdkDropListDropped)="drop($event)"
+                       cdkDropListData="dataSource"
+                       [cdkDropListDisabled]="dragDisabled" matTableExporter  #exporter="matTableExporter" [hiddenColumns]="[0,1]">
+
+                <ng-container matColumnDef="accion">
+                    <mat-header-cell *matHeaderCellDef class="min-w-20">Acciones</mat-header-cell>
+                    <mat-cell *matCellDef="let row" (click)="selectedNode = row" class="min-w-20" [ngClass]="{ 'text-primary-800 bg-primary-100 dark:text-primary-50 dark:bg-primary-500': row === selectedNode }">
+
+                        <button
+                            class="ml-1 -mr-4"
+                            mat-icon-button
+                            (click)="selectedNode = row"
+                            [matMenuTriggerFor]="chatsHeaderMenu">
+                            <mat-icon class="cursor-move" (mousedown)="dragDisabled = false;">reorder</mat-icon>
+
+                            <mat-menu #chatsHeaderMenu>
+                                <button mat-menu-item
+                                        (click)="executeCommand('editar')">
+                                    <mat-icon [svgIcon]="'heroicons_outline:pencil-alt'"></mat-icon>
+                                    Editar Unidad Org.
+                                </button>
+                                <button mat-menu-item
+                                        (click)="executeCommand('eliminar')">
+                                    <mat-icon [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                    Eliminar Unidad Org.
+                                </button>
+                                <button mat-menu-item
+                                        [matMenuTriggerFor]="formatOrganization">
+                                    <mat-icon [svgIcon]="'heroicons_outline:cog'"></mat-icon>
+                                    Exportar Registros
+                                </button>
+                            </mat-menu>
+
+                        </button>
+
+                        <mat-menu #formatOrganization="matMenu">
+                            <button mat-menu-item (click)="exporter.exportTable('xls', {fileName:'Registros de Organigrama'})">
+                                <mat-icon class="icon-size-1" [svgIcon]="'iconsmind:file_excel'"></mat-icon>XLS
+                            </button>
+                            <button mat-menu-item (click)="exporter.exportTable('xlsx', {fileName:'Registros de Organigrama'})">
+                                <mat-icon class="icon-size-1" [svgIcon]="'iconsmind:file_excel'"></mat-icon>XLSX
+                            </button>
+                            <button mat-menu-item (click)="exporter.exportTable('csv', {fileName:'Registros de Organigrama'})">
+                                <mat-icon class="icon-size-1" [svgIcon]="'iconsmind:file_csv'"></mat-icon>CSV
+                            </button>
+                            <button mat-menu-item (click)="exporter.exportTable('txt', {fileName:'Registros de Organigrama'})">
+                                <mat-icon class="icon-size-1" [svgIcon]="'iconsmind:file_txt'"></mat-icon>TXT
+                            </button>
+                            <button mat-menu-item (click)="exporter.exportTable('json', {fileName:'Registros de Organigrama'})">
+                                <mat-icon class="icon-size-1" [svgIcon]="'iconsmind:file'"></mat-icon>JSON
+                            </button>
+                        </mat-menu>
+                    </mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="icono">
+                    <mat-header-cell *matHeaderCellDef class="min-w-96">
+                       &lt;!&ndash; <span [style.paddingLeft.px]="40"></span>&ndash;&gt;
+                    </mat-header-cell>
+                    <mat-cell *matCellDef="let row" cdkDrag class="min-w-96" (click)="selectedNode = row" [ngClass]="{ 'text-primary-800 bg-primary-100 dark:text-primary-50 dark:bg-primary-500': row === selectedNode }">
+
+                        <mat-icon [style.marginLeft.px]="row.level * 16" class="mat-icon-rtl-mirror" *ngIf="!row.expandable">
+                            {{'person'}}
+                        </mat-icon>
+
+                        <mat-icon [style.marginLeft.px]="row.level * 16" class="mat-icon-rtl-mirror" *ngIf="row.expandable">
+                            {{'groups'}}
+                        </mat-icon>
+
+                        <button mat-icon-button
+                                [style.visibility]="!row.expandable ? 'hidden' : ''"
+                                [style.marginLeft.px]="row.level * 16"
+                                (click)="loadChildren(row)">
+
+                            <mat-icon class="mat-icon-rtl-mirror">
+                                {{treeControl.isExpanded(row) ? 'expand_more' : 'chevron_right'}}
+                            </mat-icon>
+
+                        </button>
+                    </mat-cell>
+                </ng-container>
+
+                &lt;!&ndash;mat-sort-header&ndash;&gt;
+                <ng-container *ngFor="let col of cols; let i = index" matColumnDef="{{col.field}}">
+                    <mat-header-cell *matHeaderCellDef  class="{{col.width}}">  {{col.header}} </mat-header-cell>
+                    <mat-cell *matCellDef="let row"
+                              class="{{col.width}}"
+                              (click)="selectedNode = row" [ngClass]="{ 'text-primary-800 bg-primary-100 dark:text-primary-50 dark:bg-primary-500': row === selectedNode }">
+                        {{ row.item[col.field] }}
+                    </mat-cell>
+                </ng-container>
+
+                <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                <mat-row *matRowDef="let row; columns: displayedColumns;" cdkDrag [cdkDragData]="row"></mat-row>
+
+            </mat-table>
+        </div>
+    </div>
+</div>-->

@@ -1,0 +1,17 @@
+/* ----------------------------------------------------------------------------------------------------- */
+/*  @ Import/write your custom styles here.
+/*  @ Styles from this file will override 'vendors.scss' and Boby's base styles.
+/* ----------------------------------------------------------------------------------------------------- */
+
+
+.selected {
+    background-color: #D2DAFF;
+}
+
+.rowisobserved {
+    color: #F5B7B1;
+}
+
+html{
+    scroll-behavior: smooth;
+}

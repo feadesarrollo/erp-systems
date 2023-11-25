@@ -1,0 +1,18 @@
+{
+
+    "/MS_BoACommonParametrics/*": {
+        "target": "http://172.17.58.51",
+        "secure": false,
+        "changeOrigin": true
+    },
+    "/AtoServices/MS_Parametrics/*": {
+        "target": "http://172.17.59.75",
+        "secure": false,
+        "changeOrigin": true
+    },
+    "/api": {
+        "target": "http://localhost:3800/api/erp-nd/Erp/doRequest",
+        "secure": false,
+        "pathRewrite": {"^/api" : ""}
+    }
+}

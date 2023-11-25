@@ -1,0 +1,220 @@
+<div mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle class="flex flex-0 items-center justify-between h-16 pr-3 sm:pr-5 pl-6 sm:pl-8 bg-primary text-on-primary">
+    <div class="text-lg font-medium">CLIENTE</div>
+    <button
+        mat-icon-button
+        (click)="Close()"
+        [tabIndex]="-1">
+        <mat-icon
+            class="text-current"
+            [svgIcon]="'heroicons_outline:x'"></mat-icon>
+    </button>
+</div>
+
+<mat-dialog-content [formGroup]="ClienteForm">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 w-full min-w-0">
+        <div class="sm:col-span-2 md:col-span-4 lg:col-span-2 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden bg-blue-0 dark:bg-transparent">
+            <div class="grid divide-x -m-6">
+                <div class="flex flex-col items-left justify-left p-6 sm:p-8">
+                    <div class="text-5xl font-semibold leading-none tracking-tighter">
+
+                        <mat-form-field class="w-full boby-mat-dense flex-auto gt-xs:pr-3" appearance="fill">
+                            <mat-label>Nombre</mat-label>
+                            <mat-icon
+                                matPrefix
+                                class="hidden sm:flex icon-size-5"
+                                [svgIcon]="'heroicons_solid:identification'"></mat-icon>
+                            <input matInput [formControlName]="'nombre'">
+                        </mat-form-field>
+
+                        <mat-form-field class="w-full boby-mat-dense flex-auto gt-xs:pr-3" appearance="fill">
+                            <mat-label>Primer Apellido</mat-label>
+                            <mat-icon
+                                matPrefix
+                                class="hidden sm:flex icon-size-5"
+                                [svgIcon]="'heroicons_solid:identification'"></mat-icon>
+                            <input matInput [formControlName]="'apellido_paterno'">
+                        </mat-form-field>
+
+                        <mat-form-field class="w-full boby-mat-dense flex-auto gt-xs:pr-3" appearance="fill">
+                            <mat-label>Segundo Apellido</mat-label>
+                            <mat-icon
+                                matPrefix
+                                class="hidden sm:flex icon-size-5"
+                                [svgIcon]="'heroicons_solid:identification'"></mat-icon>
+                            <input matInput [formControlName]="'apellido_materno'">
+                        </mat-form-field>
+
+                        <mat-form-field class="w-full boby-mat-dense flex-auto gt-xs:pr-3" appearance="fill">
+                            <mat-label>Genero</mat-label>
+                            <mat-icon
+                                matPrefix
+                                class="hidden sm:flex icon-size-5"
+                                [svgIcon]="'heroicons_solid:user-circle'"></mat-icon>
+                            <mat-select [placeholder]="'Seleccione un genero....'" [formControlName]="'genero'">
+                                <mat-option [value]="'VARON'">VARON</mat-option>
+                                <mat-option [value]="'MUJER'">MUJER</mat-option>
+                                <mat-option [value]="'OTRO'">OTRO</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                        <mat-form-field class="w-full boby-mat-dense flex-auto gt-xs:pr-3" appearance="fill">
+                            <mat-label>Nro. Documento</mat-label>
+                            <mat-icon
+                                matPrefix
+                                class="hidden sm:flex icon-size-5"
+                                [svgIcon]="'heroicons_solid:identification'"></mat-icon>
+                            <input matInput [formControlName]="'ci'">
+                        </mat-form-field>
+
+                        <mat-form-field class="w-full boby-mat-dense flex-auto gt-xs:pr-3" appearance="fill">
+                            <mat-label>Lugar Expedición</mat-label>
+                            <mat-icon
+                                matPrefix
+                                class="hidden sm:flex icon-size-5"
+                                [svgIcon]="'heroicons_solid:location-marker'"></mat-icon>
+                            <input type="text"
+                                   matInput
+                                   [matAutocomplete]="lista"
+                                   (keyup)="searchLugar($event.target.value,'expedicion')"
+                                   placeholder="Buscar lugar expedición ..."
+                                   [formControlName]="'lugar_expedicion'">
+                            <mat-autocomplete autoActiveFirstOption #lista="matAutocomplete" >
+                                <mat-option *ngFor="let lista of listaExpedicion" [value]="lista.nombre">
+                                    {{lista.nombre}}
+                                </mat-option>
+                            </mat-autocomplete>
+                        </mat-form-field>
+
+                        <mat-form-field class="w-full boby-mat-dense flex-auto gt-xs:pr-3" appearance="fill">
+                            <mat-label>Nacionalidad</mat-label>
+                            <mat-icon
+                                matPrefix
+                                class="hidden sm:flex icon-size-5"
+                                [svgIcon]="'heroicons_solid:globe'"></mat-icon>
+                            <input matInput [formControlName]="'nacionalidad'">
+                        </mat-form-field>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sm:col-span-2 md:col-span-4 lg:col-span-2 flex flex-col flex-auto p-6 bg-card shadow rounded-2xl overflow-hidden bg-blue-0 dark:bg-transparent">
+            <div class="grid divide-x -m-6">
+                <div class="flex flex-col items-left justify-left p-6 sm:p-8">
+                    <div class="text-5xl font-semibold leading-none">
+
+                        <mat-form-field class="w-full boby-mat-dense flex-auto gt-xs:pr-3" appearance="fill">
+                            <mat-label>Celular</mat-label>
+                            <mat-icon
+                                matPrefix
+                                class="hidden sm:flex icon-size-5"
+                                [svgIcon]="'heroicons_solid:device-mobile'"></mat-icon>
+                            <input matInput [formControlName]="'celular'">
+                        </mat-form-field>
+
+                        <mat-form-field class="w-full boby-mat-dense flex-auto gt-xs:pr-3" appearance="fill">
+                            <mat-label>Telefono</mat-label>
+                            <mat-icon
+                                matPrefix
+                                class="hidden sm:flex icon-size-5"
+                                [svgIcon]="'heroicons_solid:phone'"></mat-icon>
+                            <input matInput [formControlName]="'telefono'">
+                        </mat-form-field>
+
+                        <mat-form-field class="w-full boby-mat-dense flex-auto gt-xs:pr-3" appearance="fill">
+                            <mat-label>Email</mat-label>
+                            <mat-icon
+                                matPrefix
+                                class="hidden sm:flex icon-size-5"
+                                [svgIcon]="'heroicons_solid:mail'"></mat-icon>
+                            <input matInput [formControlName]="'email'">
+                        </mat-form-field>
+
+                        <mat-form-field class="w-full boby-mat-dense flex-auto gt-xs:pr-3" appearance="fill">
+                            <mat-label>Email 2</mat-label>
+                            <mat-icon
+                                matPrefix
+                                class="hidden sm:flex icon-size-5"
+                                [svgIcon]="'heroicons_solid:mail'"></mat-icon>
+                            <input matInput [formControlName]="'email2'">
+                        </mat-form-field>
+
+                        <mat-form-field class="w-full boby-mat-dense flex-auto gt-xs:pr-3" appearance="fill">
+                            <mat-label>Dirección (Av./Calle/No.)</mat-label>
+                            <mat-icon
+                                matPrefix
+                                class="hidden sm:flex icon-size-5"
+                                [svgIcon]="'heroicons_solid:home'"></mat-icon>
+                            <textarea
+                                matInput
+                                [rows]="2"
+                                [formControlName]="'direccion'"></textarea>
+                        </mat-form-field>
+
+                        <mat-form-field class="w-full boby-mat-dense flex-auto gt-xs:pr-3" appearance="fill">
+                            <mat-label>Pais de Residencia</mat-label>
+                            <mat-icon
+                                matPrefix
+                                class="hidden sm:flex icon-size-5"
+                                [svgIcon]="'heroicons_solid:location-marker'"></mat-icon>
+                            <input type="text"
+                                   matInput
+                                   [matAutocomplete]="recepcion"
+                                   (keyup)="searchLugar($event.target.value,'residencia')"
+                                   placeholder="Buscar pais de residencia ...."
+                                   [formControlName]="'id_pais_residencia'">
+                            <mat-autocomplete autoActiveFirstOption
+                                              #recepcion="matAutocomplete"
+                                              [displayWith]="getResidencia.bind(this)">
+                                <mat-option *ngFor="let pais of listaResidencia" [value]="pais.id_lugar">
+                                    {{pais.nombre}}
+                                </mat-option>
+                            </mat-autocomplete>
+                        </mat-form-field>
+
+                        <mat-form-field class="w-full boby-mat-dense flex-auto gt-xs:pr-3" appearance="fill">
+                            <mat-label>Ciudad de Residencia</mat-label>
+                            <mat-icon
+                                matPrefix
+                                class="hidden sm:flex icon-size-5"
+                                [svgIcon]="'heroicons_solid:location-marker'"></mat-icon>
+                            <input matInput [formControlName]="'ciudad_residencia'">
+                        </mat-form-field>
+
+                        <mat-form-field class="w-full boby-mat-dense flex-auto gt-xs:pr-3" appearance="fill">
+                            <mat-label>Zona/Barrio</mat-label>
+                            <mat-icon
+                                matPrefix
+                                class="hidden sm:flex icon-size-5"
+                                [svgIcon]="'heroicons_solid:office-building'"></mat-icon>
+                            <input matInput [formControlName]="'barrio_zona'">
+                        </mat-form-field>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <!-- Cancel -->
+    <button
+        class="ml-auto rounded-lg"
+        mat-button
+        [matTooltip]="'Cancelar'"
+        (click)="Close()">
+        Cancelar
+    </button>
+    <!-- Save -->
+    <button
+        class="ml-2 rounded-lg"
+        mat-flat-button
+        [color]="'primary'"
+        [disabled]="ClienteForm.invalid"
+        [matTooltip]="'Guardar'"
+        (click)="saveCliente()">
+        Guardar
+    </button>
+</mat-dialog-actions>

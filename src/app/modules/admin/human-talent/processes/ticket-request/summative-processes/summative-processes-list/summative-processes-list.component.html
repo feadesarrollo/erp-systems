@@ -1,0 +1,137 @@
+<div class="flex flex-col flex-auto min-w-0">
+
+    <p-toast></p-toast>
+
+    <!-- Menu -->
+    <div class="flex flex-col shadow bg-card">
+        <div class="flex flex-col flex-0 lg:flex-row items-center max-w-5xl w-full mx-auto px-8 lg:h-18 bg-card">
+            <div class="flex items-center mt-8 mb-4 lg:m-0 lg:ml-auto space-x-6">
+
+                <button mat-button [color]="'primary'" class="sm:inline-block text-secondary rounded-lg" [matMenuTriggerFor]="controlMenu">Inicio</button>
+                <mat-menu #controlMenu="matMenu" [xPosition]="'after'">
+                    <button mat-menu-item [routerLink]="['../../../']">
+                        <mat-icon [svgIcon]="'mat_solid:menu_open'"></mat-icon>Volver al Menu Principal
+                    </button>
+
+                    <button mat-menu-item
+                            [routerLink]="['/system/human-talent/modules/processes/ticket-request/organization-chart-ticket']">
+                        <mat-icon [svgIcon]="'mat_solid:account_tree'"></mat-icon>Cargos Jump Sit
+                    </button>
+                </mat-menu>
+
+            </div>
+        </div>
+    </div>
+
+    <mat-drawer-container
+        class="flex-auto h-full bg-card dark:bg-transparent"
+        (backdropClick)="onBackdropClicked()">
+
+        <!-- Drawer -->
+        <mat-drawer
+            class="w-full md:w-160 dark:bg-gray-900"
+            [mode]="drawerMode"
+            [opened]="false"
+            [position]="'end'"
+            [disableClose]="true"
+            #matDrawer>
+            <router-outlet></router-outlet>
+        </mat-drawer>
+        <mat-drawer-content class="flex flex-col">
+            <div class="relative flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between py-8 px-6 md:px-8 border-b">
+                <!-- Actions -->
+                <div class="flex shrink-0 items-center mt-50 sm:mt-0 sm:ml-4">
+
+                    <p-toast position="center"></p-toast>
+
+                    <!-- Search -->
+                    <mat-form-field class="boby-mat-dense boby-mat-no-subscript rounded-full min-w-64" [floatLabel]="'always'">
+                        <mat-icon
+                            matPrefix
+                            class="icon-size-5"
+                            [svgIcon]="'heroicons_solid:search'"></mat-icon>
+                        <input
+                            [formControl]="searchInputControl"
+                            (input)="filterByQuery(query.value)"
+                            placeholder="Buscar proceso sumario."
+                            matInput
+                            #query>
+                    </mat-form-field>
+
+                    <button
+                        class="ml-4 rounded-lg"
+                        mat-flat-button
+                        [color]="'primary'"
+                        [matTooltip]="'Nuevo Sumario'"
+                        (click)="createSummative()">
+                        <mat-icon [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
+                    </button>
+                    <button
+                        class="ml-4 rounded-lg"
+                        mat-flat-button
+                        [color]="'primary'"
+                        [matTooltip]="'Actualizar'"
+                        (click)="refreshSummative()">
+                        <mat-icon [svgIcon]="'heroicons_outline:refresh'"></mat-icon>
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex flex-auto overflow-auto">
+                <div class="flex flex-col flex-auto sm:mb-18 overflow-auto sm:overflow-y-auto">
+                    <table mat-table [dataSource]="summatives" matSort>
+
+                        <ng-container matColumnDef="accion" sticky>
+                            <mat-header-cell *matHeaderCellDef aria-label="row actions" class="min-w-32">Acciones</mat-header-cell>
+                            <mat-cell (click)="redirect(row)" *matCellDef="let row" [ngClass]="{ 'text-primary-800 bg-primary-100 dark:text-primary-50 dark:bg-primary-500': row === selectedSummative }" class="min-w-32">
+                                <button
+                                    class="ml-1 -mr-4"
+                                    mat-icon-button
+                                    [matMenuTriggerFor]="chatsHeaderMenu">
+                                    <mat-icon [svgIcon]="'heroicons_outline:dots-vertical'"></mat-icon>
+
+                                    <mat-menu #chatsHeaderMenu>
+                                        <button mat-menu-item
+                                                (click)="executeCommand('eliminar')">
+                                            <mat-icon [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                            Eliminar Proceso
+                                        </button>
+                                        <button mat-menu-item
+                                                (click)="executeCommand('exportar')">
+                                            <mat-icon [svgIcon]="'heroicons_outline:cog'"></mat-icon>
+                                            Exportar Procesos
+                                        </button>
+                                    </mat-menu>
+
+                                </button>
+                            </mat-cell>
+                        </ng-container>
+
+                        <ng-container *ngFor="let col of cols; let i = index" matColumnDef="{{col.field}}">
+                            <mat-header-cell *matHeaderCellDef mat-sort-header class="{{col.width}}">  {{col.header}} </mat-header-cell>
+                            <!--selectedCliente = row-->
+                            <mat-cell *matCellDef="let row"
+                                      class="{{col.width}}"
+                                      (click)="redirect(row)" [ngClass]="{ 'text-primary-800 bg-primary-100 dark:text-primary-50 dark:bg-primary-500': row === selectedSummative }"
+                            >
+                                {{ ['fecha_reg','fecha_mod'].includes(col.field) ? (row[col.field] | date:'dd/MM/yyyy H:mm') : ( ['start_date','end_date'].includes(col.field) ? (row[col.field] | date:'dd/MM/yyyy') :row[col.field]) }}
+                            </mat-cell>
+                        </ng-container>
+
+                        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                        <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+                    </table>
+                </div>
+            </div>
+            <mat-paginator
+                class="sm:absolute sm:inset-x-0 sm:bottom-0 border-b sm:border-t sm:border-b-0 z-10 bg-gray-50 dark:bg-transparent"
+                [length]="pagination.length"
+                [pageIndex]="pagination.page"
+                [pageSize]="pagination.size"
+                [pageSizeOptions]="[5, 10, 25, 50, 100]"
+                [showFirstLastButtons]="true"></mat-paginator>
+        </mat-drawer-content>
+
+    </mat-drawer-container>
+
+</div>
