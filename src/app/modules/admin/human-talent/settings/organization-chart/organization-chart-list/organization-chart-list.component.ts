@@ -64,7 +64,6 @@ export class OrganizationChartListComponent implements OnInit {
         this._htService.getOrganizationData('0',{},'query');
 
         this._htService._orgaStructure.subscribe((data) => {
-
             this.dataSource.data = data;
 
             if ( !this.searchInputControl.value ) {
@@ -149,21 +148,46 @@ export class OrganizationChartListComponent implements OnInit {
         this.loading = true;
         // Subscribe to search input field value changes
         this.searchInputControl.valueChanges
-            .pipe(debounceTime(5000))
+            .pipe(debounceTime(2000))
             .subscribe(query => {
                 if (!this.searchInputControl.value){
                     this._htService.getOrganizationData('0',{},'search');
                 }else {
-                    this._htService.searchOrganizationChart(query);
+                    this._htService.searchOrganizationChart(query).subscribe();
                 }
             });
     }
 
+    /**
+     * Create Orga
+     */
+    createOrga(): void{
+        // Create the item
+        this._htService.createOrga().subscribe((newOrga) => {
+            console.warn('newOrga',newOrga);
+            this._htService.statusOrga = 'new';
+            this.selectedNode = newOrga;
+            // Go to the new item
+            this._router.navigate(['./', newOrga.id_uo], {relativeTo: this._activatedRoute});
+            // Mark for check
+            this._changeDetectorRef.markForCheck();
+        });
+    }
+
+    refreshOrga(momento){
+
+        this._htService.getOrganizationData('0',{},'search');
+    }
+
     redirect(row){
-        //console.warn('row', this._htService.getNodeMapItem(row.id));
-        //localStorage.setItem('status','edit');
+        this._htService.selectedNode = row.item;
         this.selectedNode = row;
         this._router.navigate(['./', row.id], {relativeTo: this._activatedRoute});
+    }
+
+    selected(row){
+        this._htService.selectedNode = row.item;
+        this.selectedNode = row;
     }
 
     /**
@@ -220,7 +244,7 @@ export class OrganizationChartListComponent implements OnInit {
             case 'item':
                 //this._router.navigate(['/details'], {relativeTo: this._activatedRoute});
                 //this._router.navigate([`/system/human-talent/modules/settings/organization/${this._activatedRoute.snapshot.paramMap.get('id')}/details`], {relativeTo: this._activatedRoute});
-                this._router.navigate([`/system/human-talent/modules/settings/organization/details`], {relativeTo: this._activatedRoute});
+                this._router.navigate([`/system/human-talent/modules/settings/organization/${this.selectedNode.id}/details`], {relativeTo: this._activatedRoute});
                 this._changeDetectorRef.markForCheck();
                 /*const dialogRef = this._matDialog.open(OrganizationChartDialogComponent, {
                     height: '90%',

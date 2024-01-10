@@ -1,0 +1,251 @@
+<div class="flex flex-col flex-auto p-6 md:p-8">
+
+    <!-- Close button -->
+    <div class="flex items-center justify-end">
+        <button
+            mat-icon-button
+            [matTooltip]="'Cerrar'"
+            [routerLink]="['../../']"
+            [color]="'primary'">
+            <mat-icon
+                [svgIcon]="'heroicons_outline:x-circle'"></mat-icon>
+        </button>
+    </div>
+
+    <!-- Preview -->
+    <div class="aspect-w-9 aspect-h-6 mt-8">
+        <div class="flex items-center justify-center border rounded-lg bg-gray-50 dark:bg-card"
+             *ngIf="item?.json_template.type === 'carpeta'">
+            <ng-container >
+                <mat-icon
+                    class="icon-size-14 text-hint"
+                    [svgIcon]="'iconsmind:folder'"></mat-icon>
+            </ng-container>
+        </div>
+
+        <div class="flex items-center justify-center border rounded-lg bg-gray-50 dark:bg-card cursor-zoom-in"
+             (click)="editTemplateContent()"
+             [matTooltip]="'Editar Plantilla'"
+             *ngIf="item?.json_template.type !== 'carpeta'">
+            <ng-container >
+                <mat-icon
+                    class="icon-size-14 text-hint"
+                    [svgIcon]="'iconsmind:file'"></mat-icon>
+            </ng-container>
+        </div>
+    </div>
+
+    <!-- Name & Type -->
+    <div class="flex flex-col items-start mt-8">
+        <div class="text-xl font-medium">{{item.json_template.name}}</div>
+        <div
+            class="mt-1 px-1.5 rounded text-sm font-semibold leading-5 text-white"
+            [class.bg-indigo-600]="item.json_template.format === 'folder'"
+            [class.bg-red-600]="item.json_template.format === 'pdf'"
+            [class.bg-blue-600]="item.json_template.format === 'docx'">
+            {{item.json_template.format.toUpperCase()}}
+        </div>
+    </div>
+
+    <!-- Information -->
+    <ng-container *ngIf="!editMode">
+        <div class="flex items-center justify-between mt-8">
+            <div class="text-lg font-medium">Información</div>
+            <button
+                mat-icon-button
+                [matTooltip]="'Editar'"
+                (click)="toggleEditMode(true)"
+            >
+                <mat-icon
+                    class="icon-size-5"
+                    [svgIcon]="'heroicons_solid:pencil'"></mat-icon>
+            </button>
+        </div>
+        <div class="flex flex-col mt-4 border-t border-b divide-y font-medium">
+
+            <div class="flex items-center justify-between py-3">
+                <div class="text-secondary">Nombre</div>
+                <div>{{item?.json_template.name}}</div>
+            </div>
+
+            <div class="flex items-center justify-between py-3">
+                <div class="text-secondary">Creado Por</div>
+                <div>{{item?.json_template.createdBy}}</div>
+            </div>
+
+            <div class="flex items-center justify-between py-3">
+                <div class="text-secondary">Fecha Creación </div>
+                <div>{{item?.json_template.createdAt}}</div>
+            </div>
+
+            <div class="flex items-center justify-between py-3">
+                <div class="text-secondary">Fecha Modificación</div>
+                <div>{{item?.json_template.modifiedAt}}</div>
+            </div>
+
+            <ng-container *ngIf="item?.json_template.contents">
+                <div class="flex items-center justify-between py-3">
+                    <div class="text-secondary">Contents</div>
+                    <div>{{item?.json_template.contents}}</div>
+                </div>
+            </ng-container>
+        </div>
+
+
+        <!-- Description -->
+        <div class="flex items-center justify-between mt-8">
+            <div class="text-lg font-medium">Descripción</div>
+        </div>
+        <div class="flex mt-2 border-t">
+            <div class="py-3">
+                <ng-container *ngIf="item?.json_template.description">
+                    <div>{{item?.json_template.description}}</div>
+                </ng-container>
+                <ng-container *ngIf="!item?.json_template.description">
+                    <div class="italic text-secondary">Click aqui para agregar una descripción</div>
+                </ng-container>
+            </div>
+        </div>
+
+    </ng-container>
+    <!-- Edit mode -->
+    <ng-container *ngIf="editMode">
+        <!-- File Manager form -->
+        <div class="relative flex flex-col flex-auto items-center">
+            <div class="w-full max-w-3xl">
+                <form [formGroup]="fileManagerForm">
+
+                    <!-- Name -->
+                    <div class="mt-8">
+                        <mat-form-field class="w-full boby-mat-dense">
+                            <mat-label>Nombre</mat-label>
+                            <mat-icon
+                                matPrefix
+                                class="hidden sm:flex icon-size-5"
+                                [svgIcon]="'heroicons_solid:user-circle'"></mat-icon>
+                            <input
+                                matInput
+                                [formControlName]="'name'"
+                                [placeholder]="'Nombre'"
+                                [spellcheck]="false">
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Content -->
+                    <mat-form-field class="boby-mat-dense w-full" appearance="fill">
+                        <mat-label>Tipo</mat-label>
+                        <mat-icon
+                            class="icon-size-5"
+                            [svgIcon]="'heroicons_solid:pencil-alt'"
+                            matPrefix></mat-icon>
+                        <mat-select (selectionChange)="onTypeChange($event)"
+                                    [placeholder]="'Seleccione un tipo ...'"
+                                    [formControlName]="'type'">
+                            <mat-option [value]="'archivo'">archivo</mat-option>
+                            <mat-option [value]="'carpeta'">carpeta</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+                    <mat-form-field *ngIf="['archivo'].includes(this.fileManagerForm.get('type').value)" class="w-full boby-mat-dense" appearance="fill">
+                        <mat-label>Formato</mat-label>
+                        <mat-icon
+                            matPrefix
+                            class="hidden sm:flex icon-size-5"
+                            [svgIcon]="'heroicons_solid:information-circle'"></mat-icon>
+                        <mat-select [placeholder]="'Seleccione formato ...'"
+                                    [formControlName]="'format'">
+                            <mat-option [value]="'docx'">DOCX</mat-option>
+                            <mat-option [value]="'pdf'">PDF</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+                    <mat-form-field *ngIf="['archivo'].includes(this.fileManagerForm.get('type').value)" class="boby-mat-dense w-full">
+                        <mat-label class="font-medium">Tipo Contrato</mat-label>
+                        <mat-select [placeholder]="'Seleccione tipo contrato....'"
+                                    [formControlName]="'id_tipo_contrato'"
+                                    [compareWith]="displayContractType">
+                            <mat-option *ngFor="let cont of listContractType" [value]="cont.id_tipo_contrato">
+                                {{cont.nombre}}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+                    <mat-form-field *ngIf="['archivo'].includes(this.fileManagerForm.get('type').value)" class="boby-mat-dense w-full" appearance="fill">
+                        <mat-label>Categoria</mat-label>
+                        <mat-icon
+                            class="icon-size-5"
+                            [svgIcon]="'heroicons_solid:pencil-alt'"
+                            matPrefix></mat-icon>
+                        <mat-select (selectionChange)="onCategoryChange($event)"
+                                    [placeholder]="'Seleccione una categoria ...'"
+                                    [formControlName]="'category'">
+                            <mat-option [value]="'contrato'">CONTRATO</mat-option>
+                            <mat-option [value]="'anexo'">ANEXO</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+                    <mat-form-field *ngIf="['contrato'].includes(this.fileManagerForm.get('category').value)" class="boby-mat-dense w-full">
+                        <mat-label class="font-medium">Tipo Adenda</mat-label>
+                        <mat-select [placeholder]="'Seleccione tipo adenda....'"
+                                    [formControlName]="'id_template_fk'"
+                                    [compareWith]="displayAddenda">
+                            <mat-option *ngFor="let add of listAddenda" [value]="add.id_template">
+                                {{add.name}}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+                    <mat-form-field class="boby-mat-textarea w-full">
+                        <mat-label>Descripción</mat-label>
+                        <mat-icon
+                            matPrefix
+                            class="hidden sm:flex icon-size-5"
+                            [svgIcon]="'heroicons_solid:menu-alt-2'"></mat-icon>
+                        <textarea
+                            matInput
+                            [formControlName]="'description'"
+                            [placeholder]="'Descripción'"
+                            [rows]="5"
+                            [spellcheck]="false"
+                            matTextareaAutosize></textarea>
+                    </mat-form-field>
+
+
+                    <!-- Actions -->
+                    <div class="flex items-center mt-10 -mx-6 sm:-mx-12 py-4 pr-4 pl-1 sm:pr-12 sm:pl-7 border-t bg-gray-50 dark:bg-transparent">
+                        <!-- Delete -->
+                        <button
+                            mat-button
+                            [color]="'warn'"
+                            [matTooltip]="'Borrar'"
+                            (click)="deleteTemplateFile()">
+                            Borrar
+                        </button>
+                        <!-- Cancel -->
+                        <button
+                            class="ml-auto"
+                            mat-button
+                            [matTooltip]="'Cancelar'"
+                            (click)="toggleEditMode(false)">
+                            Cancelar
+                        </button>
+                        <!-- Save -->
+                        <button
+                            class="ml-2"
+                            mat-flat-button
+                            [color]="'primary'"
+                            [disabled]="fileManagerForm.invalid"
+                            [matTooltip]="'Guardar'"
+                            (click)="updateTemplateFile()">
+                            Guardar
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </ng-container>
+
+
+
+</div>

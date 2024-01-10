@@ -22,6 +22,7 @@ export class OrganizationChartDetailsComponent implements OnInit {
     public editMode: boolean = false;
     public OrgaChartForm: FormGroup;
     public organization: any;
+    private statusOrga: any;
     constructor(
         private _changeDetectorRef: ChangeDetectorRef,
         private _formBuilder: FormBuilder,
@@ -31,11 +32,12 @@ export class OrganizationChartDetailsComponent implements OnInit {
     ) { }
 
     ngOnInit(): void {
+
         this._orgaChartComponent.matDrawer.open();
 
         this.OrgaChartForm = this._formBuilder.group({
             id_uo: [''],
-            codigo: ['',[Validators.required]],
+            codigo: [''],
             id_nivel_organizacional: ['',[Validators.required]],
             nombre_unidad: ['',[Validators.required]],
             descripcion: ['',[Validators.required]],
@@ -47,16 +49,25 @@ export class OrganizationChartDetailsComponent implements OnInit {
             gerencia: ['',[Validators.required]]
         });
 
+        this._humanTalentService.loadCargoPresupuesto(this._activatedRoute.snapshot.paramMap.get('id')).subscribe(
+            (resp) => {
+                this.organization.codigo_categoria = resp.codigo_categoria;
+                this.organization.desc_tcc = resp.desc_tcc;
+                this.organization.gestion = resp.gestion;
+                this.organization.id_centro_costo = resp.id_centro_costo;
+                this.organization.id_gestion = resp.id_gestion;
+                this._changeDetectorRef.markForCheck();
+        });
+
         // Get the customer
         this._humanTalentService.organization$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((organization: any) => {
                 // Open the drawer in case it is closed
                 this._orgaChartComponent.matDrawer.open();
-
                 // Get the customer
                 this.organization = organization;
-                this.OrgaChartForm.patchValue(organization);
+                this.OrgaChartForm.patchValue(this.organization);
 
                 // Toggle the edit mode off
                 this.toggleEditMode(false);
@@ -94,10 +105,35 @@ export class OrganizationChartDetailsComponent implements OnInit {
     removeAvatar(){}
 
     /**
-     * save Customer
+     * Post organization
      */
-    postOrganization() {}
-    deleteOrganization(){}
+    postOrganization() {
+
+        let orga = this.OrgaChartForm.getRawValue();
+        Object.keys(this.OrgaChartForm.getRawValue()).forEach(key => {
+            if(!orga[key]){
+                orga[key] = '';
+            }
+        });
+
+        this._humanTalentService.postOrganization(orga, this.statusOrga)
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe(
+                (resp: any) => {
+                    if ( !resp.error ) {
+                        this.toggleEditMode(false);
+                        this._orgaChartComponent.refreshOrga('save');
+                        this._changeDetectorRef.markForCheck();
+                    }
+                }
+            );
+    }
+    /**
+     * Delete organization
+     */
+    deleteOrganization(){
+
+    }
     /**
      * Toggle edit mode
      *

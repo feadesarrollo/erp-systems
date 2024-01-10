@@ -1,13 +1,24 @@
-import {ChangeDetectorRef, Component, OnInit, ViewChild} from '@angular/core';
+import {
+    ChangeDetectionStrategy,
+    ChangeDetectorRef,
+    Component,
+    OnInit,
+    ViewChild,
+    ViewEncapsulation
+} from '@angular/core';
 import { ActivatedRoute, Router } from "@angular/router";
 import { SummativeProcessesService } from "../summative-processes.service";
 import { takeUntil, Subject, Observable } from 'rxjs';
 import { MatDrawer } from "@angular/material/sidenav";
 import {FormControl} from "@angular/forms";
+import { MatPaginator } from '@angular/material/paginator';
+import { MatSort } from '@angular/material/sort';
 import {BobyMediaWatcherService} from "../../../../../../../../@boby/services/media-watcher";
 @Component({
-  selector: 'erp-summative-processes-list',
-  templateUrl: './summative-processes-list.component.html'
+    selector: 'erp-summative-processes-list',
+    templateUrl: './summative-processes-list.component.html',
+    encapsulation  : ViewEncapsulation.None,
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SummativeProcessesListComponent implements OnInit {
 
@@ -16,6 +27,10 @@ export class SummativeProcessesListComponent implements OnInit {
     public displayedColumns = [
         'accion','nombre_funcionario','start_date','end_date','summative_reason','estado_reg','fecha_reg','fecha_mod','usr_reg','usr_mod'
     ];
+
+    @ViewChild(MatPaginator) private _paginator: MatPaginator;
+    @ViewChild(MatSort) private _sort: MatSort;
+
     public cols = [
         { field: 'nombre_funcionario', header: 'Nombre', width: 'min-w-80'},
         { field: 'start_date', header: 'Fecha Inicio', width: 'min-w-44'},

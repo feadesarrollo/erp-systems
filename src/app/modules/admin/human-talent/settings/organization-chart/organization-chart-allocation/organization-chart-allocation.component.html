@@ -1,11 +1,131 @@
+<div class="sm:absolute sm:inset-0 flex flex-col flex-auto min-w-0 sm:overflow-hidden bg-card dark:bg-transparent">
+    <div class="relative flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between py-4 px-6 md:px-8 border-b">
+        <!-- Actions -->
+        <div class="flex shrink-0 items-end mt-1 sm:mt-0 sm:ml-4">
 
-    organization-chart-item works!<br>
-    organization-chart-item works!<br>
-    organization-chart-item works!<br>
-    organization-chart-item works!<br>
-    organization-chart-item works!<br>
-    organization-chart-item works!<br>
-    organization-chart-item works!<br>
-    organization-chart-item works!<br>
+            <p-toast></p-toast>
+
+            <!-- Search -->
+            <mat-form-field class="boby-mat-dense boby-mat-no-subscript boby-mat-rounded min-w-64">
+                <mat-icon
+                    class="icon-size-5"
+                    matPrefix
+                    [svgIcon]="'heroicons_solid:search'"></mat-icon>
+                <input
+                    matInput
+                    [formControl]="searchInputControl"
+                    [autocomplete]="'off'"
+                    [placeholder]="'Buscar Asignación'">
+            </mat-form-field>
+
+            <button
+                class="sm:inline-flex ml-2 rounded-lg"
+                mat-flat-button
+                [color]="'primary'"
+                [matTooltip]="'Exportar Registros'"
+                (click)="exporter.exportTable('xlsx', {fileName:'Registros de Asignaciones'})">
+                <mat-icon class="icon-size-1" [svgIcon]="'iconsmind:file_excel'"></mat-icon>
+                <!--<span class="hidden sm:inline-block ml-2">Exportar</span>-->
+            </button>
+
+            <button
+                class="ml-2 rounded-lg"
+                mat-flat-button
+                [color]="'primary'"
+                [matTooltip]="'Actualizar'"
+                (click)="refreshItems()">
+                <mat-icon [svgIcon]="'heroicons_outline:refresh'"></mat-icon>
+            </button>
+
+            <!-- Recurring selector -->
+            <div class="ml-2 boby-mat-dense boby-mat-no-subscript flex items-center p-0.5 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700">
+                <button
+                    class="px-6"
+                    [ngClass]="{'bg-card pointer-events-none shadow': status,
+                                'bg-transparent': !status}"
+                    mat-flat-button
+                    (click)="setStatus(true,'activo')"
+                    disableRipple>
+                    Vigente
+                </button>
+                <button
+                    class="px-6"
+                    [ngClass]="{'bg-card pointer-events-none shadow': !status,
+                                'bg-transparent': status}"
+                    mat-flat-button
+                    (click)="setStatus(false,'inactivo')"
+                    disableRipple>
+                    Concluido
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="flex flex-auto overflow-auto">
+        <div class="flex flex-col flex-auto sm:mb-18 overflow-auto sm:overflow-y-auto">
+            <table mat-table [dataSource]="dataSource" matSort matTableExporter  #exporter="matTableExporter" [hiddenColumns]="[0]">
+
+                <ng-container matColumnDef="accion">
+                    <mat-header-cell *matHeaderCellDef aria-label="row actions" class="min-w-24">Acciones</mat-header-cell>
+                    <mat-cell (click)="selectedItem = row" *matCellDef="let row" class="min-w-24" [ngClass]="{ 'text-primary-800 bg-primary-100 dark:text-primary-50 dark:bg-primary-500': row === selectedItem }">
+                        <button
+                            class="ml-1 -mr-4"
+                            mat-icon-button
+                            [matMenuTriggerFor]="chatsHeaderMenu">
+                            <mat-icon [svgIcon]="'heroicons_outline:dots-vertical'"></mat-icon>
+
+                            <mat-menu #chatsHeaderMenu>
+                                <button mat-menu-item [matMenuTriggerFor]="formatos">
+                                    <mat-icon [svgIcon]="'heroicons_outline:printer'"></mat-icon>
+                                    Exportar Registros
+                                </button>
+                            </mat-menu>
+                        </button>
+
+                        <mat-menu #formatos="matMenu">
+                            <button mat-menu-item (click)="exporter.exportTable('xls', {fileName:'Registros de Pruebas Psico Activas'})">
+                                <mat-icon class="icon-size-1" [svgIcon]="'iconsmind:file_excel'"></mat-icon>XLS
+                            </button>
+                            <button mat-menu-item (click)="exporter.exportTable('xlsx', {fileName:'Registros de Pruebas Psico Activas'})">
+                                <mat-icon class="icon-size-1" [svgIcon]="'iconsmind:file_excel'"></mat-icon>XLSX
+                            </button>
+                            <button mat-menu-item (click)="exporter.exportTable('csv', {fileName:'Registros de Pruebas Psico Activas'})">
+                                <mat-icon class="icon-size-1" [svgIcon]="'iconsmind:file_csv'"></mat-icon>CSV
+                            </button>
+                            <button mat-menu-item (click)="exporter.exportTable('txt', {fileName:'Registros de Pruebas Psico Activas'})">
+                                <mat-icon class="icon-size-1" [svgIcon]="'iconsmind:file_txt'"></mat-icon>TXT
+                            </button>
+                            <button mat-menu-item (click)="exporter.exportTable('json', {fileName:'Registros de Pruebas Psico Activas'})">
+                                <mat-icon class="icon-size-1" [svgIcon]="'iconsmind:file'"></mat-icon>JSON
+                            </button>
+                        </mat-menu>
+                    </mat-cell>
+                </ng-container>
+
+                <ng-container *ngFor="let col of cols; let i = index" matColumnDef="{{col.field}}">
+                    <mat-header-cell *matHeaderCellDef mat-sort-header class="{{col.width}}">  {{col.header}} </mat-header-cell>
+                    <mat-cell *matCellDef="let row"
+                              class="{{col.width}}"
+                              (click)="selectedItem = row" [ngClass]="{ 'text-primary-800 bg-primary-100 dark:text-primary-50 dark:bg-primary-500': row === selectedItem }">
+                        {{['fecha_reg','fecha_mod','fecha_asignacion','fecha_finalizacion','fecha_documento_asignacion','fecha_contrato'].includes(col.field) ? (row[col.field] | date:'dd/MM/yyyy') :  row[col.field]}}
+                    </mat-cell>
+                </ng-container>
+
+                <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+            </table>
+        </div>
+
+    </div>
+    <mat-paginator
+        class="sm:absolute sm:inset-x-0 sm:bottom-0 border-b sm:border-t sm:border-b-0 z-10 bg-gray-50 dark:bg-transparent"
+        [ngClass]="{'pointer-events-none': isLoading}"
+        [length]="pagination.length"
+        [pageIndex]="pagination.page"
+        [pageSize]="7"
+        [showFirstLastButtons]="true"
+        [pageSizeOptions]="[7, 10, 25, 50, 100]"></mat-paginator>
 
 
+</div>

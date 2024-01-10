@@ -127,7 +127,8 @@ export class SummativeProcessesService {
         return this.summatives$.pipe(
             take(1),
             switchMap(summatives => this._httpClient.post('api/apps/human-talent/postSummativeProcess',summative).pipe(
-                map((updatedRole) => {
+                map((updatedSummative) => {
+                    console.warn('1.- updatedSummative',updatedSummative);
                     // Find the index of the updated contact
                     const index = summatives.findIndex(item => item.id_summative_process === id);
                     // Update the contact
@@ -145,7 +146,7 @@ export class SummativeProcessesService {
                     take(1),
                     filter(item => item && item.id_summative_process === id),
                     tap(() => {
-
+                        console.warn('2.- updatedSummative',updatedSummative);
                         // Update the summative if it's selected
                         this._summative.next(updatedSummative);
 

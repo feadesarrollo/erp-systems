@@ -54,7 +54,7 @@
                     <!-- Fields -->
                     <ng-container>
                         <div class="flex text-primary">
-                            <div class="w-full flex-auto gt-xs:pr-3" appearance="fill">
+                            <div class="w-full flex-auto gt-xs:pr-1" appearance="fill">
                                 <mat-label class="leading-6 font-bold text-lg">CODIGO</mat-label>
                                 <div class="flex sm:items-center">
                                     <mat-icon [svgIcon]="'heroicons_solid:identification'"></mat-icon>
@@ -62,7 +62,7 @@
                                 </div>
                             </div>
 
-                            <div class="boby-mat-no-subscript boby-mat-dense flex-auto w-full ml-2 sm:ml-4">
+                            <div class="boby-mat-no-subscript boby-mat-dense flex-auto w-full ml-2 sm:ml-2">
                                 <mat-label class="leading-6 font-bold text-lg">NIVEL ORGANIZACIONAL</mat-label>
                                 <div class="flex sm:items-center">
                                     <mat-icon [svgIcon]="'heroicons_solid:identification'"></mat-icon>
@@ -84,7 +84,7 @@
                                 </div>
                             </div>
 
-                            <div class="w-full boby-mat-dense flex-auto gt-xs:pr-3 ml-2 sm:ml-4" appearance="fill">
+                            <div class="w-full boby-mat-dense flex-auto gt-xs:pr-3 ml-2 sm:ml-2" appearance="fill">
                                 <mat-label class="leading-6 font-bold text-lg">DESCRIPCIÓN</mat-label>
                                 <div class="flex sm:items-center">
                                     <mat-icon [svgIcon]="'heroicons_solid:user-circle'"></mat-icon>
@@ -95,10 +95,11 @@
                         </div>
                     </ng-container>
 
+                    <div class="mt-3 text-lg font-bold truncate">DATOS CARGO</div>
                     <!-- Fields -->
                     <ng-container>
                         <div class="flex text-primary">
-                            <div class="w-full boby-mat-dense flex-auto gt-xs:pr-3" appearance="fill">
+                            <div class="w-full boby-mat-dense flex-auto gt-xs:pr-1" appearance="fill">
                                 <mat-label class="leading-6 font-bold text-lg">CARGO</mat-label>
                                 <div class="flex sm:items-center">
                                     <mat-icon [svgIcon]="'heroicons_solid:identification'"></mat-icon>
@@ -106,7 +107,7 @@
                                 </div>
                             </div>
 
-                            <div class="w-full boby-mat-dense flex-auto gt-xs:pr-3 ml-2 sm:ml-4" appearance="fill">
+                            <div class="w-full boby-mat-dense flex-auto gt-xs:pr-1 ml-2 sm:ml-2" appearance="fill">
                                 <mat-label class="leading-6 font-bold text-lg">CARGO INDIVIDUAL</mat-label>
                                 <div class="flex sm:items-center">
                                     <mat-icon [svgIcon]="'heroicons_solid:location-marker'"></mat-icon>
@@ -120,7 +121,7 @@
                     <!-- Fields -->
                     <ng-container>
                         <div class="flex text-primary">
-                            <div class="w-full boby-mat-dense flex-auto gt-xs:pr-3" appearance="fill">
+                            <div class="w-full boby-mat-dense flex-auto gt-xs:pr-1" appearance="fill">
                                 <mat-label class="leading-6 font-bold text-lg">PRESUPUESTA</mat-label>
                                 <div class="flex sm:items-center">
                                     <mat-icon [svgIcon]="'heroicons_solid:globe'"></mat-icon>
@@ -128,7 +129,7 @@
                                 </div>
                             </div>
 
-                            <div class="w-full boby-mat-dense flex-auto gt-xs:pr-3 ml-2 sm:ml-4" appearance="fill">
+                            <div class="w-full boby-mat-dense flex-auto gt-xs:pr-1 ml-2 sm:ml-2" appearance="fill">
                                 <mat-label class="leading-6 font-bold text-lg">NODO BASE</mat-label>
                                 <div class="flex sm:items-center">
                                     <mat-icon [svgIcon]="'heroicons_solid:device-mobile'"></mat-icon>
@@ -142,7 +143,7 @@
                     <!-- Fields -->
                     <ng-container>
                         <div class="flex text-primary">
-                            <div class="w-full boby-mat-dense flex-auto gt-xs:pr-3" appearance="fill">
+                            <div class="w-full boby-mat-dense flex-auto gt-xs:pr-1" appearance="fill">
                                 <mat-label class="leading-6 font-bold text-lg">CORRESPONDENCIA</mat-label>
                                 <div class="flex sm:items-center">
                                     <mat-icon [svgIcon]="'heroicons_solid:phone'"></mat-icon>
@@ -150,11 +151,34 @@
                                 </div>
                             </div>
 
-                            <div class="w-full boby-mat-dense flex-auto gt-xs:pr-3 ml-2 sm:ml-4" appearance="fill">
+                            <div class="w-full boby-mat-dense flex-auto gt-xs:pr-1 ml-2 sm:ml-2" appearance="fill">
                                 <mat-label class="leading-6 font-bold text-lg">GERENCIA</mat-label>
                                 <div class="flex sm:items-center">
                                     <mat-icon [svgIcon]="'heroicons_solid:mail'"></mat-icon>
                                     <div class="ml-6 leading-6">{{organization.gerencia}}</div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </ng-container>
+                </div>
+                <div class="mt-3 text-lg font-bold truncate">DATOS PRESUPUESTO</div>
+                <div class="flex flex-col mt-4 pt-6 border-t space-y-4">
+                    <ng-container class="border-t">
+                        <div class="flex text-primary">
+                            <div class="w-full boby-mat-dense flex-auto gt-xs:pr-1" appearance="fill">
+                                <mat-label class="leading-6 font-bold text-lg">CENTRO COSTO</mat-label>
+                                <div class="flex sm:items-center">
+                                    <mat-icon [svgIcon]="'heroicons_solid:globe'"></mat-icon>
+                                    <div class="ml-6 leading-6">{{organization.desc_tcc}}</div>
+                                </div>
+                            </div>
+
+                            <div class="w-full boby-mat-dense flex-auto gt-xs:pr-1 ml-2 sm:ml-2" appearance="fill">
+                                <mat-label class="leading-6 font-bold text-lg">CATEGORIA</mat-label>
+                                <div class="flex sm:items-center">
+                                    <mat-icon [svgIcon]="'heroicons_solid:globe'"></mat-icon>
+                                    <div class="ml-6 leading-6">{{organization.codigo_categoria}}</div>
                                 </div>
                             </div>
 
@@ -273,7 +297,7 @@
                                         <input matInput [formControlName]="'nombre_unidad'">
                                     </mat-form-field>
 
-                                    <mat-form-field class="w-full boby-mat-dense flex-auto gt-xs:pr-3 ml-2 sm:ml-4" appearance="fill">
+                                    <mat-form-field class="w-full boby-mat-dense flex-auto gt-xs:pr-3 ml-2 sm:ml-2" appearance="fill">
                                         <mat-label>Descripción</mat-label>
                                         <mat-icon
                                             matPrefix
@@ -300,7 +324,7 @@
                                         <input matInput [formControlName]="'nombre_cargo'">
                                     </mat-form-field>
 
-                                    <mat-form-field class="w-full boby-mat-dense flex-auto gt-xs:pr-3 ml-2 sm:ml-4" appearance="fill">
+                                    <mat-form-field class="w-full boby-mat-dense flex-auto gt-xs:pr-3 ml-2 sm:ml-2" appearance="fill">
                                         <mat-label>Cargo Individual</mat-label>
                                         <mat-icon
                                             matPrefix
@@ -334,7 +358,7 @@
                                         </mat-select>
                                     </mat-form-field>
 
-                                    <mat-form-field class="w-full boby-mat-dense flex-auto gt-xs:pr-3 ml-2 sm:ml-4" appearance="fill">
+                                    <mat-form-field class="w-full boby-mat-dense flex-auto gt-xs:pr-3 ml-2 sm:ml-2" appearance="fill">
                                         <mat-label>Nodo Base</mat-label>
                                         <mat-icon
                                             matPrefix
@@ -368,7 +392,7 @@
                                         </mat-select>
                                     </mat-form-field>
 
-                                    <mat-form-field class="w-full boby-mat-dense flex-auto gt-xs:pr-3 ml-2 sm:ml-4" appearance="fill">
+                                    <mat-form-field class="w-full boby-mat-dense flex-auto gt-xs:pr-3 ml-2 sm:ml-2" appearance="fill">
                                         <mat-label>Gerencia</mat-label>
                                         <mat-icon
                                             matPrefix

@@ -3,7 +3,8 @@ import { Observable, of, from, BehaviorSubject } from "rxjs";
 import {switchMap, map, tap, catchError} from "rxjs/operators";
 import { ApiErpService } from '../../../core/api-erp/api-erp.service';
 import { LeafNode, LoadMoreNode, TodoItemNode } from "../human-talent/human-talent.types";
-import {HttpHeaders} from "@angular/common/http";
+import {HttpClient, HttpHeaders} from "@angular/common/http";
+import {Validators} from "@angular/forms";
 @Injectable({
   providedIn: 'root'
 })
@@ -18,6 +19,8 @@ export class HumanTalentService {
 
     private _organization: BehaviorSubject<any[] | null> = new BehaviorSubject(null);
 
+    private _selectedNode$: BehaviorSubject<any[] | null> = new BehaviorSubject(null);
+
     batchNumber = 100;
 
     _orgaStructure = new BehaviorSubject<LoadMoreNode[]>([]);
@@ -25,6 +28,22 @@ export class HumanTalentService {
     treeNodeMap = new Map<string, TodoItemNode>();
 
     _orgaChartData = new BehaviorSubject< any >([]);
+    private _statusOrga: BehaviorSubject<any | null> = new BehaviorSubject('');
+    /**
+     * Getter for orga chart data
+     */
+    get selectedNode$(): Observable<any[]>
+    {
+        return this._selectedNode$.asObservable();
+    }
+
+    /**
+     * Getter for orga chart data
+     */
+    set selectedNode(value)
+    {
+        this._selectedNode$.next(value);
+    }
 
     /**
      * Getter for orga chart data
@@ -56,6 +75,22 @@ export class HumanTalentService {
 
     get data(): TodoItemNode[] {
         return this.dataChange.value;
+    }
+
+    /**
+     * Setter for status orga
+     */
+    set statusOrga(value)
+    {
+        this._statusOrga.next(value);
+    }
+
+    /**
+     * Getter for status orga
+     */
+    get statusOrga$(): Observable<any>
+    {
+        return this._statusOrga.asObservable();
     }
 
     initialize() {
@@ -159,7 +194,10 @@ export class HumanTalentService {
     }
 
     /************************************ TREE REFACTOR ************************************/
-    constructor(private _apiErp:ApiErpService) {
+    constructor(
+        private _apiErp:ApiErpService,
+        private _httpClient: HttpClient
+    ) {
         //this.initialize();
     }
 
@@ -1854,6 +1892,35 @@ export class HumanTalentService {
 
     }
 
+    /**
+     * Post orga
+     */
+    createOrga(): Observable<any>
+    {
+        return from(this._apiErp.post('organigrama/Uo/getOrgaId', {})).pipe(
+            switchMap((resp: any) => {
+                const newOrga = {
+                    id_uo: resp.data.id_uo,
+                    codigo: '',
+                    id_nivel_organizacional: '',
+                    nombre_unidad: '',
+                    descripcion: '',
+                    nombre_cargo: '',
+                    cargo_individual: '',
+                    presupuesta: '',
+                    nodo_base: '',
+                    correspondencia: '',
+                    gerencia: ''
+                };
+                // Update the organizations with the new organization
+                //this._items.next([newItem, ...this._items.getValue()]);
+                // Return the new organization
+                return of(newOrga);
+            })
+        );
+
+    }
+
     /*searchOrganizationChart( query ): Observable <any []>{
         from(this._apiErp.post(
             'organigrama/EstructuraUo/listarEstructuraUo',
@@ -1893,35 +1960,64 @@ export class HumanTalentService {
         return of([]);
     }*/
 
-    searchOrganizationChart( query ): void{
+    searchOrganizationChart( query ): Observable<any>{
 
         if ( this._orgaStructure.getValue().length > 0 ){
             this.nodeMap.clear();
             this._orgaStructure.next([]);
         }
+        return this._httpClient.get<any[]>('api/apps/human-talent/searchOrganizationChart',{params: {query}}).pipe(
+            tap((response: any) => {
+                for( let index = 0 ; index < response.datos.length ; index++ ) {
 
-        from(this._apiErp.post(
+                    if ( index == 0 ){
+                        const orgaStructure = this._generateNode(response.datos[index]);
+
+                        this._orgaStructure.next([orgaStructure]);
+                    }else {
+                        if (!this.nodeMap.has(response.datos[index-1].id_uo)) {
+                            return;
+                        }
+
+                        const parent = this.nodeMap.get(response.datos[index-1].id_uo)!;
+
+                        if (parent.children!.length > 0) {
+                            return;
+                        }
+
+                        const nodes = this._generateNode(response.datos[index]);
+
+                        parent.childrenChange.next([nodes]);
+
+                        this._orgaStructure.next(this._orgaStructure.value);
+                    }
+                }
+            })
+        );
+
+        /*from(this._apiErp.post(
             'organigrama/EstructuraUo/searchOrganizationChart',
             { query }
         )).subscribe(( response: any )=>{
-            for( let index = 0 ; index < response.datos.length ; index++ ) {
+            const datos = JSON.parse(response.data.orga_json);
+            for( let index = 0 ; index < datos.length ; index++ ) {
 
                 if ( index == 0 ){
-                    const orgaStructure = this._generateNode(response.datos[index]);
+                    const orgaStructure = this._generateNode(datos[index]);
 
                     this._orgaStructure.next([orgaStructure]);
                 }else {
-                    if (!this.nodeMap.has(response.datos[index-1].id_uo)) {
+                    if (!this.nodeMap.has(datos[index-1].id_uo)) {
                         return;
                     }
 
-                    const parent = this.nodeMap.get(response.datos[index-1].id_uo)!;
+                    const parent = this.nodeMap.get(datos[index-1].id_uo)!;
 
                     if (parent.children!.length > 0) {
                         return;
                     }
 
-                    const nodes = this._generateNode(response.datos[index]);
+                    const nodes = this._generateNode(datos[index]);
 
                     parent.childrenChange.next([nodes]);
 
@@ -1929,7 +2025,7 @@ export class HumanTalentService {
                 }
             }
 
-        });
+        });*/
     }
 
     /**
@@ -2039,7 +2135,6 @@ export class HumanTalentService {
      */
     postUnitOrder(node): Observable<any>
     {
-        console.warn('postUnitOrder',node);
         return from(this._apiErp.post(
             'organigrama/EstructuraUo/postUnitOrder',
             {node: JSON.stringify(node)}
@@ -2049,5 +2144,20 @@ export class HumanTalentService {
             })
         );
 
+    }
+
+    loadCargoPresupuesto(id_uo){
+        return from(this._apiErp.post(
+            'organigrama/Cargo/loadCargoPresupuesto',
+            {id_uo: id_uo}
+        )).pipe(
+            switchMap((response: any) => {
+                return of(response.data)
+            })
+        );
+    }
+
+    postOrganization(orga, statusOrga): Observable<any>{
+        return of('');
     }
 }

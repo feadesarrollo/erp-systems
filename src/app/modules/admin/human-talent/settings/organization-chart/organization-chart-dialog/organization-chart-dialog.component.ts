@@ -13,12 +13,14 @@ import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { BobyMediaWatcherService } from "../../../../../../../@boby/services/media-watcher";
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import {ActivatedRoute} from "@angular/router";
+import {HumanTalentService} from "../../../human-talent.service";
 
 @Component({
     selector: 'erp-organization-chart-dialog',
     templateUrl: './organization-chart-dialog.component.html',
-    styleUrls: ['./organization-chart-dialog.component.scss'],
-    /*encapsulation  : ViewEncapsulation.None,
+    /*styleUrls: ['./organization-chart-dialog.component.scss'],
+    encapsulation  : ViewEncapsulation.None,
     changeDetection: ChangeDetectionStrategy.OnPush*/
 })
 export class OrganizationChartDialogComponent implements OnInit {
@@ -27,20 +29,25 @@ export class OrganizationChartDialogComponent implements OnInit {
     drawerMode: 'over' | 'side' = 'side';
     drawerOpened: boolean = true;
     filter$: BehaviorSubject<string> = new BehaviorSubject('item');
-    organizationDetail: any = {};
+    public id_uo: any = {};
     orgaChart: any;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
     constructor(
-        @Inject(MAT_DIALOG_DATA) public _data: any,
-        public matDialogRef: MatDialogRef<OrganizationChartDialogComponent>,
         private _changeDetectorRef: ChangeDetectorRef,
-        private _fuseMediaWatcherService: BobyMediaWatcherService
+        private _fuseMediaWatcherService: BobyMediaWatcherService,
+        private _activatedRoute: ActivatedRoute,
+        private _htService: HumanTalentService
     ) { }
 
     ngOnInit(): void {
 
-        this.orgaChart = this._data.node;
+        this.id_uo = this._activatedRoute.snapshot.paramMap.get('id');
 
+        this._htService.selectedNode$.subscribe(
+            (selected) =>{
+                this.orgaChart = selected;
+            }
+        );
         // Subscribe to media changes
         this._fuseMediaWatcherService.onMediaChange$
             .pipe(takeUntil(this._unsubscribeAll))
@@ -87,14 +94,5 @@ export class OrganizationChartDialogComponent implements OnInit {
     get filterProcess(): string
     {
         return this.filter$.value;
-    }
-
-    /**
-     * close
-     */
-    Close(): void
-    {
-        // Close the dialog
-        this.matDialogRef.close();
     }
 }

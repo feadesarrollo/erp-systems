@@ -85,6 +85,14 @@ import { SummativeProcessesComponent } from './processes/ticket-request/summativ
 import { SummativeProcessesListComponent } from './processes/ticket-request/summative-processes/summative-processes-list/summative-processes-list.component';
 import { SummativeProcessesDetailsComponent } from './processes/ticket-request/summative-processes/summative-processes-details/summative-processes-details.component';
 import { ItemHistoryComponent } from './processes/ticket-request/organization-chart-ticket/item-history/item-history.component';
+import { OrganizationChartItemDialogComponent } from './settings/organization-chart/organization-chart-item/organization-chart-item-dialog/organization-chart-item-dialog.component';
+import { OrganizationChartItemDetailsComponent } from './settings/organization-chart/organization-chart-item-details/organization-chart-item-details.component';
+import { FileManagerComponent } from './settings/file-manager/file-manager.component';
+import { FileManagerListComponent } from './settings/file-manager/file-manager-list/file-manager-list.component';
+import { FileManagerDetailsComponent } from './settings/file-manager/file-manager-details/file-manager-details.component';
+import { FileManagerViewComponent } from './settings/file-manager/file-manager-view/file-manager-view.component';
+
+import { EditorModule, TINYMCE_SCRIPT_SRC  } from '@tinymce/tinymce-angular';
 
 @NgModule({
     declarations: [
@@ -127,7 +135,13 @@ import { ItemHistoryComponent } from './processes/ticket-request/organization-ch
         SummativeProcessesComponent,
         SummativeProcessesListComponent,
         SummativeProcessesDetailsComponent,
-        ItemHistoryComponent
+        ItemHistoryComponent,
+        OrganizationChartItemDialogComponent,
+        OrganizationChartItemDetailsComponent,
+        FileManagerComponent,
+        FileManagerListComponent,
+        FileManagerDetailsComponent,
+        FileManagerViewComponent
     ],
     imports: [
         RouterModule.forChild(humanTalentRoutes),
@@ -173,8 +187,13 @@ import { ItemHistoryComponent } from './processes/ticket-request/organization-ch
         TreeModule,
         OrganizationChartModule,
         ToastModule,
-        PanelModule
+        PanelModule,
+        EditorModule
     ],
-    providers: [MessageService, TreeDragDropService]
+    providers: [
+        MessageService,
+        TreeDragDropService,
+        { provide: TINYMCE_SCRIPT_SRC, useValue: 'tinymce/tinymce.min.js' }
+    ]
 })
 export class HumanTalentModule { }

@@ -178,18 +178,21 @@ export class HumanTalentApi
                 return from(this._apiErp.post('organigrama/Cargo/listarCargo', {
                     id_uo:  request.params.get('id_uo'),
                     start:  request.params.get('start'),
-                    limit:  request.params.get('limit')
+                    limit:  request.params.get('limit'),
+                    sort: request.params.get('sort'),
+                    dir: request.params.get('dir'),
+                    query: request.params.get('query')
                 })).pipe(map((response: any) => {
 
                     const page = parseInt(request.params.get('page') ?? '0', 10);
-                    const size = parseInt(request.params.get('size') ?? '10', 10);
+                    const size = parseInt(request.params.get('size') ?? '50', 10);
 
-                    console.warn('response',response);
                     // Clone the items
                     let items: any[] | null = response.datos;
 
                     // Paginate - Start
                     const itemsLength = response.total;
+                    const total = response.total;
 
                     // Calculate pagination details
                     const begin = page * size;
@@ -226,7 +229,8 @@ export class HumanTalentApi
                     // Return a success code along with some data
                     return [200, {
                         items,
-                        pagination
+                        pagination,
+                        total
                     }];
                 }));
             });
@@ -384,5 +388,191 @@ export class HumanTalentApi
                 }));
             });
 
+        this._bobyApiService
+            .onGet('api/apps/human-talent/searchOrganizationChart')
+            .reply(({request}) => {
+                return from(this._apiErp.post('organigrama/EstructuraUo/searchOrganizationChart', {
+                    query: request.params.get('query')
+                })).pipe(map((response: any) => {
+                    const datos = JSON.parse(response.data.orga_json);
+                    // Return a success code along with some data
+                    return [200, {datos}];
+                }));
+            });
+
+        this._bobyApiService
+            .onGet('api/apps/human-talent/getAllocations')
+            .reply(({request}) => {
+
+                return from(this._apiErp.post('organigrama/UoFuncionario/listarUoFuncionario', {
+                    id_uo:  request.params.get('id_uo'),
+                    start:  request.params.get('start'),
+                    limit:  request.params.get('limit'),
+                    status:  request.params.get('status')
+                })).pipe(map((response: any) => {
+
+                    const page = parseInt(request.params.get('page') ?? '0', 10);
+                    const size = parseInt(request.params.get('size') ?? '10', 10);
+
+                    // Clone the items
+                    let items: any[] | null = response.datos;
+
+                    // Paginate - Start
+                    const itemsLength = response.total;
+
+                    // Calculate pagination details
+                    const begin = page * size;
+                    const end = Math.min((size * (page + 1)), itemsLength);
+                    const lastPage = Math.max(Math.ceil(itemsLength / size), 1);
+
+                    // Prepare the pagination object
+                    let pagination = {};
+
+                    // If the requested page number is bigger than
+                    // the last possible page number, return null for
+                    // products but also send the last possible page so
+                    // the app can navigate to there
+                    if ( page > lastPage ) {
+                        items = null;
+                        pagination = {
+                            lastPage
+                        };
+                    } else {
+                        // Paginate the results by size
+                        items = items.slice(begin, end);
+
+                        // Prepare the pagination mock-api
+                        pagination = {
+                            length    : itemsLength,
+                            size      : size,
+                            page      : page,
+                            lastPage  : lastPage,
+                            startIndex: begin,
+                            endIndex  : end - 1
+                        };
+                    }
+
+                    // Return a success code along with some data
+                    return [200, {
+                        items,
+                        pagination
+                    }];
+                }));
+            });
+
+        this._bobyApiService
+            .onPost('api/apps/human-talent/postItem')
+            .reply(({request}) => {
+                //console.warn('request.body',request.body);
+                return from(this._apiErp.post('organigrama/Cargo/insertarCargo', {
+                    id_cargo : request.body.statusItem == 'new' ? '' : request.body.id_cargo,
+                    id_tipo_contrato : request.body.id_tipo_contrato,
+                    id_oficina : request.body.id_oficina,
+                    id_uo : request.body.id_uo,
+                    id_temporal_cargo : request.body.id_temporal_cargo,
+                    id_escala_salarial : request.body.id_escala_salarial,
+                    codigo : request.body.codigo,
+                    fecha_ini : /*moment.utc(*/request.body.fecha_ini/*).format('DD/MM/YYYY')*/,
+                    fecha_fin : /*moment.utc(*/request.body.fecha_fin/*).format('DD/MM/YYYY')*/,
+
+                    id_gestion : request.body.id_gestion,
+                    id_centro_costo : request.body.id_centro_costo,
+                    id_ot : request.body.id_ot,
+                    porcentaje : request.body.porcentaje,
+                    fecha_ini_cc : /*moment.utc(*/request.body.fecha_ini_cc/*).format('DD/MM/YYYY')*/,
+                    fecha_fin_cc : /*moment.utc(*/request.body.fecha_fin_cc/*).format('DD/MM/YYYY')*/
+                })).pipe(map((response) => {
+                    // Return a success code along with some data
+                    return [200, response];
+                }));
+            });
+
+        this._bobyApiService
+            .onGet('api/apps/human-talent/getTemplateFile')
+            .reply(({request}) => {
+
+                return from(this._apiErp.post('organigrama/TipoDocumentoContrato/getTemplateFile', {})).pipe(map((response:any) => {
+
+                    // Clone the items
+                    let djson = JSON.parse(response.datos[0].djson);
+                    let items = djson;
+
+                    // See if a folder id exist
+                    const folderId = request.params.get('folderId') === 'null' ? null : request.params.get('folderId');
+
+                    // Filter the items by folder id. If folder id is null,
+                    // that means we want to root items which have folder id
+                    // of null
+                    items = items.filter(item => item.json_template.folderId === folderId);
+
+                    // Separate the items by folders and files
+                    const folders = items.filter(item => item.json_template.type === 'carpeta');
+                    const files = items.filter(item => item.json_template.type !== 'carpeta');
+
+                    // Sort the folders and files alphabetically by filename
+                    folders.sort((a, b) => a.json_template.name.localeCompare(b.json_template.name));
+                    files.sort((a, b) => a.json_template.name.localeCompare(b.json_template.name));
+
+                    // Figure out the path and attach it to the response
+                    // Prepare the empty paths array
+                    const pathItems = djson;
+                    const path = [];
+
+                    // Prepare the current folder
+                    let currentFolder = null;
+                    // Get the current folder and add it as the first entry
+                    if ( folderId )
+                    {
+                        currentFolder = pathItems.find(item => item.json_template.id === folderId);
+                        path.push(currentFolder);
+                    }
+
+                    // Start traversing and storing the folders as a path array
+                    // until we hit null on the folder id
+                    while ( currentFolder?.folderId )
+                    {
+                        currentFolder = pathItems.find(item => item.json_template.id === currentFolder.folderId);
+                        if ( currentFolder )
+                        {
+                            path.unshift(currentFolder);
+                        }
+                    }
+
+                    // Return a success code along with some data
+                    return [200,
+                        {
+                            folders,
+                            files,
+                            path
+                        }
+                    ];
+                }));
+            });
+
+        this._bobyApiService
+            .onPost('api/apps/human-talent/postTemplateFile')
+            .reply(({request}) => {
+
+                return from(this._apiErp.post('organigrama/TipoDocumentoContrato/postTemplateFile', {file:JSON.stringify(request.body)})).pipe(map((response) => {
+                    // Return a success code along with some data
+                    return [200, response];
+                }));
+            });
+
+        this._bobyApiService
+            .onDelete('api/apps/human-talent/deleteTemplateFile')
+            .reply(({request}) => {
+
+                // Get the id
+                const id_template = request.params.get('id_template');
+
+                return from(this._apiErp.post('organigrama/TipoDocumentoContrato/deleteTemplateFile', {id_template})).pipe(map((response) => {
+                    // Return a success code along with some data
+                    return [200, response];
+                }));
+            });
+
     }
+
+
 }

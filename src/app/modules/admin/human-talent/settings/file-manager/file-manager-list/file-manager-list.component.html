@@ -1,0 +1,185 @@
+<div class="absolute inset-0 flex flex-col min-w-0 overflow-hidden">
+
+    <mat-drawer-container
+        class="flex-auto h-full bg-card dark:bg-transparent"
+        (backdropClick)="onBackdropClicked()">
+
+        <!-- Drawer -->
+        <mat-drawer
+            class="w-full sm:w-100 dark:bg-gray-900"
+            [mode]="drawerMode"
+            [opened]="false"
+            [position]="'end'"
+            [disableClose]="true"
+            #matDrawer>
+            <router-outlet></router-outlet>
+        </mat-drawer>
+
+        <mat-drawer-content class="flex flex-col bg-gray-100 dark:bg-transparent">
+
+            <!-- Main -->
+            <div class="flex flex-col flex-auto">
+
+                <!-- Header -->
+                <div class="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between p-6 sm:py-12 md:px-8 border-b bg-card dark:bg-transparent">
+                    <!-- Title -->
+                    <div>
+                        <div class="text-4xl font-extrabold tracking-tight leading-none">Administrador de Archivos</div>
+
+                        <div class="flex items-center mt-0.5 font-medium text-secondary">
+                            <ng-container *ngIf="!items.path.length">
+                                {{items.folders.length}} carpetas, {{items.files.length}} archivos
+                            </ng-container>
+                            <!-- Breadcrumbs -->
+                            <ng-container *ngIf="items.path.length">
+                                <div class="flex items-center space-x-2">
+                                    <a
+                                        class="text-primary cursor-pointer"
+                                        [routerLink]="['../../']">Inicio
+                                    </a>
+                                    <div class="">/</div>
+                                    <ng-container *ngFor="let path of items.path; let last = last; trackBy: trackByFn">
+                                        <ng-container *ngIf="!last">
+                                            <a
+                                                class="text-primary cursor-pointer"
+                                                [routerLink]="['/apps/file-manager/folders/', path.json_template.id]">{{path.json_template.name}}</a>
+                                        </ng-container>
+                                        <ng-container *ngIf="last">
+                                            <div>{{path.json_template.name}}</div>
+                                        </ng-container>
+                                        <ng-container *ngIf="!last">
+                                            <div class="">/</div>
+                                        </ng-container>
+                                    </ng-container>
+                                </div>
+                            </ng-container>
+                        </div>
+
+                    </div>
+                    <!-- Actions -->
+                    <div class="mt-4 sm:mt-0">
+                        <!-- Upload button -->
+                        <button
+                            mat-flat-button
+                            [color]="'primary'"
+                            (click)="newTemplateFile('folder')">
+                            <mat-icon [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
+                            <span class="ml-2 mr-1">Nuevo archivo</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Items list -->
+                <ng-container *ngIf="items && (items.folders.length > 0 || items.files.length > 0); else noItems">
+                    <div class="p-6 md:p-8 space-y-8">
+                        <!-- Folders -->
+                        <ng-container *ngIf="items.folders.length > 0">
+                            <div>
+                                <div class="font-medium">Carpetas</div>
+                                <div
+                                    class="flex flex-wrap -m-2 mt-2">
+                                    <ng-container *ngFor="let folder of items.folders; trackBy:trackByFn">
+                                        <div class="relative w-40 h-40 m-2 p-4 shadow rounded-2xl bg-card">
+                                            <!--<ng-container *ngIf="selected === true">
+                                                <mat-icon
+                                                    class="absolute top-0 right-0 mt-3 mr-3 icon-size-7 text-primary"
+                                                    [svgIcon]="'heroicons_solid:check-circle'"></mat-icon>
+                                            </ng-container>-->
+                                            <a
+                                                class="absolute z-20 top-1.5 right-1.5 w-8 h-8 min-h-8"
+                                                (click)="$event.preventDefault()"
+                                                [routerLink]="['./details/', folder.json_template.id]"
+                                                mat-icon-button>
+                                                <mat-icon
+                                                    class="icon-size-5"
+                                                    [svgIcon]="'heroicons_solid:information-circle'"></mat-icon>
+                                            </a>
+                                            <a
+                                                class="z-10 absolute inset-0 flex flex-col p-4 cursor-pointer"
+                                                [routerLink]="['./folders/', folder.json_template.id]">
+                                                <div class="aspect-w-9 aspect-h-6">
+                                                    <div class="flex items-center justify-center">
+                                                        <!-- Icon -->
+                                                        <mat-icon
+                                                            class="icon-size-14 text-hint"
+                                                            [svgIcon]="'iconsmind:folder'"></mat-icon>
+                                                    </div>
+                                                </div>
+                                                <div class="flex flex-col flex-auto justify-center text-center text-sm font-medium">
+                                                    <div
+                                                        class="truncate"
+                                                        [matTooltip]="folder.json_template.name">{{folder.json_template.name}}</div>
+                                                    <!--<ng-container *ngIf="folder.contents">
+                                                        <div class="text-secondary truncate">{{folder.contents}}</div>
+                                                    </ng-container>-->
+                                                </div>
+                                            </a>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </ng-container>
+
+                        <!-- Files -->
+                        <ng-container *ngIf="items.files.length > 0">
+                            <div>
+                                <div class="font-medium">Archivos</div>
+                                <div
+                                    class="flex flex-wrap -m-2 mt-2">
+                                    <ng-container *ngFor="let file of items.files; trackBy:trackByFn">
+                                        <a
+                                            class="flex flex-col w-40 h-40 m-2 p-4 shadow rounded-2xl cursor-pointer bg-card"
+                                            [routerLink]="['./details/', file.json_template.id]">
+                                            <div class="aspect-w-9 aspect-h-6">
+                                                <div class="flex items-center justify-center">
+                                                    <!-- Icons -->
+                                                    <div class="relative">
+                                                        <mat-icon
+                                                            class="icon-size-14 text-hint"
+                                                            [svgIcon]="'iconsmind:file'"></mat-icon>
+                                                        <div
+                                                            class="absolute left-0 bottom-0 px-1.5 rounded text-sm font-semibold leading-5 text-white"
+                                                            [class.bg-red-600]="file.json_template.format === 'pdf'"
+                                                            [class.bg-blue-600]="file.json_template.format === 'doc'"
+                                                            [class.bg-blue-600]="file.json_template.format === 'docx'"
+                                                            [class.bg-green-600]="file.json_template.format === 'xls'"
+                                                            [class.bg-gray-600]="file.json_template.format === 'txt'"
+                                                            [class.bg-amber-600]="file.json_template.format === 'jpg'">
+                                                            {{file.json_template.format.toUpperCase()}}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="flex flex-col flex-auto justify-center text-center text-sm font-medium">
+                                                <div
+                                                    class="truncate"
+                                                    [matTooltip]="file.json_template.name">{{file.json_template.name}}</div>
+                                                <ng-container *ngIf="file.json_template.contents">
+                                                    <div class="text-secondary truncate">{{file.json_template.contents}}</div>
+                                                </ng-container>
+                                            </div>
+                                        </a>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </ng-container>
+                    </div>
+                </ng-container>
+
+                <!-- No items template -->
+                <ng-template #noItems>
+                    <div class="flex flex-auto flex-col items-center justify-center bg-gray-100 dark:bg-transparent">
+                        <mat-icon
+                            class="icon-size-24"
+                            [svgIcon]="'iconsmind:file_hide'"></mat-icon>
+                        <div class="mt-4 text-2xl font-semibold tracking-tight text-secondary">No hay elementos!</div>
+                    </div>
+                </ng-template>
+
+            </div>
+
+        </mat-drawer-content>
+
+    </mat-drawer-container>
+
+</div>

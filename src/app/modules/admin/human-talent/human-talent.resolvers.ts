@@ -4,6 +4,7 @@ import { HumanTalentService } from './human-talent.service';
 import { catchError, Observable, throwError, of } from 'rxjs';
 import { switchMap } from "rxjs/operators";
 import { PermissionsService } from "./permissions/permissions.service";
+import {OrganizationChartService} from "./settings/organization-chart/organization-chart.service";
 
 @Injectable({
     providedIn: 'root'
@@ -219,4 +220,84 @@ export class OrganizationChartResolver implements Resolve<any>
     }
 }
 
+@Injectable({
+    providedIn: 'root'
+})
+export class ItemsResolver implements Resolve<any>
+{
+    /**
+     * Constructor
+     */
+    constructor(
+        private _organizationService:  OrganizationChartService,
+        private _router: Router
+    )
+    {
+    }
+
+    // -----------------------------------------------------------------------------------------------------
+    // @ Public methods
+    // -----------------------------------------------------------------------------------------------------
+
+    /**
+     * Resolver
+     *
+     * @param route
+     * @param state
+     */
+    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<any>
+    {
+        console.warn('route',route);
+        return this._organizationService.getItems(route.paramMap.get('id'),0,7,'codigo','asc','');
+    }
+}
+
+@Injectable({
+    providedIn: 'root'
+})
+export class ItemDetailResolver implements Resolve<any>
+{
+    /**
+     * Constructor
+     */
+    constructor(
+        private _organizationService:  OrganizationChartService,
+        private _router: Router
+    )
+    {
+    }
+
+    // -----------------------------------------------------------------------------------------------------
+    // @ Public methods
+    // -----------------------------------------------------------------------------------------------------
+
+    /**
+     * Resolver
+     *
+     * @param route
+     * @param state
+     */
+    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<any>
+    {
+        return this._organizationService.getItemById(route.paramMap.get('id'))
+            .pipe(
+                // Error here means the requested contact is not available
+                catchError((error) => {
+
+                    // Log the error
+                    console.error(error);
+
+                    // Get the parent url
+                    const parentUrl = state.url.split('/').slice(0, -1).join('/');
+
+                    console.error('parentUrl',parentUrl);
+                    // Navigate to there
+                    this._router.navigateByUrl(parentUrl);
+
+                    // Throw an error
+                    return throwError(error);
+                })
+            );
+    }
+}
 

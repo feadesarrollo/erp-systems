@@ -54,8 +54,17 @@
                         mat-flat-button
                         [color]="'primary'"
                         [matTooltip]="'Nueva Unidad'"
-                        [routerLink]="['./', 0]">
+                        (click)="createOrga()">
                         <mat-icon [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
+                    </button>
+
+                    <button
+                        class="ml-2 rounded-lg"
+                        mat-flat-button
+                        [color]="'primary'"
+                        [matTooltip]="'Actualizar'"
+                        (click)="refreshOrga('refresh')">
+                        <mat-icon [svgIcon]="'heroicons_outline:refresh'"></mat-icon>
                     </button>
 
                 </div>
@@ -72,14 +81,16 @@
 
                         <ng-container matColumnDef="accion">
                             <mat-header-cell *matHeaderCellDef class="min-w-20">Acciones</mat-header-cell>
-                            <mat-cell *matCellDef="let row" (click)="redirect(row)" class="min-w-20" [ngClass]="{ 'text-primary-800 bg-primary-100 dark:text-primary-50 dark:bg-primary-500': row === selectedNode }">
+                            <mat-cell *matCellDef="let row" class="min-w-20" [ngClass]="{ 'text-primary-800 bg-primary-100 dark:text-primary-50 dark:bg-primary-500': row === selectedNode }">
 
                                 <button
                                     class="ml-1 -mr-4"
                                     mat-icon-button
-                                    (click)="selectedNode = row"
-                                    [matMenuTriggerFor]="chatsHeaderMenu">
-                                    <mat-icon class="cursor-move" (mousedown)="dragDisabled = false;">reorder</mat-icon>
+                                    (click)="selected(row)"
+                                    [matMenuTriggerFor]="chatsHeaderMenu"
+                                    *ngIf="row.item['nodo_base']=='no'">
+                                    <!--cursor-move-->
+                                    <mat-icon class="cursor-pointer" (mousedown)="dragDisabled = false;">reorder</mat-icon>
 
                                     <mat-menu #chatsHeaderMenu>
                                         <button mat-menu-item
@@ -124,7 +135,7 @@
                         <ng-container matColumnDef="icono">
                             <mat-header-cell *matHeaderCellDef class="min-w-96">
                             </mat-header-cell>
-                            <mat-cell *matCellDef="let row" cdkDrag class="min-w-96" (click)="redirect(row)" [ngClass]="{ 'text-primary-800 bg-primary-100 dark:text-primary-50 dark:bg-primary-500': row === selectedNode }">
+                            <mat-cell *matCellDef="let row" (click)="selected(row)" cdkDrag class="min-w-96"  [ngClass]="{ 'text-primary-800 bg-primary-100 dark:text-primary-50 dark:bg-primary-500': row === selectedNode }">
 
                                 <mat-icon [style.marginLeft.px]="row.level * 16" class="mat-icon-rtl-mirror" *ngIf="!row.expandable">
                                     {{'person'}}

@@ -17,12 +17,20 @@ import { PermissionsDetailsComponent } from "./permissions/permissions-details/p
 import { ClassifiersComponent } from "./classifiers/classifiers.component";
 import { PermissionResolver, PermissionsResolver } from "./permissions/permissions.resolvers";
 import { CanDeactivatePermissionsDetails } from './permissions/permissions.guards';
-import {OrganizationChartResolver, OrganizationChartsResolver, RoleResolver} from './human-talent.resolvers';
+import {
+    ItemDetailResolver, ItemsResolver,
+    OrganizationChartResolver,
+    OrganizationChartsResolver,
+    RoleResolver
+} from './human-talent.resolvers';
 import { OrganizationChartTicketComponent } from "./processes/ticket-request/organization-chart-ticket/organization-chart-ticket.component";
 import {OrganigramaComponent} from "./processes/organigrama/organigrama.component";
 import {OrganizationChartListComponent} from "./settings/organization-chart/organization-chart-list/organization-chart-list.component";
 import {OrganizationChartDetailsComponent} from "./settings/organization-chart/organization-chart-details/organization-chart-details.component";
-import {CanDeactivateOrganizationChartsDetails} from "./settings/organization-chart/organization-chart.guards";
+import {
+    CanDeactivateItemDetail,
+    CanDeactivateOrganizationChartsDetails
+} from "./settings/organization-chart/organization-chart.guards";
 import {SummativeProcessesComponent} from "./processes/ticket-request/summative-processes/summative-processes.component";
 import {SummativeProcessesListComponent} from "./processes/ticket-request/summative-processes/summative-processes-list/summative-processes-list.component";
 import {SummativeProcessesDetailsComponent} from "./processes/ticket-request/summative-processes/summative-processes-details/summative-processes-details.component";
@@ -34,6 +42,15 @@ import {CanDeactivateSummativesDetails} from "./processes/ticket-request/summati
 import {OrganizationComponent} from "./settings/organization/organization.component";
 import {OrgChartComponent} from "./org-chart/org-chart.component";
 import {OrganizationChartDialogComponent} from "./settings/organization-chart/organization-chart-dialog/organization-chart-dialog.component";
+import {OrganizationChartItemComponent} from "./settings/organization-chart/organization-chart-item/organization-chart-item.component";
+import {OrganizationChartAllocationComponent} from "./settings/organization-chart/organization-chart-allocation/organization-chart-allocation.component";
+import {OrganizationChartItemDetailsComponent} from "./settings/organization-chart/organization-chart-item-details/organization-chart-item-details.component";
+import {FileManagerComponent} from "./settings/file-manager/file-manager.component";
+import {FileManagerListComponent} from "./settings/file-manager/file-manager-list/file-manager-list.component";
+import {FileManagerDetailsComponent} from "./settings/file-manager/file-manager-details/file-manager-details.component";
+import {FileManagerFolderResolver, FileManagerItemsResolver, FileManagerItemResolver} from "./settings/file-manager/file-manager.resolvers";
+import {CanDeactivateFileManager} from "./settings/file-manager/file-manager.guards";
+
 
 export const humanTalentRoutes: Route[] = [
     {
@@ -97,22 +114,75 @@ export const humanTalentRoutes: Route[] = [
                         path     : '',
                         component: OrganizationChartListComponent,
                         resolve: {
-                            customers: OrganizationChartsResolver
+                            organizations: OrganizationChartsResolver
                         },
                         children : [
                             {
                                 path         : ':id',
                                 component    : OrganizationChartDetailsComponent,
-                                children:  [
-                                    {
-                                        path         : 'details',
-                                        component    : OrganizationChartDialogComponent,
-                                    }
-                                ],
                                 resolve: {
-                                    customer: OrganizationChartResolver
+                                    organization: OrganizationChartResolver
                                 },
                                 canDeactivate: [CanDeactivateOrganizationChartsDetails]
+                            }
+                        ]
+                    }
+                ]
+            },
+
+            {
+                path         : 'settings/organization/:id/details',
+                component    : OrganizationChartDialogComponent,
+                /*resolve: {
+                    items: ItemsResolver
+                },*/
+                children: [
+                    {
+                        path         : ':id',
+                        component    : OrganizationChartItemDetailsComponent,
+                        resolve: {
+                            item: ItemDetailResolver
+                        },
+                        canDeactivate: [CanDeactivateItemDetail]
+                    }
+                ]
+            },
+
+            {
+                path     : 'settings/file-manager',
+                component: FileManagerComponent,
+                children : [
+                    {
+                        path    : 'folders/:folderId',
+                        component: FileManagerListComponent,
+                        resolve : {
+                            items: FileManagerFolderResolver
+                        },
+                        children: [
+                            {
+                                path         : 'details/:id',
+                                component    : FileManagerDetailsComponent,
+                                resolve      : {
+                                    item: FileManagerItemResolver
+                                },
+                                canDeactivate: [CanDeactivateFileManager]
+                            }
+                        ]
+                    },
+                    {
+                        path     : '',
+                        component: FileManagerListComponent,
+                        resolve  : {
+                            items: FileManagerItemsResolver
+                        },
+                        children : [
+                            {
+                                path         : 'details/:id',
+                                component    : FileManagerDetailsComponent,
+                                resolve      : {
+                                    item: FileManagerItemResolver
+                                },
+                                canDeactivate: [CanDeactivateFileManager]
                             }
                         ]
                     }
