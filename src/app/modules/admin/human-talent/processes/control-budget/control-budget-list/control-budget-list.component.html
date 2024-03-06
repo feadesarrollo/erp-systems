@@ -1,0 +1,77 @@
+<div class="sm:absolute sm:inset-0 flex flex-col flex-auto min-w-0 sm:overflow-hidden bg-card dark:bg-transparent">
+    <div
+        class="relative flex self-start pt-2 pb-1 pl-5 pr-4 cursor-pointer overflow-hidden rounded-t-xl border border-b-0 bg-default"
+        matRipple
+        [matMenuTriggerFor]="projectsMenu">
+        <div class="flex items-center">
+            <div class="overflow-hidden">
+                <div class="font-medium leading-6 truncate">Inicio</div>
+            </div>
+            <div class="flex items-center justify-center pl-2">
+                <mat-icon
+                    class="icon-size-5"
+                    [svgIcon]="'heroicons_solid:chevron-down'"></mat-icon>
+            </div>
+        </div>
+        <mat-menu
+            #projectsMenu="matMenu"
+            [xPosition]="'before'">
+            <button
+                mat-menu-item
+                (click)="refresh()"
+                ><mat-icon svgIcon="mat_outline:refresh"></mat-icon>Actualizar
+            </button>
+            <button
+                mat-menu-item
+                [routerLink]="['/system/human-talent/modules']"><mat-icon svgIcon="mat_solid:menu_open"></mat-icon>Volver al Menu Principal
+            </button>
+
+        </mat-menu>
+    </div>
+<mat-drawer-container
+    class="flex-auto h-full bg-card dark:bg-transparent"
+    (backdropClick)="onBackdropClicked()">
+    <!-- Drawer -->
+    <mat-drawer
+        class="w-full md:w-100 dark:bg-gray-900"
+        [mode]="drawerMode"
+        [opened]="false"
+        [position]="'end'"
+        [disableClose]="true"
+        #matDrawer>
+        <router-outlet></router-outlet>
+    </mat-drawer>
+    <mat-drawer-content class="flex flex-col">
+        <p-treeTable class="overflow-y-auto" (onNodeExpand)="onNodeExpand($event)" [value]="organization" [columns]="cols" [reorderableColumns]="true"
+                     [resizableColumns]="true" columnResizeMode="expand" selectionMode="multiple" [reorderableColumns]="true" [lazy]="true"
+                     (onLazyLoad)="loadNodes($event)" [loading]="loading" (onNodeExpand)="onNodeExpand($event)" [frozenColumns]="frozenCols" [metaKeySelection]="true">
+
+            <ng-template pTemplate="caption">
+                <div style="text-align: right">
+                    <span class="p-input-icon-right">
+                        <i class="pi pi-search" (click)="searchFin($event.target.value)"></i>
+                        <input type="search" pInputText size="50" placeholder="Buscar por funcionario,item,nombre cargo" (keyup.enter)="searchFin($event.target.value)" style="width:auto">
+                    </span>
+                </div>
+            </ng-template>
+
+            <ng-template pTemplate="header" let-columns>
+                <tr>
+                    <th *ngFor="let col of columns" [style]="{'width': col.width}" ttResizableColumn ttReorderableColumn>
+                        {{col.header}}
+                    </th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-rowNode let-rowData="rowData" let-columns="columns">
+                <tr [ttRow]="rowNode" [ttSelectableRow]="rowNode" >
+                    <td *ngFor="let col of columns; let i = index" ttEditableColumn [style]="{'width': col.width}" (click)="col.field == 'centro' && redirect(rowNode)">
+                        <p-treeTableToggler [rowNode]="rowNode" *ngIf="i == 0"></p-treeTableToggler>
+                        {{rowData[col.field]}}
+                    </td>
+                </tr>
+            </ng-template>
+
+        </p-treeTable>
+    </mat-drawer-content>
+</mat-drawer-container>
+</div>

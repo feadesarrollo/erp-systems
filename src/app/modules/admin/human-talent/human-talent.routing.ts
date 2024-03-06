@@ -50,6 +50,11 @@ import {FileManagerListComponent} from "./settings/file-manager/file-manager-lis
 import {FileManagerDetailsComponent} from "./settings/file-manager/file-manager-details/file-manager-details.component";
 import {FileManagerFolderResolver, FileManagerItemsResolver, FileManagerItemResolver} from "./settings/file-manager/file-manager.resolvers";
 import {CanDeactivateFileManager} from "./settings/file-manager/file-manager.guards";
+import {ControlBudgetComponent} from "./processes/control-budget/control-budget.component";
+import {ControlBudgetListComponent} from "./processes/control-budget/control-budget-list/control-budget-list.component";
+import {ControlBudgetDetailsComponent} from "./processes/control-budget/control-budget-details/control-budget-details.component";
+import {BudgetResolver, BudgetsResolver} from "./processes/control-budget/control-budget.resolvers";
+import {CanDeactivateBudgetDetails} from "./processes/control-budget/control-budget.guards";
 
 
 export const humanTalentRoutes: Route[] = [
@@ -241,6 +246,30 @@ export const humanTalentRoutes: Route[] = [
                                     customer: SummativeResolver
                                 },
                                 canDeactivate: [CanDeactivateSummativesDetails]
+                            }
+                        ]
+                    }
+                ]
+            },
+
+            {
+                path: 'processes/control-budget',
+                component: ControlBudgetComponent,
+                children: [
+                    {
+                        path: '',
+                        component: ControlBudgetListComponent,
+                        /*resolve: {
+                            budgets: BudgetsResolver
+                        },*/
+                        children: [
+                            {
+                                path: ':id',
+                                component: ControlBudgetDetailsComponent,
+                                resolve: {
+                                    budget: BudgetResolver
+                                },
+                                canDeactivate: [CanDeactivateBudgetDetails]
                             }
                         ]
                     }

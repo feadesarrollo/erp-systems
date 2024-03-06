@@ -27,6 +27,7 @@ export class CustomerDetailsComponent implements OnInit {
 
     public listaExpedicion: any;
     public listaResidencia: any;
+    public listaNacionalidad: any;
 
     editMode: boolean = false;
     customer: any;
@@ -183,6 +184,9 @@ export class CustomerDetailsComponent implements OnInit {
                     case 'residencia':
                         this.listaResidencia = listaLugar;
                         break;
+                    case 'nacionalidad':
+                        this.listaNacionalidad = listaLugar;
+                        break;
                 }
 
             }
@@ -190,11 +194,22 @@ export class CustomerDetailsComponent implements OnInit {
     }
 
     /**
-     * Get Nombre Funcionario Recepcion
+     * Get pais residencia
      */
     getResidencia(id_lugar: string) {
         if ( this.listaResidencia != undefined ) {
             return this.listaResidencia.find(lugar => lugar.id_lugar === id_lugar).nombre;
+        }else{
+            return this.cliente.pais_residencia;
+        }
+    }
+
+    /**
+     * Get pais nacionalidad
+     */
+    getNacionalidad(id_lugar: string) {
+        if ( this.listaNacionalidad != undefined ) {
+            return this.listaNacionalidad.find(lugar => lugar.id_lugar === id_lugar).nombre;
         }else{
             return this.cliente.pais_residencia;
         }

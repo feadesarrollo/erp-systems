@@ -76,6 +76,7 @@ export class FileManagerListComponent implements OnInit {
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             });
+
     }
 
     updateTemplate(template, id_template){

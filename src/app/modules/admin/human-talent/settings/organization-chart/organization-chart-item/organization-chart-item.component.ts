@@ -16,6 +16,10 @@ import {MatTableDataSource} from "@angular/material/table";
 import {ActivatedRoute, Router} from "@angular/router";
 import {MatDrawer} from "@angular/material/sidenav";
 import {BobyMediaWatcherService} from "../../../../../../../@boby/services/media-watcher";
+import {BobyLoadingService} from "../../../../../../../@boby/services/loading";
+import {MatDialog} from "@angular/material/dialog";
+import {debounceTime} from "rxjs/operators";
+
 @Component({
     selector: 'erp-organization-chart-item',
     templateUrl: './organization-chart-item.component.html',
@@ -68,6 +72,7 @@ export class OrganizationChartItemComponent implements OnInit {
     private query = '';
     drawerMode: 'side' | 'over';
     @ViewChild('matDrawer', {static: true}) matDrawer: MatDrawer;
+
     constructor(
         private _orgaChartService: OrganizationChartService,
         private _changeDetectorRef: ChangeDetectorRef,
@@ -102,6 +107,17 @@ export class OrganizationChartItemComponent implements OnInit {
             this.totalRows = resp.total;
             this._changeDetectorRef.markForCheck();
         });
+
+        this.searchInputControl.valueChanges
+            .pipe(debounceTime(1000))
+            .subscribe(query => {
+                this.query = query;
+                this._orgaChartService.getItems(this.id_uo,this.start,this.pageSize,this.sort,this.dir,query).subscribe((resp: any) =>{
+                    this.items = resp.items;
+                    this.totalRows = resp.total;
+                    this._changeDetectorRef.markForCheck();
+                });
+            });
     }
 
     ngAfterViewInit() {
@@ -157,6 +173,10 @@ export class OrganizationChartItemComponent implements OnInit {
     redirect(row){
         this.selectedItem = row;
         this._router.navigate(['./', row.id_cargo], {relativeTo: this._activatedRoute});
+    }
+
+    selected(row){
+        this.selectedItem = row;
     }
 
     /**

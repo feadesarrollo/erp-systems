@@ -1,9 +1,12 @@
-import {ChangeDetectorRef, Component, Inject, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, ElementRef, Inject, OnInit, ViewChild} from '@angular/core';
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
 import {ClaimsService} from "../../claims.service";
 import {BobyConfirmationService} from "../../../../../../../@boby/services/confirmation";
 import {BobyLoadingService} from "../../../../../../../@boby/services/loading";
+import {MatAutocompleteSelectedEvent} from "@angular/material/autocomplete";
+import {MatChipInputEvent} from "@angular/material/chips";
+import {COMMA, ENTER} from "@angular/cdk/keycodes";
 
 @Component({
   selector: 'erp-claim-mail-compose',
@@ -30,6 +33,14 @@ export class ClaimMailComposeComponent implements OnInit {
     private imageSrc:any = '';
     private configForm: FormGroup;
     public claim: any;
+
+    public selectedEmail: string[] = [];
+    public selectedEmailCC: string[] = [];
+    public selectedEmailBCC: string[] = [];
+    @ViewChild('emailInputCC') emailInputCC: ElementRef<HTMLInputElement>;
+    @ViewChild('emailInputBCC') emailInputBCC: ElementRef<HTMLInputElement>;
+    public separatorKeysCodes: number[] = [ENTER, COMMA];
+    public mode:string = 'SOLO_CORREO';
     /**
      * Constructor
      */
@@ -56,15 +67,14 @@ export class ClaimMailComposeComponent implements OnInit {
     {
         this.claim = this._data.claim;
 
-        console.warn('this.claim',this.claim);
         // Create the form
         this.composeForm = this._formBuilder.group({
-            to     : ['', [Validators.required/*, Validators.email*/]],
+            to     : ['', [Validators.required, Validators.email]],
             cc     : [''/*, [Validators.email]*/],
             bcc    : [''/*, [Validators.email]*/],
             subject: [''],
             body   : ['', [Validators.required]],
-            mode   : ['NINGUNO', [Validators.required]],
+            mode   : ['SOLO_CORREO', [Validators.required]],
         });
     }
 
@@ -127,7 +137,6 @@ export class ClaimMailComposeComponent implements OnInit {
                 this.close();
             }
         );
-
     }
 
     /**
@@ -264,6 +273,60 @@ export class ClaimMailComposeComponent implements OnInit {
                 }
             );
         };
+    }
+
+    selectedMode(event): void {
+        this.mode = event.value;
+    }
+
+    addCC(event: MatChipInputEvent): void {
+        const value = (event.value || '').trim();
+        // Add our email
+        if (value) {
+            this.selectedEmailCC.push(value);
+        }
+        // Clear the input value
+        event.chipInput!.clear();
+
+        this.composeForm.get('cc').setValue(this.selectedEmailCC);
+    }
+
+    removeCC(fruit: string): void {
+        const index = this.selectedEmailCC.indexOf(fruit);
+        if (index >= 0) {
+            this.selectedEmailCC.splice(index, 1);
+        }
+    }
+
+    selectedCC(event: MatAutocompleteSelectedEvent): void {
+        this.selectedEmailCC.push(event.option.value);
+        this.emailInputCC.nativeElement.value = '';
+        this.composeForm.get('cc').setValue(this.selectedEmailCC);
+    }
+
+    addBCC(event: MatChipInputEvent): void {
+        const value = (event.value || '').trim();
+        // Add our email
+        if (value) {
+            this.selectedEmailBCC.push(value);
+        }
+        // Clear the input value
+        event.chipInput!.clear();
+
+        this.composeForm.get('bcc').setValue(this.selectedEmailBCC);
+    }
+
+    removeBCC(fruit: string): void {
+        const index = this.selectedEmailBCC.indexOf(fruit);
+        if (index >= 0) {
+            this.selectedEmailBCC.splice(index, 1);
+        }
+    }
+
+    selectedBCC(event: MatAutocompleteSelectedEvent): void {
+        this.selectedEmailBCC.push(event.option.value);
+        this.emailInputBCC.nativeElement.value = '';
+        this.composeForm.get('bcc').setValue(this.selectedEmailBCC);
     }
 
 }

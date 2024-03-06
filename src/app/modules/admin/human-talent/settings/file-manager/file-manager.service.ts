@@ -180,7 +180,7 @@ export class FileManagerService {
      */
     getAddenda(): Observable<any[]>
     {
-        return from(this._apiErp.post('organigrama/TipoDocumentoContrato/getAddenda',{start:0,limit:50,sort:'nombre',dir:'asc',par_filtro:'tipcon.nombre#tipcon.codigo'})).pipe(
+        return from(this._apiErp.post('organigrama/TipoDocumentoContrato/getAddenda',{})).pipe(
             switchMap((resp: any) => {
                 // Return a new observable with the response
                 return of(JSON.parse(resp.datos[0].djson));
@@ -202,4 +202,38 @@ export class FileManagerService {
             })
         );
     }
+
+    /** Method service tree */
+    getUnitList(id): Observable<any>
+    {
+        return from(this._apiErp.post(
+            'organigrama/TipoDocumentoContrato/getUnitList',{id})).pipe(
+            switchMap((response: any) => {
+                return of(JSON.parse(response.datos[0].djson));
+            }),
+            catchError((error)=>{
+                return of(error);
+            })
+        );
+
+    }
+
+    checkedSelection (id, expandable, checked, id_template): Observable<any>
+    {
+        return from(this._apiErp.post('organigrama/TipoDocumentoContrato/checkedSelection', {
+            id,
+            expandable,
+            checked,
+            id_template
+        })).pipe(
+            switchMap((resp: any) => {
+                // Return a new observable with the response
+                return of(resp);
+            }),
+            catchError(error=>{
+                return of(error)
+            })
+        );
+    }
+    /** Method service tree */
 }

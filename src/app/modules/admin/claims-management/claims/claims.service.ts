@@ -197,6 +197,15 @@ export class ClaimsService {
 
     }
 
+    getOfficeData(){
+        return from(this._apiErp.post('reclamo/Reclamo/getDatosOficina', {id_usuario: 0})).pipe(
+            switchMap((resp: any) => {
+                // Return a new observable with the response
+                return of(resp.data);
+            })
+        );
+    }
+
     /**
      * Load Cliente
      */

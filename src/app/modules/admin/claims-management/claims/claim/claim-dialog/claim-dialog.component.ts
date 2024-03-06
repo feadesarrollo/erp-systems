@@ -156,6 +156,14 @@ export class ClaimDialogComponent implements OnInit {
                 }
             );
 
+            this._reclamoService.getOfficeData().subscribe(
+                (resp: any) => {
+                    this.listaOficinaRecepcion = [{id_oficina:resp.id_oficina, nombre:resp.oficina_nombre}];
+                    this.ReclamoForm.get('step1').get('id_oficina_registro_incidente').setValue(resp.id_oficina);
+                    this.ReclamoForm.get('step1').get('nro_frd').setValue(resp.v_frd);
+                }
+            );
+
             this.ReclamoForm = this._formBuilder.group({
                 step1: this._formBuilder.group({
                     id_cliente: ['',[Validators.required]],
@@ -167,12 +175,12 @@ export class ClaimDialogComponent implements OnInit {
                 }),
 
                 step2: this._formBuilder.group({
-                    nro_vuelo: ['',[Validators.required]],
-                    pnr: ['',[Validators.pattern(/^[0-9]\d*$/)]],
+                    nro_vuelo: [''/*,[Validators.required]*/],
+                    pnr: [''/*,[Validators.pattern(/^[0-9]\d*$/)]*/],
                     origen: [''/*,[Validators.required]*/],
                     transito: [''/*,[Validators.required]*/],
                     destino: [''/*,[Validators.required]*/],
-                    fecha_hora_vuelo: ['',[Validators.required]],
+                    fecha_hora_vuelo: [''/*,[Validators.required]*/],
                 }),
 
                 step3: this._formBuilder.group({
@@ -550,6 +558,7 @@ export class ClaimDialogComponent implements OnInit {
      * Get Nombre Oficina Recepcion
      */
     getOficinaRecepcion(id_oficina: string) {
+        console.warn('getOficinaRecepcion',id_oficina);
         if ( this._data.momento == 'nuevo' ) {
             if (id_oficina !== null && id_oficina !== undefined && id_oficina !== '')
                 return this.listaOficinaRecepcion.find(oficina => oficina.id_oficina === id_oficina).nombre;

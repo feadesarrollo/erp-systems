@@ -59,6 +59,8 @@ import { UploadFileComponent } from './claim/claim-files/upload-file/upload-file
 import { FileDetailComponent } from './claim/claim-files/file-detail/file-detail.component';
 import { NgxMatMomentModule } from '@angular-material-components/moment-adapter';
 import { QuillModule } from 'ngx-quill';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatBadgeModule } from '@angular/material/badge';
 
 import { BobyScrollbarModule } from '@boby/directives/scrollbar';
 import { AnswerComponent } from './answer/answer.component';
@@ -72,6 +74,12 @@ import { AnswerDetailsComponent } from './answer/answer-details/answer-details.c
 import { AnswerTemplateComponent } from './answer/answer-template/answer-template.component';
 import { ClaimRipatComponent } from './claim/claim-ripat/claim-ripat.component';
 
+import { AccordionModule } from 'primeng/accordion';
+import { DialogModule } from 'primeng/dialog';
+import { OrganizationChartModule } from 'primeng/organizationchart';
+import { MessageService } from 'primeng/api';
+import { OverlayPanelModule } from 'primeng/overlaypanel';
+import { ClaimNewComponent } from './claim/claim-new/claim-new.component';
 @NgModule({
     declarations: [
         ClaimsComponent,
@@ -97,7 +105,8 @@ import { ClaimRipatComponent } from './claim/claim-ripat/claim-ripat.component';
         ClaimGanttDocumentComponent,
         AnswerDetailsComponent,
         AnswerTemplateComponent,
-        ClaimRipatComponent
+        ClaimRipatComponent,
+        ClaimNewComponent
     ],
     imports: [
         RouterModule.forChild(claimsRoutes),
@@ -143,9 +152,17 @@ import { ClaimRipatComponent } from './claim/claim-ripat/claim-ripat.component';
         EditorModule,
         BobyCardModule,
         MatTableExporterModule,
-        MatButtonToggleModule
+        MatButtonToggleModule,
+        MatChipsModule,
+        MatBadgeModule,
+
+        AccordionModule,
+        DialogModule,
+        OrganizationChartModule,
+        OverlayPanelModule
     ],
     providers: [
+        MessageService,
         { provide: TINYMCE_SCRIPT_SRC, useValue: 'tinymce/tinymce.min.js' }
     ]
 })

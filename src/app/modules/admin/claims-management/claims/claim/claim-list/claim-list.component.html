@@ -37,6 +37,8 @@
                     </mat-select>
                 </mat-form-field>
 
+
+
                 <mat-form-field class="boby-mat-no-subscript boby-mat-dense w-full sm:w-64 mt-2 ml-1" [matTooltip]="'Seleccione ESTADO'">
                     <mat-select
                         [formControlName]="'state'"
@@ -47,6 +49,7 @@
                         </ng-container>
                     </mat-select>
                 </mat-form-field>
+
 
                 <mat-form-field class="boby-mat-no-subscript boby-mat-dense w-full sm:w-96 mt-2 ml-1"
                                 [floatLabel]="'always'">
@@ -64,6 +67,46 @@
 
                 <div class="relative flex flex-col sm:justify-between mt-2">
                     <div class="flex shrink-0 items-end sm:ml-4">
+
+                        <button
+                            class="mt-0 sm:mt-0 sm:ml-auto rounded-lg"
+                            mat-flat-button
+                            [color]="'primary'"
+                            [matTooltip]="'Ver Estados'"
+                            (click)="display = true; viewState()">
+                            <mat-icon class="text-current">{{'account_tree'}}</mat-icon>
+                        </button>
+
+                        <!--<p-overlayPanel #op1 [showCloseIcon]="true">
+                            <p-organizationChart [value]="data"
+                                                 selectionMode="single"
+                                                 [(selection)]="selectedNode"
+                                                 (onNodeSelect)="onNodeSelect($event)"
+                                                 styleClass="company">
+                                <ng-template let-node pTemplate="leaf">
+                                    <span style="font-weight:bold">{{node.label}}</span>
+                                </ng-template>
+                                <ng-template let-node pTemplate="default">
+                                    {{node.label}}
+                                </ng-template>
+                            </p-organizationChart>
+                        </p-overlayPanel>-->
+
+                        <p-dialog header="Dialog" [(visible)]="display" [modal]="true" showEffect="fade" [breakpoints]="{'960px': '75vw'}" >
+                            <p-organizationChart [value]="data"
+                                                 selectionMode="single"
+                                                 [(selection)]="selectedNode"
+                                                 (onNodeSelect)="onNodeSelect($event)"
+                                                 styleClass="company">
+                                <ng-template let-node pTemplate="leaf">
+                                    <span style="font-weight:bold">{{node.label}}</span>
+                                </ng-template>
+                                <ng-template let-node pTemplate="default">
+                                    {{node.label}}
+                                </ng-template>
+                            </p-organizationChart>
+                        </p-dialog>
+
                         <button
                             class="mt-0 sm:mt-0 sm:ml-auto rounded-lg"
                             mat-flat-button
@@ -115,7 +158,7 @@
                                 <div class="flex items-center justify-between -mt-3">
                                     <!-- Reclamo estado -->
                                     <ng-container *ngIf="rec.estado">
-                                        <div
+                                        <div matBadge="{{rec.dias_estado}}" matBadgePosition="after" matBadgeOverlap="true" [matTooltip]="rec.dias_estado+' dias en el estado '+rec.estado "
                                             class="py-0.5 px-3 rounded-full text-sm font-semibold"
                                             [ngClass]="{'text-blue-800 bg-blue-100 dark:text-blue-50 dark:bg-blue-500': ['borrador','anulado','pendiente_asignacion','formulacion_cargos','contencioso_administrativo'].includes(rec.estado),
                                                         'text-green-800 bg-green-100 dark:text-green-50 dark:bg-green-500': ['pendiente_revision','derivado','respuesta_registrado_ripat','resolucion_administrativa','respuesta_parcial'].includes(rec.estado),

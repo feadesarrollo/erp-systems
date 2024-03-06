@@ -4,6 +4,7 @@ import {AddPermissions} from "../../../../../store/claims-management/claims-mana
 import {PermissionsService} from "../permissions/permissions.service";
 import { takeUntil, Subject } from 'rxjs';
 import {HumanTalentService} from "../human-talent.service";
+import {BobyLoadingService} from "../../../../../@boby/services/loading";
 
 @Component({
     selector: 'erp-human-talent-menu',
@@ -31,7 +32,8 @@ export class HumanTalentMenuComponent implements OnInit {
         private _activatedRoute: ActivatedRoute,
         private _changeDetectorRef: ChangeDetectorRef,
         private _admin: PermissionsService,
-        private _htService: HumanTalentService
+        private _htService: HumanTalentService,
+        //private _loadService: BobyLoadingService
     ) { }
 
     ngOnInit(): void {
@@ -50,8 +52,10 @@ export class HumanTalentMenuComponent implements OnInit {
                     }, [])
                 ).flat(1);
 
+                //this._loadService.show();
                 this._htService.getModulesByRoles(modules).subscribe(
                     (response:any) => {
+                        //this._loadService.hide();
                         const list =  JSON.parse(response.datos[0].djson);
                         this.processList = list.filter(item => item.type == 'processes');
                         this.reportList = list.filter(item => item.type == 'report');

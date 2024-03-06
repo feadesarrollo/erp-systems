@@ -67,7 +67,7 @@
 
                         <ng-container matColumnDef="accion">
                             <mat-header-cell *matHeaderCellDef aria-label="row actions" class="min-w-24">Acciones</mat-header-cell>
-                            <mat-cell (click)="redirect(row)" *matCellDef="let row" class="min-w-24" [ngClass]="{ 'text-primary-800 bg-primary-100 dark:text-primary-50 dark:bg-primary-500': row === selectedItem }">
+                            <mat-cell (click)="selected(row)" *matCellDef="let row" class="min-w-24" [ngClass]="{ 'text-primary-800 bg-primary-100 dark:text-primary-50 dark:bg-primary-500': row === selectedItem }">
                                 <button
                                     class="ml-1 -mr-4"
                                     mat-icon-button

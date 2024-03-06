@@ -410,13 +410,34 @@
                         <div class="space-y-1">
                             <ng-container>
                                 <div class="flex">
-                                    <mat-form-field class="w-full boby-mat-dense flex-auto gt-xs:pr-3" appearance="fill">
+                                    <!--<mat-form-field class="w-full boby-mat-dense flex-auto gt-xs:pr-3" appearance="fill">
                                         <mat-label>Nacionalidad</mat-label>
                                         <mat-icon
                                             matPrefix
                                             class="hidden sm:flex icon-size-5"
                                             [svgIcon]="'heroicons_solid:globe'"></mat-icon>
                                         <input matInput [formControlName]="'nacionalidad'">
+                                    </mat-form-field>-->
+
+                                    <mat-form-field class="w-full boby-mat-dense flex-auto gt-xs:pr-3" appearance="fill">
+                                        <mat-label>Nacionalidad</mat-label>
+                                        <mat-icon
+                                            matPrefix
+                                            class="hidden sm:flex icon-size-5"
+                                            [svgIcon]="'heroicons_solid:location-marker'"></mat-icon>
+                                        <input type="text"
+                                               matInput
+                                               [matAutocomplete]="recepcion"
+                                               (keyup)="searchLugar($event.target.value,'nacionalidad')"
+                                               placeholder="Buscar pais de nacionalidad ...."
+                                               [formControlName]="'nacionalidad'">
+                                        <mat-autocomplete autoActiveFirstOption
+                                                          #recepcion="matAutocomplete"
+                                                          [displayWith]="getNacionalidad.bind(this)">
+                                            <mat-option *ngFor="let pais of listaNacionalidad" [value]="pais.id_lugar">
+                                                {{pais.nombre}}
+                                            </mat-option>
+                                        </mat-autocomplete>
                                     </mat-form-field>
 
                                     <mat-form-field class="w-full boby-mat-dense flex-auto gt-xs:pr-3 ml-2 sm:ml-4" appearance="fill">

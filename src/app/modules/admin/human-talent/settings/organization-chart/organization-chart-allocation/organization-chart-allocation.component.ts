@@ -2,10 +2,14 @@ import {ChangeDetectorRef, Component, Input, OnInit, ViewChild} from '@angular/c
 import {ActivatedRoute, Router} from "@angular/router";
 import {MatTableDataSource} from "@angular/material/table";
 import {FormControl} from "@angular/forms";
-import {MatPaginator} from "@angular/material/paginator";
-import {MatSort} from "@angular/material/sort";
+import {MatPaginator, PageEvent} from "@angular/material/paginator";
+import {MatSort, Sort} from "@angular/material/sort";
 import {OrganizationChartService} from "../organization-chart.service";
 import { takeUntil, Observable, Subject } from 'rxjs';
+import {BobyLoadingService} from "../../../../../../../@boby/services/loading";
+import {MatDialog} from "@angular/material/dialog";
+import {DocumentViewerComponent} from "./document-viewer/document-viewer.component";
+import {debounceTime} from "rxjs/operators";
 
 @Component({
   selector: 'erp-organization-chart-allocation',
@@ -22,7 +26,7 @@ export class OrganizationChartAllocationComponent implements OnInit {
     public dataSource: MatTableDataSource<any>;
     public searchInputControl: FormControl = new FormControl();
     @ViewChild(MatPaginator) paginator: MatPaginator;
-    @ViewChild(MatSort) sort: MatSort;
+
     public cols = [
         { field: 'tipo', header: 'Tipo Asignación', width: 'min-w-32'},
         { field: 'desc_funcionario1', header: 'Funcionario', width: 'min-w-96'},
@@ -49,19 +53,95 @@ export class OrganizationChartAllocationComponent implements OnInit {
     public displayedColumns = [ 'accion','tipo','desc_funcionario1','fecha_asignacion','fecha_finalizacion','desc_cargo','observaciones_finalizacion','categoria',
         'nro_documento_asignacion','fecha_documento_asignacion','nro_contrato','fecha_contrato','certificacion_presupuestaria','codigo_ruta','codigo','ci','estado_funcional',
         'estado_reg','fecha_reg','fecha_mod','usr_reg','usr_mod'];
+
     private start: number = 0;
-    private limit: number = 6;
     public statusFlag: boolean = true;
     public status: string = 'activo';
+
+    public totalRows = 0;
+    public currentPage = 0;
+    public pageSize = 7;
+    public pageSizeOptions = [7, 10, 25, 50, 100];
+    public viewer_file: string ='url';
+    public items: any[] = [];
+
+    private sort = 'desc_funcionario1';
+    private dir = 'asc';
+    private query = '';
+
     constructor(
         private _orgaChartService: OrganizationChartService,
         private _changeDetectorRef: ChangeDetectorRef,
+        private _loadService: BobyLoadingService,
+        private _matDialog: MatDialog
     ) { }
 
     ngOnInit(): void {
-        this._orgaChartService.getAllocations(this.id_uo,this.start,this.limit,this.status).subscribe(resp =>{
+        this._orgaChartService.getAllocations(this.id_uo,this.status,this.start,this.pageSize,this.sort,this.dir,this.query).subscribe((resp: any) =>{
+            this.items = resp.items;
+            this.totalRows = resp.total;
+            this._changeDetectorRef.markForCheck();
+        });
 
-            this.dataSource = new MatTableDataSource(resp.items);
+        this.searchInputControl.valueChanges
+            .pipe(debounceTime(1000))
+            .subscribe(query => {
+                this.query = query;
+                this._orgaChartService.getAllocations(this.id_uo,this.status,this.start,this.pageSize,this.sort,this.dir,query).subscribe((resp: any) =>{
+                    this.items = resp.items;
+                    this.totalRows = resp.total;
+                    this._changeDetectorRef.markForCheck();
+                });
+            });
+    }
+
+    refreshItems(momento){
+
+        this._orgaChartService.getAllocations(this.id_uo,this.status,this.start,this.pageSize,this.sort,this.dir,this.query).subscribe(
+            (resp: any) => {
+
+                if ( momento == 'save' ) {
+                    this.selectedItem = resp.items.find(item => item.id_cargo == this.selectedItem.id_cargo);
+                    this._orgaChartService.item = this.selectedItem;
+
+                    this.items = resp.items;
+                    this.totalRows = resp.total;
+                }else {
+                    this.items = resp.items;
+                    this.totalRows = resp.total;
+                }
+                this._changeDetectorRef.markForCheck();
+            }
+        );
+    }
+
+    sortData(sort: Sort) {
+        this.sort = sort.active;
+        this.dir = sort.direction;
+        this._orgaChartService.getAllocations(this.id_uo,this.status,this.currentPage*this.pageSize,this.pageSize,this.sort,this.dir,this.query).subscribe(
+            (response:any) => {
+                this.items = response.items;
+                this._changeDetectorRef.markForCheck();
+
+            }
+        );
+    }
+
+    pageChanged(event: PageEvent) {
+        this.pageSize = event.pageSize;
+        this.currentPage = event.pageIndex;
+        this._orgaChartService.getAllocations(this.id_uo,this.status,this.currentPage*this.pageSize,this.pageSize,this.sort,this.dir,this.query).subscribe(
+            (response:any) => {
+                this.items = response.items;
+                this._changeDetectorRef.markForCheck();
+
+            }
+        );
+    }
+
+    ngAfterViewInit(){
+        if ( this.paginator ) {
+
             this.paginator._intl.itemsPerPageLabel = "Registros por pagina";
             this.paginator._intl.getRangeLabel = (page: number, pageSize: number, length: number) => {
                 if (length === 0 || pageSize === 0) {
@@ -77,42 +157,53 @@ export class OrganizationChartAllocationComponent implements OnInit {
             this.paginator._intl.firstPageLabel = 'Primera Página';
             this.paginator._intl.lastPageLabel = 'Ultima Página';
             this.paginator._intl.previousPageLabel = 'Página Anterior';
-            this.pagination = resp.pagination;
-            this.dataSource.paginator = this.paginator;
-            this.dataSource.sort = this.sort;
+
+            this.paginator.pageIndex = this.currentPage;
+            this.paginator.length = this.totalRows;
 
             this.paginator.page.subscribe(
                 (event) => {
 
                 }
             );
-        });
-    }
-
-    refreshItems(){
-
-        this._orgaChartService.getAllocations(this.id_uo,this.start,this.limit,this.status).subscribe(
-            (resp) => {
-                this.dataSource = new MatTableDataSource(resp.items);
-                this.pagination = resp.pagination;
-                this.dataSource.paginator = this.paginator;
-                this.dataSource.sort = this.sort;
-                this._changeDetectorRef.markForCheck();
-            }
-        );
+        }
     }
 
     setStatus(flag,status){
-        this.status = flag;
-        this._orgaChartService.getAllocations(this.id_uo,this.start,this.limit,status).subscribe(
-            (resp) => {
-                this.dataSource = new MatTableDataSource(resp.items);
-                this.pagination = resp.pagination;
-                this.dataSource.paginator = this.paginator;
-                this.dataSource.sort = this.sort;
+        this.status = status;
+        this.statusFlag = flag;
+        this._orgaChartService.getAllocations(this.id_uo,this.status,this.start,this.pageSize,this.sort,this.dir,this.query).subscribe(
+            (resp: any) => {
+                this.items = resp.items;
+                this.totalRows = resp.total;
                 this._changeDetectorRef.markForCheck();
             }
         );
+    }
+
+    generateContract(){
+        this.viewer_file = 'url';
+
+        this.selectedItem.viewer_file = this.viewer_file;
+
+        this._loadService.show();
+        this._orgaChartService.generateContract(this.selectedItem.id_uo_funcionario)
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((response) => {
+                console.warn('response',response);
+                this._loadService.hide();
+                const detalle = response.detail;
+                this.selectedItem.archivo_generado = detalle.archivo_generado;
+                this.selectedItem.viewer_file = this.viewer_file;
+                const dialogRef = this._matDialog.open(DocumentViewerComponent, {
+                    data: this.selectedItem
+                });
+
+                dialogRef.afterClosed()
+                    .subscribe((result) => {
+
+                    });
+            });
     }
 
 }

@@ -33,7 +33,7 @@
                 mat-flat-button
                 [color]="'primary'"
                 [matTooltip]="'Actualizar'"
-                (click)="refreshItems()">
+                (click)="refreshItems('refresh')">
                 <mat-icon [svgIcon]="'heroicons_outline:refresh'"></mat-icon>
             </button>
 
@@ -41,8 +41,8 @@
             <div class="ml-2 boby-mat-dense boby-mat-no-subscript flex items-center p-0.5 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700">
                 <button
                     class="px-6"
-                    [ngClass]="{'bg-card pointer-events-none shadow': status,
-                                'bg-transparent': !status}"
+                    [ngClass]="{'bg-card pointer-events-none shadow': statusFlag,
+                                'bg-transparent': !statusFlag}"
                     mat-flat-button
                     (click)="setStatus(true,'activo')"
                     disableRipple>
@@ -50,8 +50,8 @@
                 </button>
                 <button
                     class="px-6"
-                    [ngClass]="{'bg-card pointer-events-none shadow': !status,
-                                'bg-transparent': status}"
+                    [ngClass]="{'bg-card pointer-events-none shadow': !statusFlag,
+                                'bg-transparent': statusFlag}"
                     mat-flat-button
                     (click)="setStatus(false,'inactivo')"
                     disableRipple>
@@ -64,7 +64,7 @@
 
     <div class="flex flex-auto overflow-auto">
         <div class="flex flex-col flex-auto sm:mb-18 overflow-auto sm:overflow-y-auto">
-            <table mat-table [dataSource]="dataSource" matSort matTableExporter  #exporter="matTableExporter" [hiddenColumns]="[0]">
+            <table mat-table [dataSource]="items" matSort (matSortChange)="sortData($event)" matTableExporter  #exporter="matTableExporter" [hiddenColumns]="[0]">
 
                 <ng-container matColumnDef="accion">
                     <mat-header-cell *matHeaderCellDef aria-label="row actions" class="min-w-24">Acciones</mat-header-cell>
@@ -79,6 +79,12 @@
                                 <button mat-menu-item [matMenuTriggerFor]="formatos">
                                     <mat-icon [svgIcon]="'heroicons_outline:printer'"></mat-icon>
                                     Exportar Registros
+                                </button>
+
+                                <button mat-menu-item
+                                        (click)="generateContract()">
+                                    <mat-icon [svgIcon]="'mat_solid:picture_as_pdf'"></mat-icon>
+                                    Generar Contrato
                                 </button>
                             </mat-menu>
                         </button>
@@ -121,11 +127,12 @@
     <mat-paginator
         class="sm:absolute sm:inset-x-0 sm:bottom-0 border-b sm:border-t sm:border-b-0 z-10 bg-gray-50 dark:bg-transparent"
         [ngClass]="{'pointer-events-none': isLoading}"
-        [length]="pagination.length"
-        [pageIndex]="pagination.page"
-        [pageSize]="7"
+        [length]="totalRows"
+        [pageIndex]="currentPage"
+        [pageSize]="pageSize"
+        [pageSizeOptions]="pageSizeOptions"
         [showFirstLastButtons]="true"
-        [pageSizeOptions]="[7, 10, 25, 50, 100]"></mat-paginator>
+        (page)="pageChanged($event)"></mat-paginator>
 
 
 </div>

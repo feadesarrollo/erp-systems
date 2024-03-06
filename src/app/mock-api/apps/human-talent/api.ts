@@ -181,7 +181,8 @@ export class HumanTalentApi
                     limit:  request.params.get('limit'),
                     sort: request.params.get('sort'),
                     dir: request.params.get('dir'),
-                    query: request.params.get('query')
+                    query: request.params.get('query'),
+                    par_filtro:'cargo.codigo#ttc.nombre#tipcon.nombre#escsal.nombre#ofi.nombre#tipcon.codigo#escsal.haber_basico'
                 })).pipe(map((response: any) => {
 
                     const page = parseInt(request.params.get('page') ?? '0', 10);
@@ -406,19 +407,24 @@ export class HumanTalentApi
 
                 return from(this._apiErp.post('organigrama/UoFuncionario/listarUoFuncionario', {
                     id_uo:  request.params.get('id_uo'),
+                    status:  request.params.get('status'),
                     start:  request.params.get('start'),
                     limit:  request.params.get('limit'),
-                    status:  request.params.get('status')
+                    sort: request.params.get('sort'),
+                    dir: request.params.get('dir'),
+                    query: request.params.get('query'),
+                    par_filtro:'FUNCIO.desc_funcionario1#FUNCIO.desc_funcionario2#FUNCIO.ci#FUNCIO.codigo#UOFUNC.nro_documento_asignacion#UOFUNC.nro_contrato#UOFUNC.codigo_ruta'
                 })).pipe(map((response: any) => {
 
-                    const page = parseInt(request.params.get('page') ?? '0', 10);
-                    const size = parseInt(request.params.get('size') ?? '10', 10);
+                    const page = parseInt(request.params.get('start') ?? '0', 10);
+                    const size = parseInt(request.params.get('limit') ?? '10', 10);
 
                     // Clone the items
                     let items: any[] | null = response.datos;
 
                     // Paginate - Start
                     const itemsLength = response.total;
+                    const total = response.total;
 
                     // Calculate pagination details
                     const begin = page * size;
@@ -455,7 +461,8 @@ export class HumanTalentApi
                     // Return a success code along with some data
                     return [200, {
                         items,
-                        pagination
+                        pagination,
+                        total
                     }];
                 }));
             });

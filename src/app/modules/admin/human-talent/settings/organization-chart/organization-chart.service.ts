@@ -113,12 +113,11 @@ export class OrganizationChartService {
         );
     }
 
-    getAllocations(id_uo,start,limit,status):Observable<{ pagination: any; items: any[] }>{
+    getAllocations(id_uo,status,start,limit,sort,dir,query):Observable<{ pagination: any; items: any[]; total: any; }>{
 
-        return from(this._httpClient.get<{ pagination: any; items: any[] }>('api/apps/human-talent/getAllocations', {params: {id_uo, start,limit,status}})).pipe(
+        return from(this._httpClient.get<{ pagination: any; items: any[]; total: any; }>('api/apps/human-talent/getAllocations', {params: {id_uo,status,start,limit,sort,dir,query}})).pipe(
             tap((response) => {
-                //this._pagination.next(response.pagination);
-                //this._items.next(response.items);
+                this._items.next(response.items);
                 return response;
             })
         );
@@ -284,6 +283,16 @@ export class OrganizationChartService {
                     })
                 ))
             ))
+        );
+    }
+
+    generateContract(id_uo_funcionario: number)
+    {
+        return from(this._apiErp.post('organigrama/UoFuncionario/reporteModeloContrato', {id_uo_funcionario})).pipe(
+            switchMap((resp: any) => {
+                // Return a new observable with the response
+                return of(resp);
+            })
         );
     }
 }

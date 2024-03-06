@@ -9,8 +9,11 @@ import { AnswerListComponent } from './answer/answer-list/answer-list.component'
 import { AnswerDetailsComponent } from "./answer/answer-details/answer-details.component";
 import {AnswerResolver, AnswersResolver} from "./answers.resolvers";
 import {ClaimRipatComponent} from "./claim/claim-ripat/claim-ripat.component";
+import {OfficialsComponent} from "../../human-talent/processes/officials/officials.component";
+import {ClaimNewComponent} from "./claim/claim-new/claim-new.component";
 
 export const claimsRoutes: Route[] = [
+
     {
         path: 'claim',
         component: ClaimComponent,
@@ -29,6 +32,10 @@ export const claimsRoutes: Route[] = [
                 resolve : {
                     claim : ClaimResolver
                 }
+            },
+            {
+                path: 'new-claim/:id',
+                component: ClaimNewComponent
             }
         ]
     },

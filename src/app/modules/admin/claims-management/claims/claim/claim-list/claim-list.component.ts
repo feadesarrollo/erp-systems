@@ -38,7 +38,9 @@ import {cloneDeep} from "lodash-es";
 import {Sort} from "@angular/material/sort";
 import {debounceTime} from "rxjs/operators";
 import {ClaimRipatComponent} from "../claim-ripat/claim-ripat.component";
-
+import {TreeNode} from "primeng/api";
+import { MessageService } from "primeng/api";
+import {BobyMockApiUtils} from "../../../../../../../@boby/lib/mock-api";
 @Component({
     selector: 'erp-claim-list',
     templateUrl: './claim-list.component.html',
@@ -147,6 +149,41 @@ export class ClaimListComponent implements OnInit {
     private hiddenColumns = ['detalle_incidente','observaciones_incidente'];
     private sort = 'id_reclamo';
     private dir = 'desc';
+
+    public display: boolean = false;
+
+    public data = [{
+        label: 'Root',
+        expanded: true,
+        children: [
+            {
+                label: 'Child 1',
+                expanded: true,
+                children: [
+                    {
+                        label: 'Grandchild 1.1'
+                    },
+                    {
+                        label: 'Grandchild 1.2'
+                    }
+                ]
+            },
+            {
+                label: 'Child 2',
+                expanded: true,
+                children: [
+                    {
+                        label: 'Child 2.1'
+                    },
+                    {
+                        label: 'Child 2.2'
+                    }
+                ]
+            }
+        ]
+    }];
+
+    selectedNode: TreeNode;
     /**
      * Constructor
      */
@@ -159,7 +196,8 @@ export class ClaimListComponent implements OnInit {
         private readonly sso: ScrollStrategyOptions,
         private _formBuilder: FormBuilder,
         private _fcService: BobyConfirmationService,
-        private _store: Store
+        private _store: Store,
+        private messageService: MessageService
         /*private _loadService: BobyLoadingService*/
     )
     {
@@ -377,6 +415,9 @@ export class ClaimListComponent implements OnInit {
             });
     }
 
+    viewState(){
+        this._changeDetectorRef.markForCheck();
+    }
 
     toggleChange(event){
         this.viewer = event.source.value;
@@ -728,12 +769,17 @@ export class ClaimListComponent implements OnInit {
         return item.id || index;
     }
 
+    onNodeSelect(event) {
+        this.messageService.add({severity: 'success', summary: 'Node Selected', detail: event.node.label});
+    }
+
     /**
      * Create a new Claim
      */
     createReclamo(){
 
         this.momento = 'nuevo';
+        //this._router.navigate(['/system/claims-management/claims/claim/new-claim/', BobyMockApiUtils.guid()], {relativeTo: this._activatedRoute});
         const dialogRef = this._matDialog.open(ClaimDialogComponent,{
             height: '75%',
             width: '60%',

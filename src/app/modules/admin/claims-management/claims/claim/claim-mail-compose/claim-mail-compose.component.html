@@ -18,12 +18,68 @@
         class="flex flex-col flex-auto p-6 sm:p-8 overflow-y-auto"
         [formGroup]="composeForm">
 
+        <!-- System -->
+        <mat-form-field class="boby-mat-dense w-full flex-auto">
+            <mat-label>Modo Envio</mat-label>
+            <mat-icon
+                class="icon-size-5"
+                [svgIcon]="'heroicons_solid:thumb-up'"
+                matPrefix></mat-icon>
+            <mat-select [placeholder]="'Seleccione con o sin sistema....'" [formControlName]="'mode'" (selectionChange)="selectedMode($event)">
+                <mat-option [value]="'SOLO_CORREO'">SOLO_CORREO </mat-option>
+                <mat-option [value]="'SISTEMA_ERP'">SISTEMA_ERP</mat-option>
+            </mat-select>
+        </mat-form-field>
+
         <!-- To -->
+        <!--<mat-form-field appearance="fill" *ngIf="['SOLO_CORREO'].includes(mode)">
+            <mat-label>Para</mat-label>
+            <mat-chip-list #chipList aria-label="Fruit selection">
+                <mat-chip
+                    *ngFor="let email of selectedEmail"
+                    (removed)="remove(email)">
+                    {{email}}
+                    <button matChipRemove>
+                        <mat-icon>cancel</mat-icon>
+                    </button>
+                </mat-chip>
+                <input
+                    placeholder="Correo Destinatario..."
+                    #emailInput
+                    [formControlName]="'to'"
+                    [matAutocomplete]="officialTo"
+                    [matChipInputFor]="chipList"
+                    [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                    (matChipInputTokenEnd)="add($event)"
+                    (keyup)="searchOfficialsEmails($event.target.value, 'to')">
+            </mat-chip-list>
+
+            <mat-autocomplete autoActiveFirstOption
+                              #officialTo="matAutocomplete"
+                              (optionSelected)="selected($event)">
+                <mat-option *ngFor="let officialT of officialsListTo" [value]="officialT.email_empresa">
+                    {{officialT.desc_funcionario2}}
+                </mat-option>
+            </mat-autocomplete>
+            <div
+                class="copy-fields-toggles"
+                matSuffix>
+                <span
+                    class="text-sm font-medium cursor-pointer select-none hover:underline"
+                    *ngIf="!copyFields.cc"
+                    (click)="showCopyField('cc')">
+                    Cc
+                </span>
+                <span
+                    class="ml-2 text-sm font-medium cursor-pointer select-none hover:underline"
+                    *ngIf="!copyFields.bcc"
+                    (click)="showCopyField('bcc')">
+                    Bcc
+                </span>
+            </div>
+        </mat-form-field>-->
         <mat-form-field>
             <mat-label>Para</mat-label>
-            <!--<input
-                matInput
-                [formControlName]="'to'">-->
             <input
                 type="text"
                 matInput
@@ -31,7 +87,6 @@
                 (keyup)="searchOfficialsEmails($event.target.value, 'to')"
                 placeholder="Correo Destinatario ...."
                 [formControlName]="'to'">
-
             <mat-autocomplete autoActiveFirstOption
                               #officialTo="matAutocomplete"
                               [displayWith]="officialToListName.bind(this)">
@@ -58,12 +113,39 @@
         </mat-form-field>
 
         <!-- Cc -->
-        <mat-form-field
-            *ngIf="copyFields.cc">
+        <mat-form-field appearance="fill" *ngIf="copyFields.cc && ['SOLO_CORREO'].includes(mode)">
             <mat-label>Cc</mat-label>
-            <!--<input
-                matInput
-                [formControlName]="'cc'">-->
+            <mat-chip-list #chipListCC aria-label="Fruit selection">
+                <mat-chip
+                    *ngFor="let email of selectedEmailCC"
+                    (removed)="removeCC(email)">
+                    {{email}}
+                    <button matChipRemove>
+                        <mat-icon>cancel</mat-icon>
+                    </button>
+                </mat-chip>
+                <input
+                    #emailInputCC
+                    placeholder="Correo Copia ..."
+                    [formControlName]="'cc'"
+                    [matAutocomplete]="officialCC"
+                    [matChipInputFor]="chipListCC"
+                    [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                    (matChipInputTokenEnd)="addCC($event)"
+                    (keyup)="searchOfficialsEmails($event.target.value, 'cc')">
+            </mat-chip-list>
+
+            <mat-autocomplete autoActiveFirstOption
+                              #officialCC="matAutocomplete"
+                              (optionSelected)="selectedCC($event)">
+                <mat-option *ngFor="let officialC of officialsListCC" [value]="officialC.email_empresa">
+                    {{officialC.desc_funcionario2}}
+                </mat-option>
+            </mat-autocomplete>
+        </mat-form-field>
+
+        <mat-form-field *ngIf="copyFields.cc && ['SISTEMA_ERP'].includes(mode)">
+            <mat-label>Cc</mat-label>
             <input
                 type="text"
                 matInput
@@ -82,12 +164,39 @@
         </mat-form-field>
 
         <!-- Bcc -->
-        <mat-form-field
-            *ngIf="copyFields.bcc">
+        <mat-form-field appearance="fill" *ngIf="copyFields.bcc && ['SOLO_CORREO'].includes(mode)">
             <mat-label>Bcc</mat-label>
-            <!--<input
-                matInput
-                [formControlName]="'bcc'">-->
+            <mat-chip-list #chipListBCC aria-label="Email selection">
+                <mat-chip
+                    *ngFor="let email of selectedEmailBCC"
+                    (removed)="removeBCC(email)">
+                    {{email}}
+                    <button matChipRemove>
+                        <mat-icon>cancel</mat-icon>
+                    </button>
+                </mat-chip>
+                <input
+                    #emailInputBCC
+                    placeholder="Correo Copia Oculta ..."
+                    [formControlName]="'bcc'"
+                    [matAutocomplete]="officialBCC"
+                    [matChipInputFor]="chipListBCC"
+                    [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                    (matChipInputTokenEnd)="addBCC($event)"
+                    (keyup)="searchOfficialsEmails($event.target.value, 'bcc')">
+            </mat-chip-list>
+
+            <mat-autocomplete autoActiveFirstOption
+                              #officialBCC="matAutocomplete"
+                              (optionSelected)="selectedBCC($event)">
+                <mat-option *ngFor="let officialB of officialsListBCC" [value]="officialB.email_empresa">
+                    {{officialB.desc_funcionario2}}
+                </mat-option>
+            </mat-autocomplete>
+        </mat-form-field>
+
+        <mat-form-field *ngIf="copyFields.bcc && ['SISTEMA_ERP'].includes(mode)">
+            <mat-label>Bcc</mat-label>
             <input
                 type="text"
                 matInput
@@ -103,20 +212,6 @@
                     {{officialB.desc_funcionario2}}
                 </mat-option>
             </mat-autocomplete>
-        </mat-form-field>
-
-
-        <mat-form-field class="boby-mat-dense w-full flex-auto">
-            <mat-label>Sistema</mat-label>
-            <mat-icon
-                class="icon-size-5"
-                [svgIcon]="'heroicons_solid:thumb-up'"
-                matPrefix></mat-icon>
-            <mat-select [placeholder]="'Seleccione con o sin sistema....'" [formControlName]="'mode'">
-                <mat-option [value]="'SISTEMA_ERP'">SISTEMA_ERP</mat-option>
-                <mat-option [value]="'NINGUNO'">NINGUNO</mat-option>
-
-            </mat-select>
         </mat-form-field>
 
         <!-- Subject -->

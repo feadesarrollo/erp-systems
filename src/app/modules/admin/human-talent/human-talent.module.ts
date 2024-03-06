@@ -93,6 +93,16 @@ import { FileManagerDetailsComponent } from './settings/file-manager/file-manage
 import { FileManagerViewComponent } from './settings/file-manager/file-manager-view/file-manager-view.component';
 
 import { EditorModule, TINYMCE_SCRIPT_SRC  } from '@tinymce/tinymce-angular';
+import { DocumentViewerComponent } from './settings/organization-chart/organization-chart-allocation/document-viewer/document-viewer.component';
+import { ControlBudgetComponent } from './processes/control-budget/control-budget.component';
+
+import { TreeTableModule } from 'primeng/treetable';
+import { AutoCompleteModule } from 'primeng/autocomplete';
+import { InputTextModule } from 'primeng/inputtext';
+
+import { ControlBudgetListComponent } from './processes/control-budget/control-budget-list/control-budget-list.component';
+import { ControlBudgetDetailsComponent } from './processes/control-budget/control-budget-details/control-budget-details.component';
+
 
 @NgModule({
     declarations: [
@@ -141,7 +151,11 @@ import { EditorModule, TINYMCE_SCRIPT_SRC  } from '@tinymce/tinymce-angular';
         FileManagerComponent,
         FileManagerListComponent,
         FileManagerDetailsComponent,
-        FileManagerViewComponent
+        FileManagerViewComponent,
+        DocumentViewerComponent,
+        ControlBudgetComponent,
+        ControlBudgetListComponent,
+        ControlBudgetDetailsComponent
     ],
     imports: [
         RouterModule.forChild(humanTalentRoutes),
@@ -188,7 +202,10 @@ import { EditorModule, TINYMCE_SCRIPT_SRC  } from '@tinymce/tinymce-angular';
         OrganizationChartModule,
         ToastModule,
         PanelModule,
-        EditorModule
+        EditorModule,
+        TreeTableModule,
+        AutoCompleteModule,
+        InputTextModule
     ],
     providers: [
         MessageService,
