@@ -298,4 +298,17 @@ export class ReportsService {
             })
         );
     }
+
+    getReportXls(params: any): Observable<any>{
+
+        return from(this._httpClient.post('reclamo/Reclamo/getReportXls',{
+            id_gestion: params.id_gestion,
+            id_periodo: params.id_periodo
+        })).pipe(
+            switchMap((resp: any) => {
+                // Return a new observable with the response
+                return of(JSON.parse(resp.datos[0].jsondata));
+            })
+        );
+    }
 }

@@ -164,7 +164,6 @@ export class OrganizationChartListComponent implements OnInit {
     createOrga(): void{
         // Create the item
         this._htService.createOrga().subscribe((newOrga) => {
-            console.warn('newOrga',newOrga);
             this._htService.statusOrga = 'new';
             this.selectedNode = newOrga;
             // Go to the new item

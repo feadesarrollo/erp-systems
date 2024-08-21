@@ -10,11 +10,11 @@
                 <mat-menu #controlMenu="matMenu" [xPosition]="'after'">
 
                     <!--<button mat-menu-item (click)="savePlanning()">Guardar Planificación</button>-->
-                    <button mat-menu-item *ngIf="field != 'aprobado_ps'" (click)="enablePlanning()">
-                        <mat-icon [svgIcon]="'mat_solid:edit_note'"></mat-icon>
+                    <button class="text-primary font-bold" mat-menu-item *ngIf="field != 'aprobado_ps' && allowed?.includes('admin')" (click)="enablePlanning()">
+                        <mat-icon class="text-primary" [svgIcon]="'mat_solid:edit_note'"></mat-icon>
                         {{field}}
                     </button>
-                    <button mat-menu-item
+                    <button *ngIf="allowed?.includes('admin')" mat-menu-item
                             (click)="executeCommand('report')">
                         <mat-icon [svgIcon]="'mat_solid:local_printshop'"></mat-icon>
                         Reporte Planificación
@@ -28,7 +28,7 @@
 
                 </mat-menu>
 
-                <button mat-button [color]="'primary'" class="sm:inline-block text-secondary rounded-lg" [matMenuTriggerFor]="settingsMenu">Settings</button>
+                <button *ngIf="allowed?.includes('admin')" mat-button [color]="'primary'" class="sm:inline-block text-secondary rounded-lg" [matMenuTriggerFor]="settingsMenu">Settings</button>
                 <mat-menu #settingsMenu="matMenu" [xPosition]="'after'">
                     <button mat-menu-item
                             [routerLink]="['/system/human-talent/modules/processes/psychoactive-program/organization-chart-selection']">
@@ -99,22 +99,39 @@
                         <ng-container *ngFor="let dayObj of week; let dateIndex = index;" >
                             <div *ngIf="!checkEmptyObject(dayObj)" style="width: 14.28%" class="text-center border-none p-1 border-transparent text-sm">
                             </div>
-                            <div *ngIf="checkEmptyObject(dayObj)" style="width: 14.28%" class="px-1 mb-1" (click)="['editado_ps'].includes(selected.estado) && dayObj?.schedules.length > 0 && onEventClick($event, dayObj)"  #infoDetailsPanelOrigin>
-
+                            <div *ngIf="checkEmptyObject(dayObj)" style="width: 14.28%" class="px-1 mb-1">
+                                <!--(contextmenu)="dayObj?.schedules.length > 0 && onRightMenu($event, dayObj)"-->
                                 <div class="col-span-1 sm:col-span-1 flex flex-col items-center justify-center py-8 px-1 rounded-2xl text-secondary bg-primary-100 dark:bg-white dark:bg-opacity-5"
                                      [ngClass]="{'bg-primary-500 text-white': isToday(dayObj.day) === true,'hover:bg-primary-200': isToday(dayObj.day) === false, 'text-primary-800 bg-primary-100 dark:text-primary-50 dark:bg-primary-500': checkSchedule(dayObj)}"
-                                     >
+                                    >
                                     <div class="text-5xl font-semibold leading-none tracking-tight">
-                                        {{ dayObj.day }}
-
-                                        <div class="font-medium text-center text-xs h-7" cdkDropList [cdkDropListData]="dayObj.schedules" (cdkDropListDropped)="['editado_ps'].includes(selected.estado) && drop($event)">
-                                            <div *ngFor="let schedule of dayObj.schedules" cdkDrag class="grab" (click)="['elaborado_ps','aprobado_ps'].includes(selected.estado) && viewDetail(schedule)">
-                                                {{ schedule.name }}
+                                        <div class="justify-center items-center cursor-cell"
+                                             (click)="dayObj?.schedules.length > 0 && allowed?.includes('admin') && ['editado_ps'].includes(selected.estado) && onContextMenuAction($event, dayObj)">
+                                            {{ dayObj.day }}
+                                        </div>
+                                        <div class="font-medium text-center text-xs h-7 mt-2" cdkDropList [cdkDropListData]="dayObj.schedules" (cdkDropListDropped)="['editado_ps'].includes(selected.estado) && drop($event,dayObj)">
+                                            <div *ngFor="let schedule of dayObj.schedules;let i=index;" cdkDrag class="cursor-zoom-in" (click)="['elaborado_ps','aprobado_ps'].includes(selected.estado) && viewDetail(schedule) || ['editado_ps'].includes(selected.estado) && dayObj?.schedules.length > 0 && allowed?.includes('admin') &&  onEventClick($event, dayObj)" (mousedown)="enter(schedule)">
+                                                <div *ngIf="dayObj.managers?.includes(name) || allowed?.includes('admin')" >
+                                                    <span class="{{color_list[colors(i)]}} font-bold text-xs">{{ schedule.name }}</span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+
+                            <div style="visibility: hidden; position: fixed"
+                                 [style.left]="contextMenuPosition.x"
+                                 [style.top]="contextMenuPosition.y"
+                                 [matMenuTriggerFor]="optionMenu"
+                                 #clickMenuTrigger="matMenuTrigger">
+                            </div>
+                            <mat-menu #optionMenu="matMenu">
+                                <ng-template matMenuContent let-item="item">
+                                    <button mat-menu-item (click)="onContextMenuAction($event,item)">Definir Responsables</button>
+                                </ng-template>
+                            </mat-menu>
+
                         </ng-container>
                     </ng-container>
                 </div>
@@ -162,27 +179,6 @@
                 <form
                     class="flex flex-col w-full p-6 pt-8 sm:pt-10 sm:pr-8"
                     [formGroup]="eventForm">
-
-                    <!--<mat-form-field class="flex-auto gt-xs:pr-3">
-                        <mat-label>Unidad Organizacional</mat-label>
-                        <mat-icon
-                            matPrefix
-                            class="hidden sm:flex icon-size-5"
-                            [svgIcon]="'heroicons_solid:office-building'"></mat-icon>
-                        <input type="text"
-                               matInput
-                               [matAutocomplete]="oficina_inc"
-                               (keyup)="searchOrganizationalUnits($event.target.value)"
-                               placeholder="Oficina Recepción ...."
-                               [formControlName]="'id_uo'">
-                        <mat-autocomplete autoActiveFirstOption
-                                          #oficina_inc="matAutocomplete"
-                                          [displayWith]="getOrganizationalUnits.bind(this)">
-                            <mat-option *ngFor="let uo of organizationalUnits" [value]="uo.id_uo">
-                                {{uo.nombre_unidad}}
-                            </mat-option>
-                        </mat-autocomplete>
-                    </mat-form-field>-->
                     <mat-form-field class="flex-auto gt-xs:pr-3 min-w-60">
                         <mat-label>Unidad Organizacional</mat-label>
                         <mat-select (selectionChange)="selectionOrganizationalUnits($event)"
@@ -202,6 +198,78 @@
                     <div class="flex-auto ml-6">{{'Descripcion'}}</div>
                 </div>
 
+            </div>
+        </ng-container>
+    </ng-template>
+
+    <ng-template #managerPanel>
+        <!-- Preview mode -->
+        <ng-container *ngIf="panelMode === 'view'">
+            <div class="flex flex-col py-4 px-6 w-full max-w-160 space-y-1.5 border text-md rounded shadow-md overflow-auto bg-card">
+                <!-- Info -->
+                <div class="flex flex-row justify-between">
+                    <mat-icon [svgIcon]="'heroicons_outline:user-group'" class="text-amber-500 dark:text-amber-400 hover:text-amber-700"></mat-icon>
+                    <div class="flex flex-auto justify-between ml-6">
+                        <!-- Info -->
+                        <div>
+                            <div class="text-3xl font-semibold tracking-tight leading-none text-primary">{{event?.schedules[0].name}}</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Calendar -->
+                <div class="flex mt-6">
+                    <mat-icon [svgIcon]="'heroicons_outline:calendar'" class="text-amber-500 dark:text-amber-400 hover:text-amber-700"></mat-icon>
+                    <div class="flex flex-auto items-center ml-6">
+                        <div class="leading-none text-primary text-xl font-semibold">{{event?.date}}</div>
+                    </div>
+                </div>
+
+                <form class="flex flex-col w-full p-6 pt-8 sm:pt-10 sm:pr-8" [formGroup]="managerForm">
+
+                    <mat-form-field class="flex-auto min-w-96">
+                        <mat-chip-list #chipList aria-label="Manager selection">
+                            <mat-chip
+                                *ngFor="let manager of managers"
+                                [selectable]="selectable"
+                                [removable]="removable"
+                                (removed)="remove(manager)">
+                                {{manager}}
+                                <mat-icon matChipRemove *ngIf="removable" svgIcon="mat_solid:cancel"></mat-icon>
+                            </mat-chip>
+                            <input
+                                placeholder="Nuevo Encargado..."
+                                #managerInput
+                                #autocompleteTrigger="matAutocompleteTrigger"
+                                [formControlName]="'official'"
+                                [matAutocomplete]="managerAuto"
+                                [matChipInputFor]="chipList"
+                                [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                                (matChipInputTokenEnd)="add($event)"
+                                (keyup)="searchOfficial($event.target.value, 'search')">
+                        </mat-chip-list>
+                        <mat-autocomplete #managerAuto="matAutocomplete" (optionSelected)="selectedManager($event)" autoActiveFirstOption>
+                            <mat-option *ngFor="let oficial of listOfficials" [value]="oficial.id_funcionario">
+                                <mat-checkbox color="primary" style="padding: 0 12px;" [checked]="managers.indexOf(oficial.desc_funcionario1) >= 0"></mat-checkbox>
+                                {{oficial.desc_funcionario1}}
+                            </mat-option>
+                        </mat-autocomplete>
+                        <button mat-icon-button matSuffix style="width: 34px; height: 34px;" (click)="openAuto(autocompleteTrigger)"><mat-icon style="width: 34px;" svgIcon="mat_solid:expand_more"></mat-icon></button>
+                    </mat-form-field>
+
+                </form>
+
+                <div class="flex justify-end">
+                    <button
+                        class="sm:inline-flex ml-2 rounded-lg"
+                        mat-flat-button
+                        [color]="'primary'"
+                        [matTooltip]="'Guardar Encargados'"
+                        (click)="saveManagers()">
+                        <mat-icon [svgIcon]="'mat_solid:save'"
+                                  class="text-amber-500 dark:text-amber-400 hover:text-amber-700">
+                        </mat-icon>Guardar
+                    </button>
+                </div>
             </div>
         </ng-container>
     </ng-template>

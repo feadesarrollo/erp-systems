@@ -85,7 +85,8 @@ export class PermissionsDetailsComponent implements OnInit {
             {id:'create', name:'Crear'},
             {id:'read', name:'Lectura'},
             {id:'update', name:'Actualizar'},
-            {id:'delete', name:'Eliminar'}
+            {id:'delete', name:'Eliminar'},
+            {id:'admin', name:'Admin'},
         ];
         // Open the drawer
         this._permissionsListComponent.matDrawer.open();

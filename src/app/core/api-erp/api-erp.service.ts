@@ -36,7 +36,7 @@ export class ApiErpService {
                     this._authService.redirect();
 
                     // Reload the app
-                    location.reload();
+                    //location.reload();
                 }
             );
     }

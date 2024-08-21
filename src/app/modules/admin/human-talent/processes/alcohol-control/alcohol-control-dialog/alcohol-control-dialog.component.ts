@@ -33,7 +33,7 @@ export class AlcoholControlDialogComponent implements OnInit {
         {value:'holiday', name: 'Feriado', percent:2, number:8}
     ];
 
-    public listOfficials: any;
+    public listOfficials: any = [];
     private daysOfMonth = new Map<number, Date>();
     private chosenDays = new Map<number, Date>();
     private lotteryOfDays:any[] = [];

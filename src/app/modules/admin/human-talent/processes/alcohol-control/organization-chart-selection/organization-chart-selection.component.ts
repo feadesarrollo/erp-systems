@@ -7,6 +7,9 @@ import {HumanTalentService} from "../../../human-talent.service";
 import {MatDialog} from "@angular/material/dialog";
 import {MessageService} from "primeng/api";
 import {AlcoholControlDialogComponent} from "../alcohol-control-dialog/alcohol-control-dialog.component";
+import {FormBuilder, FormGroup} from "@angular/forms";
+import {BobyConfirmationService} from "../../../../../../../@boby/services/confirmation";
+import {BobyLoadingService} from "../../../../../../../@boby/services/loading";
 
 @Component({
   selector: 'erp-organization-chart-selection',
@@ -42,15 +45,18 @@ export class OrganizationChartSelectionComponent implements OnInit {
     //typesOfShoes: string[] = ['Boots', 'Clogs', 'Loafers', 'Moccasins', 'Sneakers'];
     selectedUnits: any[] = [];
     selectedOrgChart: any = [];
-
+    private id;
     markSelectedChart: TodoItemFlatNode [] = [];
 
-    selectedProject: string = 'ACME Corp. Backend App';
+    private configForm: FormGroup;
     constructor(
         private _database: HumanTalentService,
         private _changeDetectorRef: ChangeDetectorRef,
         private _matDialog: MatDialog,
-        private _messageService: MessageService
+        private _messageService: MessageService,
+        private _formBuilder: FormBuilder,
+        private _fcService: BobyConfirmationService,
+        private _loadService: BobyLoadingService
     ) {
 
         this.treeFlattener = new MatTreeFlattener(this.transformer, this.getLevel,this.isExpandable, this.getChildren);
@@ -62,6 +68,7 @@ export class OrganizationChartSelectionComponent implements OnInit {
         _database.getSelectedOrganizationChart().subscribe((resp) => {
             this.selectedUnits = resp.selected_list;
             this.selectedOrgChart = resp.selected_org_chart;
+            this.id = resp.id;
             this._changeDetectorRef.markForCheck();
         });
 
@@ -101,7 +108,7 @@ export class OrganizationChartSelectionComponent implements OnInit {
 
 
 
-        if ( this.selectedOrgChart.includes(+node.id) ){
+        if ( this.selectedOrgChart?.includes(+node.id) ){
             this.checklistSelection.select(newNode);
             this._changeDetectorRef.markForCheck();
         }
@@ -125,6 +132,42 @@ export class OrganizationChartSelectionComponent implements OnInit {
     }
 
     deleteSelection(): void{
+        // Build the config form
+        this.configForm = this._formBuilder.group({
+            title: 'Alerta',
+            message: `Estimado Usuario, esta seguro de eliminar el listado parametrizado?`,
+            icon: this._formBuilder.group({
+                show: true,
+                name: 'heroicons_outline:exclamation',
+                color: 'warn'
+            }),
+            actions: this._formBuilder.group({
+                confirm: this._formBuilder.group({
+                    show: true,
+                    label: 'Confirmar',
+                    color: 'warn'
+                }),
+                cancel: this._formBuilder.group({
+                    show: true,
+                    label: 'Cancelar'
+                })
+            }),
+            dismissible: true
+        });
+
+        const dialogRef = this._fcService.open(this.configForm.value);
+
+        // Subscribe to afterClosed from the dialog reference
+        dialogRef.afterClosed().subscribe((result) => {
+            if (result == 'confirmed') {
+                this._loadService.show();
+                this._database.deleteSelection(this.id).subscribe((resp)=>{
+                    this._loadService.hide();
+                    this.refreshOrgChart();
+                });
+            }
+        });
+
 
     }
 
@@ -173,21 +216,25 @@ export class OrganizationChartSelectionComponent implements OnInit {
     }
 
     refreshOrgChart(){
+        this._loadService.show();
         this._database.getSelectedOrganizationChart().subscribe((resp) => {
+            this._loadService.hide();
             this.selectedUnits = resp.selected_list;
             this.selectedOrgChart = resp.selected_org_chart;
+            this.id = resp.id;
             this._changeDetectorRef.markForCheck();
         });
+
+        this._database.initialize();
     }
 
     /** Whether all the descendants of the node are selected. */
     descendantsAllSelected(node: TodoItemFlatNode): boolean {
-
         //this.selectedUnits = this.checklistSelection.selected;
         const descendants = this.treeControl.getDescendants(node);
 
 
-        if ( !this.selectedOrgChart.includes(+node.id) ){
+        if ( !this.selectedOrgChart?.includes(+node.id) ){
             if ( this.checklistSelection.isSelected(node) ) {
                 //this.selectedOrgChart = [...this.selectedOrgChart, +node.id]
                 this.selectedOrgChart = this.checklistSelection.selected.reduce((accumulator, key) => {
@@ -320,6 +367,72 @@ export class OrganizationChartSelectionComponent implements OnInit {
     saveNode(node: TodoItemFlatNode, itemValue: string) {
         const nestedNode = this.flatNodeMap.get(node);
         this._database.updateItem(nestedNode!, itemValue);
+    }
+
+    /**
+     * Track by function for ngFor loops
+     *
+     * @param index
+     * @param item
+     */
+    trackByFn(index: number, item: any): any
+    {
+        return item.id || index;
+    }
+
+    deleteSelected(item){
+        // Build the config form
+        this.configForm = this._formBuilder.group({
+            title: 'Alerta',
+            message: `Estimado Usuario, esta seguro de eliminar la unidad parametrizada?`,
+            icon: this._formBuilder.group({
+                show: true,
+                name: 'heroicons_outline:exclamation',
+                color: 'warn'
+            }),
+            actions: this._formBuilder.group({
+                confirm: this._formBuilder.group({
+                    show: true,
+                    label: 'Confirmar',
+                    color: 'warn'
+                }),
+                cancel: this._formBuilder.group({
+                    show: true,
+                    label: 'Cancelar'
+                })
+            }),
+            dismissible: true
+        });
+
+        const dialogRef = this._fcService.open(this.configForm.value);
+
+        // Subscribe to afterClosed from the dialog reference
+        dialogRef.afterClosed().subscribe((result) => {
+            if (result == 'confirmed') {
+
+                    this._database.checkedSelection(item.id_uo,item.haschildren,false).subscribe(
+                    (resp)=>{
+                        if ( resp.error ){
+                            this._messageService.add({
+                                severity: 'error',
+                                summary: 'ADVERTENCIA',
+                                detail: resp.message,
+                                life: 9000
+                            });
+                        }else{
+                            this.selectedUnits = JSON.parse(resp.data.selected_list);
+                            this.selectedOrgChart = JSON.parse(resp.data.selected_org_chart);
+                            this.id = resp.data.id;
+
+                            let node = this.checklistSelection.selected.find(elem => +elem.id === +item.id_uo);
+                            this.checklistSelection.deselect(node);
+
+                            this._changeDetectorRef.markForCheck();
+                        }
+                    }
+                );
+            }
+        });
     }
 
 }

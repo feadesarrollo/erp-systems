@@ -190,7 +190,6 @@ export class OrganizationChartAllocationComponent implements OnInit {
         this._orgaChartService.generateContract(this.selectedItem.id_uo_funcionario)
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe((response) => {
-                console.warn('response',response);
                 this._loadService.hide();
                 const detalle = response.detail;
                 this.selectedItem.archivo_generado = detalle.archivo_generado;

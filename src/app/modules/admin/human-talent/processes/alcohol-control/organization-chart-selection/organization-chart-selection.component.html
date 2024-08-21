@@ -82,8 +82,8 @@
                         </button>
                         <mat-menu #orgaMenu="matMenu">
                             <!--<button mat-menu-item (click)="saveSelection()">Guardar Selección</button>-->
-                            <button mat-menu-item (click)="refreshOrgChart()">Actualizar Organigrama</button>
-                            <button mat-menu-item (click)="deleteSelection()">Quitar Selección</button>
+                            <button mat-menu-item (click)="refreshOrgChart()"><mat-icon class="text-primary" [svgIcon]="'heroicons_outline:refresh'"></mat-icon>Actualizar Organigrama</button>
+                            <button mat-menu-item (click)="deleteSelection()"><mat-icon class="text-primary" [svgIcon]="'heroicons_outline:trash'"></mat-icon>Eliminar Selección</button>
                         </mat-menu>
                     </div>
                 </div>
@@ -153,17 +153,38 @@
                                 [svgIcon]="'heroicons_solid:dots-vertical'"></mat-icon>
                         </button>
                         <mat-menu #listMenu="matMenu">
-                            <!--<button mat-menu-item>Guardar Lista</button>-->
-                            <button mat-menu-item>Quitar Lista</button>
+                            <button mat-menu-item (click)="deleteSelection()"><mat-icon class="text-primary" [svgIcon]="'heroicons_outline:trash'"></mat-icon>Eliminar Lista</button>
                         </mat-menu>
                     </div>
                 </div>
 
-                <mat-selection-list #shoes>
+                <!--<mat-selection-list #shoes>
                     <mat-list-option color="primary" *ngFor="let unit of selectedUnits">
                         {{unit.nombre_unidad}} ({{unit.codigo}})
                     </mat-list-option>
-                </mat-selection-list>
+                </mat-selection-list>-->
+
+                <ng-container *ngFor="let unit of selectedUnits; let first = first; let i = index; trackBy: trackByFn">
+                    <div class="group w-full select-none hover:bg-gray-100 dark:hover:bg-hover">
+
+                        <!-- Task content -->
+                        <div class="relative flex items-center h-full pl-5">
+
+                            <button class="mr-2 -ml-2.5 leading-none"
+                                    mat-icon-button
+                                    (click)="deleteSelected(unit)">
+                                <ng-container>
+                                    <mat-icon class="text-primary" [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                </ng-container>
+                            </button>
+
+                            <ng-container>
+                                <span class="font-bold text-red-500 text-lg">{{i+1}}.- </span><span class="text-lg">{{unit.nombre_unidad}} ({{unit.codigo}})</span>
+                            </ng-container>
+
+                        </div>
+                    </div>
+                </ng-container>
             </boby-card>
 
         </div>

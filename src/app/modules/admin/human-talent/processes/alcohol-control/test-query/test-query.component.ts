@@ -25,6 +25,7 @@ import {ViewDocGenDialogComponent} from "../view-doc-gen-dialog/view-doc-gen-dia
 import { takeUntil, Subject, switchMap, map, debounceTime } from 'rxjs';
 import {ViewDocumentDialogComponent} from "../details-officials/view-document-dialog/view-document-dialog.component";
 import {DetailsOfficialsDialogComponent} from "../details-officials/details-officials-dialog/details-officials-dialog.component";
+import {PermissionsService} from "../../../permissions/permissions.service";
 
 @Component({
     selector: 'erp-test-query',
@@ -76,6 +77,9 @@ export class TestQueryComponent implements OnInit {
     monthList: any [] = [];
     dayList: any [] = [];
     /******************************* FILTERS *******************************/
+
+    private roles: any;
+    public allowed: any;
     constructor(
         private messageService: MessageService,
         private _htService: HumanTalentService,
@@ -87,7 +91,8 @@ export class TestQueryComponent implements OnInit {
         private _activatedRoute: ActivatedRoute,
         private _messageService: MessageService,
         private _fcService: BobyConfirmationService,
-        private _claimService: ClaimsService
+        private _claimService: ClaimsService,
+        private _roles: PermissionsService
     ) { }
 
     ngOnInit(): void {
@@ -143,6 +148,14 @@ export class TestQueryComponent implements OnInit {
                 })
             )
             .subscribe();
+
+        this._roles.getRolesByOfficial()
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((roles)=>{
+                this.allowed = roles.find(sys => sys.permissionModule.find(mod=> mod.modules.includes('programa-psicoactivo'))).permissionModule.find(allow => allow.permission).permission;
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });
     }
 
     onYearChange(ev) {
@@ -496,11 +509,11 @@ export class TestQueryComponent implements OnInit {
      * Action archivo
      */
     viewDocument(document:any): void {
-        if (document?.document_path) {
+        if (document?.tests?.document_path) {
             this.viewer_file = 'url';
-            document.viewer_file = this.viewer_file;
+            document.tests.viewer_file = this.viewer_file;
             const dialogRef = this._matDialog.open(ViewDocumentDialogComponent, {
-                data: document
+                data: document.tests
             });
 
             dialogRef.afterClosed()

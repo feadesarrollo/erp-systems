@@ -1,22 +1,19 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnInit, ViewEncapsulation} from '@angular/core';
+import {ChangeDetectorRef, Component, Inject, OnInit} from '@angular/core';
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
-import {HumanTalentService} from "../../../../human-talent.service";
-import {BobyConfirmationService} from "../../../../../../../../@boby/services/confirmation";
-import {MatTableDataSource} from "@angular/material/table";
-import * as moment from "moment";
-import {ClaimFilesService} from "../../../../../claims-management/claims/claim/claim-files/claim-files.service";
+import {HumanTalentService} from "../../../human-talent.service";
+import {BobyConfirmationService} from "../../../../../../../@boby/services/confirmation";
+import {ClaimFilesService} from "../../../../claims-management/claims/claim/claim-files/claim-files.service";
 import {MessageService} from "primeng/api";
-import {BobyLoadingService} from "@boby/services/loading";
+import * as moment from "moment";
+import {ClaimsService} from "../../../../claims-management/claims/claims.service";
 
 @Component({
-    selector: 'erp-details-officials-dialog',
-    templateUrl: './details-officials-dialog.component.html',
-    styleUrls: ['./details-officials-dialog.component.scss'],
-    encapsulation  : ViewEncapsulation.None,
-    changeDetection: ChangeDetectionStrategy.OnPush
+  selector: 'erp-manual-registration-dialog',
+  templateUrl: './manual-test-dialog.component.html',
+  styleUrls: ['./manual-test-dialog.component.scss']
 })
-export class DetailsOfficialsDialogComponent implements OnInit {
+export class ManualTestDialogComponent implements OnInit {
 
     public TestForm: FormGroup;
 
@@ -27,41 +24,41 @@ export class DetailsOfficialsDialogComponent implements OnInit {
     public selectionChange:string = 'negativo';
     private file:any = '';
     public processing: boolean = false;
+    public listOfficials: any = [];
     constructor(
         @Inject(MAT_DIALOG_DATA) public _data: any,
         private _changeDetectorRef: ChangeDetectorRef,
         private _formBuilder: FormBuilder,
         private _htService: HumanTalentService,
         private _fcService: BobyConfirmationService,
-        public matDialogRef: MatDialogRef<DetailsOfficialsDialogComponent>,
+        public matDialogRef: MatDialogRef<ManualTestDialogComponent>,
         private _archivoS: ClaimFilesService,
         private _messageService: MessageService,
-        private _loadService: BobyLoadingService,
+        private _claimService: ClaimsService
     ) { }
 
     ngOnInit(): void {
-        const date  = this._data.information.date.split('/');
-        //moment(this._data.information.date,'DD/MM/YYYY').add(1, 'days').format('YYYY-MM-DD')
+
         this.TestForm = this._formBuilder.group({
-            testdate: [new Date(+date[2], date[1] - 1, +date[0]), Validators.required],
+            official: ['', Validators.required],
+            //testdate: [moment().add(1, 'days').format('YYYY-MM-DD'), Validators.required],
+            testdate: [new Date(), Validators.required],
             testtype: ['Alcohol', Validators.required],
             result: ['negativo', Validators.required],
-            testconfirm: ['No se realizo']
+            testconfirm: ['']
         });
-        this._changeDetectorRef.markForCheck();
 
         this._htService.getTestType().subscribe(
             (resp: any) => {
                 this.testTypeList = resp.testTypeList;
-                if ( this._data.status == 'edit' ) {
-                    if ( this._data.selectedOfficial.tests != null ){
-                        //this._data.selectedOfficial.testdate = moment.utc(new Date(this._data.selectedOfficial.testdate));
-                        this.TestForm.patchValue(this._data.selectedOfficial.tests);
-                    }else{
+                /*if ( this._data.status == 'edit' ) {
+                    if ( this._data.selectedOfficial.result != '' ){
+                        this.TestForm.patchValue(this._data.selectedOfficial);
+                    }else{*/
                         this.TestForm.get('testconfirm').setValue('No se realizo');
-                    }
+                    /*}
 
-                }
+                }*/
             }
         );
 
@@ -71,8 +68,8 @@ export class DetailsOfficialsDialogComponent implements OnInit {
 
     onSelectionChange(event){
         this.selectionChange = event.value;
-        if ( event.value == 'negativo' ){
-            //this.imageSrc = '';
+        if ( event.value == 'positivo' ){
+
         }
     }
 
@@ -122,17 +119,8 @@ export class DetailsOfficialsDialogComponent implements OnInit {
 
         const reader = new FileReader();
         reader.readAsDataURL(this.file);
-
-        reader.onloadstart = () => {
-            this._loadService.show();
-        };
-
         reader.onload = () => {
             this.imageSrc = reader.result;
-        };
-
-        reader.onloadend = () => {
-            this._loadService.hide();
         };
 
     }
@@ -146,7 +134,7 @@ export class DetailsOfficialsDialogComponent implements OnInit {
         this.matDialogRef.close();
     }
 
-    completeDetail(){
+    postManualTest(){
 
         // Build the config form
         this.configForm = this._formBuilder.group({
@@ -176,20 +164,15 @@ export class DetailsOfficialsDialogComponent implements OnInit {
         // Subscribe to afterClosed from the dialog reference
         dialogRef.afterClosed().subscribe((result) => {//cancelled, confirmed
             if ( result == 'confirmed' ){
-
-
                 const testOfficial = this.TestForm.value;
                 Object.keys(this.TestForm.value).forEach(key => {
                     if(!testOfficial[key]){
                         testOfficial[key] = '';
                     }
-                    /*if (['testdate'].includes(key)) {
-                        testOfficial[key] = moment/!*.utc*!/(testOfficial[key]).format('YYYY-MM-DD');
-                    }*/
                 });
                 this.processing = true;
                 this._changeDetectorRef.markForCheck();
-                this._htService.postTestOfficial(testOfficial, this._data.selectedOfficial, this.file, this.imageSrc, this._data.id_control_sorteo_prueba,this._data.id).subscribe(
+                this._htService.postManualTest(testOfficial, this.TestForm.get('official').value, this.file, this.imageSrc).subscribe(
                     (resp: any) => {
                         this.processing = false;
                         this._changeDetectorRef.markForCheck();
@@ -209,10 +192,29 @@ export class DetailsOfficialsDialogComponent implements OnInit {
                         console.error('error',error);
                     }
                 );
-            }/*else{
-                this.matDialogRef.close(this.TestTypeForm.value);
-            }*/
+            }
         });
 
     }
+
+    /**
+     * Search Official
+     */
+    searchOfficial(query: string): void
+    {
+        this._claimService.searchFuncionario(query).subscribe(
+            (lists) => {
+                this.listOfficials = lists;
+            }
+        );
+    }
+
+    /**
+     * Get Official Name
+     */
+    getOfficialName(id_funcionario: string) {
+        if (id_funcionario !== null && id_funcionario !== undefined && id_funcionario !== '')
+            return this.listOfficials.find(off => off.id_funcionario === id_funcionario).desc_funcionario2;
+    }
+
 }

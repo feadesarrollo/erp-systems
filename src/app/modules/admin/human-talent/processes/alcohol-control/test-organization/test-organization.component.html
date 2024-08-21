@@ -1,0 +1,179 @@
+<!--<p-organizationChart [value]="organization" selectionMode="single"
+                     (onNodeExpand)="onNodeExpand($event)"
+                     styleClass="company"
+                     class="justify-items-center items-center">
+    <ng-template let-node pTemplate="person">
+        <div class="node-header">{{node.label}}</div>
+        <div class="node-content">
+            <div>{{node.data.nombre_unidad}}</div>
+        </div>
+    </ng-template>
+    <ng-template let-node pTemplate="department">
+        {{node.label}}
+    </ng-template>
+</p-organizationChart>-->
+<div
+    class="absolute inset-0 min-w-0 text-center overflow-auto print:overflow-visible"
+    cdkScrollable>
+    <div class="flex flex-col shadow bg-card">
+        <div class="flex flex-col flex-0 lg:flex-row items-center max-w-5xl w-full mx-auto px-8 lg:h-18 bg-card">
+            <div class="flex items-center mt-8 mb-4 lg:m-0 lg:ml-auto space-x-6">
+                <button mat-button [color]="'primary'" class="sm:inline-block text-secondary rounded-lg" [matMenuTriggerFor]="controlMenu">Acción</button>
+                <mat-menu #controlMenu="matMenu" [xPosition]="'after'">
+                    <button mat-menu-item
+                            [routerLink]="['/system/human-talent/modules/processes/psychoactive-program/test-query']">
+                        <mat-icon [svgIcon]="'mat_solid:edit_calendar'"></mat-icon>Consulta Pruebas Realizadas
+                    </button>
+                    <button mat-menu-item [routerLink]="['../']">
+                        <mat-icon [svgIcon]="'mat_solid:article'"></mat-icon>Regresar a Listado de Planes
+                    </button>
+                    <button mat-menu-item
+                            [routerLink]="['../../']">
+                        <mat-icon [svgIcon]="'mat_solid:menu_open'"></mat-icon>Volver a Menu Principal
+                    </button>
+                </mat-menu>
+
+                <button *ngIf="allowed?.includes('admin')" mat-button [color]="'primary'" class="sm:inline-block text-secondary rounded-lg" [matMenuTriggerFor]="settingsMenu">Settings</button>
+                <mat-menu #settingsMenu="matMenu" [xPosition]="'after'">
+                    <button mat-menu-item
+                            [routerLink]="['/system/human-talent/modules/processes/psychoactive-program/organization-chart-selection']">
+                        <mat-icon [svgIcon]="'mat_solid:account_tree'"></mat-icon>Organigrama
+                    </button>
+                    <button mat-menu-item
+                            [routerLink]="['/system/human-talent/modules/processes/psychoactive-program/test-type']">
+                        <mat-icon [svgIcon]="'mat_solid:auto_fix_high'"></mat-icon>Tipo Prueba
+                    </button>
+                </mat-menu>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="relative flex flex-auto sm:flex-row flex-0 sm:items-center sm:justify-between py-2 px-6 border-b">
+        <!-- Actions -->
+        <div class="flex shrink-0 items-end mt-1 sm:mt-0 sm:ml-4">
+
+
+            <!-- Unit -->
+            <mat-form-field class="boby-mat-no-subscript boby-mat-dense w-full sm:w-96 mt-2 ml-1">
+                <input type="text"
+                       matInput
+                       [matAutocomplete]="uo"
+                       [placeholder]="'Seleccione Unidad ....'"
+                       [formControl]="searchInputControl">
+                <mat-autocomplete autoActiveFirstOption
+                                  #uo="matAutocomplete"
+                                  [displayWith]="getOrganizationUnit.bind(this)">
+                    <mat-option *ngFor="let uo of organizationUnits" [value]="uo.id_uo">
+                        {{uo.nombre_unidad}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-form-field>
+
+            <button
+                class="sm:inline-flex ml-2 rounded-lg"
+                mat-flat-button
+                [color]="'primary'"
+                [matTooltip]="'Reporte Consolidado Pruebas'"
+                (click)="generateTestReport()">
+                <mat-icon class="icon-size-1" [svgIcon]="'iconsmind:file_excel'"></mat-icon>
+            </button>
+
+            <button
+                class="ml-2 rounded-lg"
+                mat-flat-button
+                [color]="'primary'"
+                [matTooltip]="'Actualizar'"
+                (click)="refresh()">
+                <mat-icon [svgIcon]="'heroicons_outline:refresh'"></mat-icon>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div class="w-full inline-block p-6 sm:p-10 text-left print:p-0">
+        <!-- Process -->
+        <div *ngFor="let node of nodes; let index = index" class="w-full p-6 mb-4 rounded-2xl shadow bg-card print:w-auto print:rounded-none print:shadow-none print:bg-transparent">
+
+            <div class="grid grid-cols-12 gap-x-4 gap-y-1">
+                <div class="col-span-2 justify-center">
+                    <img
+                        class="w-20 h-20 rounded items-center justify-center"
+                        *ngIf="node.picture"
+                        [alt]="'Fotografia Funcionario'"
+                        [src]="node.picture">
+                </div>
+
+                <div class="col-span-10">
+                    <div class="font-medium tracking-tight text-secondary">Funcionario:</div>
+                    <div class="font-medium">{{node.funcionario}}</div>
+
+                    <div class="font-medium tracking-tight text-secondary">Nombre Unidad:</div>
+                    <div class="font-medium">{{node.nombre_unidad}}</div>
+                </div>
+
+            </div>
+            <ng-container *ngIf="node.tests.length > 0">
+                <div class="col-span-12 my-1 border-b pt-4"></div>
+
+                <!--<div class="group w-full text-primary mt-2 bg-gray-100 dark h-12 font-medium  text-3xl font-semibold bg-gray-50 dark:bg-transparent">
+                    PRUEBAS
+                </div>-->
+
+                <div class="grid grid-cols-12 gap-x-1 mt-2">
+                    <!-- Columns -->
+                    <div class="col-span-2 font-medium text-lg text-primary">TIPO PRUEBA</div>
+                    <div class="col-span-3 font-medium text-lg text-primary">GERENCIA</div>
+                    <div class="col-span-3 font-medium text-lg text-primary">CARGO</div>
+                    <div class="col-span-2 font-medium text-lg text-primary">RESULTADO</div>
+                    <div class="col-span-2 font-medium text-lg text-primary">FECHA PRUEBA</div>
+
+                    <!-- Divider -->
+                    <div class="col-span-12 my-2 border-b"></div>
+
+                    <ng-container *ngFor="let test of node.tests; let index = index">
+                        <!-- Item -->
+                        <div class="col-span-2 text-lg self-center font-medium text-secondary">
+                            <div class="flex flex-row justify-between pr-16">
+                                <div>
+                                    {{test.testtype}}
+                                </div>
+                                <div *ngIf="test.result == 'positivo'">
+                                    <button [matTooltip]="'Ver Documento'" (click)="test.result == 'positivo' && viewDocument(test)">
+                                        <mat-icon class="text-green-500 dark:text-green-400 hover:text-green-700" svgIcon="heroicons_outline:eye"></mat-icon>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-span-3 text-lg self-center font-medium">{{test.gerencia}}</div>
+                        <div class="col-span-3 text-lg self-center font-medium">{{test.occupation}}</div>
+                        <div class="col-span-2 text-lg self-center font-medium">{{test.result}}</div>
+                        <div class="col-span-2 text-lg self-center font-medium">{{test.date}}</div>
+
+                        <!-- Divider -->
+                        <div class="col-span-12 my-4 border-b"></div>
+                    </ng-container>
+
+                    <!-- Item -->
+                    <!--<div class="col-span-8 text-lg self-center font-medium text-secondary">
+                        <div class="flex flex-row justify-between pr-16">
+                            <div>
+                                2.1 PAC
+                            </div>
+                            <div>
+                                <button>
+                                    <mat-icon class="text-green-500 dark:text-green-400 hover:text-green-700" svgIcon="heroicons_outline:eye"></mat-icon>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-span-2 text-lg self-center font-medium">77777777777</div>
+                    <div class="col-span-2 text-lg self-center font-medium">07/07/2023</div>
+
+                    &lt;!&ndash; Divider &ndash;&gt;
+                    <div class="col-span-12 my-4 border-b"></div>-->
+                </div>
+            </ng-container>
+        </div>
+    </div>
+</div>

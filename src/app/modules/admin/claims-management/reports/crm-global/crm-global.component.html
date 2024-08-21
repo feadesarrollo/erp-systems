@@ -20,7 +20,7 @@
                 <button
                     class="hidden sm:inline-flex ml-3"
                     mat-flat-button
-                    [color]="'primary'">
+                    [color]="'primary'" (click)="generateReport()">
                     <mat-icon
                         class="icon-size-5"
                         [svgIcon]="'heroicons_solid:save'"></mat-icon>
@@ -84,7 +84,7 @@
                                     </mat-option>
                                 </mat-select>
                             </mat-form-field>-->
-                            <mat-form-field class="px-1.5 pt-3 rounded-full overflow-hidden border-none font-medium" [matTooltip]="'Seleccione GESTIÓN'">
+                            <mat-form-field class="px-1.5 pt-3 rounded-full overflow-hidden border-none font-medium w-full" [matTooltip]="'Seleccione GESTIÓN'">
                                 <mat-icon
                                     matPrefix
                                     class="hidden sm:flex icon-size-5"
@@ -103,7 +103,7 @@
                             </mat-form-field>
 
                             <!-- Mes -->
-                            <mat-form-field class="px-1.5 pt-3 rounded-full overflow-hidden border-none font-medium" [matTooltip]="'Seleccione PERIODO'">
+                            <mat-form-field class="px-1.5 pt-3 rounded-full overflow-hidden border-none font-medium w-full" [matTooltip]="'Seleccione PERIODO'">
                                 <mat-icon
                                     matPrefix
                                     class="hidden sm:flex icon-size-5"

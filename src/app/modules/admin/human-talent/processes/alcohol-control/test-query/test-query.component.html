@@ -7,11 +7,11 @@
                 <mat-menu #controlMenu="matMenu" [xPosition]="'after'">
                     <button mat-menu-item
                             [routerLink]="['../']">
-                        <mat-icon [svgIcon]="'mat_solid:menu_open'"></mat-icon>Volver a Lista Sorteo
+                        <mat-icon [svgIcon]="'mat_solid:menu_open'"></mat-icon>Regresar a Listado de Planes
                     </button>
                 </mat-menu>
 
-                <button mat-button [color]="'primary'" class="sm:inline-block text-secondary rounded-lg" [matMenuTriggerFor]="settingsMenu">Settings</button>
+                <button *ngIf="allowed?.includes('admin')" mat-button [color]="'primary'" class="sm:inline-block text-secondary rounded-lg" [matMenuTriggerFor]="settingsMenu">Settings</button>
                 <mat-menu #settingsMenu="matMenu" [xPosition]="'after'">
                     <button mat-menu-item
                             [routerLink]="['/system/human-talent/modules/processes/psychoactive-program/organization-chart-selection']">
@@ -146,11 +146,11 @@
                                     <mat-icon [svgIcon]="'heroicons_outline:printer'"></mat-icon>
                                     Exportar Registros
                                 </button>
-                                <button mat-menu-item
+                                <!--<button mat-menu-item
                                         (click)="executeCommand('test_detail')">
                                     <mat-icon [svgIcon]="'heroicons_outline:eye'"></mat-icon>
                                     Completar Detalle Prueba
-                                </button>
+                                </button>-->
                                 <!--<button mat-menu-item
                                         (click)="executeCommand('delete')">
                                     <mat-icon [svgIcon]="'heroicons_outline:trash'"></mat-icon>
@@ -160,13 +160,13 @@
                         </button>
 
                         <mat-menu #formatos="matMenu">
-                            <button mat-menu-item (click)="exporter.exportTable('xls', {fileName:'Registros de Pruebas Psico Activas'})">
+                            <!--<button mat-menu-item (click)="exporter.exportTable('xls', {fileName:'Registros de Pruebas Psico Activas'})">
                                 <mat-icon class="icon-size-1" [svgIcon]="'iconsmind:file_excel'"></mat-icon>XLS
-                            </button>
+                            </button>-->
                             <button mat-menu-item (click)="exporter.exportTable('xlsx', {fileName:'Registros de Pruebas Psico Activas'})">
                                 <mat-icon class="icon-size-1" [svgIcon]="'iconsmind:file_excel'"></mat-icon>XLSX
                             </button>
-                            <button mat-menu-item (click)="exporter.exportTable('csv', {fileName:'Registros de Pruebas Psico Activas'})">
+                            <!--<button mat-menu-item (click)="exporter.exportTable('csv', {fileName:'Registros de Pruebas Psico Activas'})">
                                 <mat-icon class="icon-size-1" [svgIcon]="'iconsmind:file_csv'"></mat-icon>CSV
                             </button>
                             <button mat-menu-item (click)="exporter.exportTable('txt', {fileName:'Registros de Pruebas Psico Activas'})">
@@ -174,7 +174,7 @@
                             </button>
                             <button mat-menu-item (click)="exporter.exportTable('json', {fileName:'Registros de Pruebas Psico Activas'})">
                                 <mat-icon class="icon-size-1" [svgIcon]="'iconsmind:file'"></mat-icon>JSON
-                            </button>
+                            </button>-->
                         </mat-menu>
                     </mat-cell>
                 </ng-container>
@@ -204,7 +204,7 @@
                     <mat-cell (click)="selectedOfficial = row; row['result'] == 'positivo' && viewDocument(row)" *matCellDef="let row" class="min-w-32" [ngClass]="{ 'text-primary-800 bg-primary-100 dark:text-primary-50 dark:bg-primary-500': row === selectedOfficial }">
                         <!--class="flex items-center cursor-pointer hover:bg-hover" [matTooltip]="'Ver Documento'"-->
                         <div [ngClass]="{ 'flex items-center cursor-pointer hover:bg-hover': row['result'] == 'positivo', 'flex items-center ': row['document_path'] == ''}" [matTooltip]="row['result'] == 'positivo'?'Ver Documento':''">
-                            <mat-icon  class="w-10 h-10 rounded text-blue-800 bg-blue-100 dark:text-blue-50 dark:bg-blue-500" *ngIf="row['testtype'] == ''" [svgIcon]="'mat_solid:edit_calendar'"></mat-icon>
+                            <mat-icon  class="w-10 h-10 rounded text-blue-800 bg-blue-100 dark:text-blue-50 dark:bg-blue-500" *ngIf="row['testtype'] == null" [svgIcon]="'mat_solid:edit_calendar'"></mat-icon>
                             <mat-icon  class="w-10 h-10 rounded text-green-800 bg-green-100 dark:text-green-50 dark:bg-green-500" *ngIf="row['result'] == 'negativo'" [svgIcon]="'mat_solid:check_circle'"></mat-icon>
                             <mat-icon  class="w-10 h-10 rounded text-warn-800 bg-warn-100 dark:text-warn-50 dark:bg-warn-500" *ngIf="row['result'] == 'positivo'" [svgIcon]="'mat_solid:check_circle'"></mat-icon>
                         </div>
@@ -235,7 +235,7 @@
         [pageIndex]="pagination.page"
         [pageSize]="7"
         [showFirstLastButtons]="true"
-        [pageSizeOptions]="[7, 10, 25, 50, 100]"></mat-paginator>
+        [pageSizeOptions]="[7,10,25,50,100,250,500,1000,2000]"></mat-paginator>
 
 
 </div>

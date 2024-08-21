@@ -20,6 +20,9 @@ import {AlcoholControlGanttComponent} from "./alcohol-control-gantt/alcohol-cont
 import {UploadFileComponent} from "../../../claims-management/claims/claim/claim-files/upload-file/upload-file.component";
 import {ViewDocumentDialogComponent} from "./details-officials/view-document-dialog/view-document-dialog.component";
 import {ViewDocGenDialogComponent} from "./view-doc-gen-dialog/view-doc-gen-dialog.component";
+import {CdkDragDrop, moveItemInArray} from "@angular/cdk/drag-drop";
+import {PermissionsService} from "../../permissions/permissions.service";
+import {ManualTestDialogComponent} from "./manual-test-dialog/manual-test-dialog.component";
 
 @Component({
   selector: 'erp-alcohol-control',
@@ -52,6 +55,33 @@ export class AlcoholControlComponent implements OnInit {
     public selectedUnits: any[] = [];
     private configForm: FormGroup;
     public viewer_file: string ='url';
+    private roles: any;
+    public allowed: any;
+    public switch: any=true;
+
+    public _cols = [
+        { field: 'testdate', header: 'Fecha Prueba', width: 'min-w-32'},
+        { field: 'testtype', header: 'Tipo Prueba', width: 'min-w-32'},
+        { field: 'result', header: 'Resultado', width: 'min-w-32'},
+        { field: 'testconfirm', header: 'Prueba Confirmatoria', width: 'min-w-44'},
+
+        { field: 'unit', header: 'Nombre Unidad', width: 'min-w-96'},
+        { field: 'official', header: 'Funcionario', width: 'min-w-96'},
+        { field: 'ci', header: 'CI', width: 'min-w-24'},
+        { field: 'occupation', header: 'Cargo', width: 'min-w-96'},
+        { field: 'office', header: 'Oficina', width: 'min-w-96'},
+        { field: 'place', header: 'Lugar', width: 'min-w-32'},
+
+        { field: 'estado_reg', header: 'Estado', width: 'min-w-20'},
+        { field: 'fecha_reg', header: 'Fecha Reg.', width: 'min-w-32'},
+        { field: 'fecha_mod', header: 'Fecha Mod.', width: 'min-w-32'},
+        { field: 'usr_reg', header: 'Creado Por', width: 'min-w-44',},
+        { field: 'usr_mod', header: 'Modificado Por', width: 'min-w-44'}
+    ];
+
+    public _displayedColumns = [ 'accion','picture','official','status','ci','testdate','testtype','result','testconfirm','unit','occupation','office','place'];
+
+    public selectedOfficial: any = {};
     constructor(
         private messageService: MessageService,
         private _htService: HumanTalentService,
@@ -63,7 +93,8 @@ export class AlcoholControlComponent implements OnInit {
         private _activatedRoute: ActivatedRoute,
         private _messageService: MessageService,
         private _fcService: BobyConfirmationService,
-        private _claimService: ClaimsService
+        private _claimService: ClaimsService,
+        private _roles: PermissionsService
     ) { }
 
     ngOnInit(): void {
@@ -148,6 +179,13 @@ export class AlcoholControlComponent implements OnInit {
                 })
             )
             .subscribe();
+
+        this._roles.getRolesByOfficial()
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((roles)=>{
+                this.allowed = roles.find(sys => sys.permissionModule.find(mod=> mod.modules.includes('programa-psicoactivo'))).permissionModule.find(allow => allow.permission).permission;
+                this._changeDetectorRef.markForCheck();
+            });
     }
 
     goToSiguiente(record: any): void
@@ -229,35 +267,66 @@ export class AlcoholControlComponent implements OnInit {
 
     openDialogLottery(): void{
 
-        const dialogRef = this._matDialog.open(AlcoholControlDialogComponent,{
-            height: '70%',
-            width: '40%',
-            data: {
-                selectedUnits: this.selectedUnits
-            }
-        });
+        if (this.switch && this.allowed?.includes('admin') ) {
 
-        dialogRef.afterClosed()
-            .subscribe((result) => {
-                if ( result != undefined ) {
-                    if (result.error) {
-                        this._messageService.add({
-                            severity: 'error',
-                            summary: 'ADVERTENCIA',
-                            detail: result.message,
-                            life: 9000
-                        });
-                    } else {
-                        this._messageService.add({
-                            severity: 'success',
-                            summary: 'EXITO',
-                            detail: `${result.detail.message}, Sorteo Generado.`,
-                            life: 9000
-                        });
-                        this.refreshPsychoactiveProgram();
-                    }
+            const dialogRef = this._matDialog.open(AlcoholControlDialogComponent, {
+                height: '70%',
+                width: '40%',
+                data: {
+                    selectedUnits: this.selectedUnits
                 }
             });
+
+            dialogRef.afterClosed()
+                .subscribe((result) => {
+                    if (result != undefined) {
+                        if (result.error) {
+                            this._messageService.add({
+                                severity: 'error',
+                                summary: 'ADVERTENCIA',
+                                detail: result.message,
+                                life: 9000
+                            });
+                        } else {
+                            this._messageService.add({
+                                severity: 'success',
+                                summary: 'EXITO',
+                                detail: `${result.detail.message}, Sorteo Generado.`,
+                                life: 9000
+                            });
+                            this.refreshPsychoactiveProgram();
+                        }
+                    }
+                });
+        }else{
+            const dialogRef = this._matDialog.open(ManualTestDialogComponent, {
+                data: {
+                    selectedUnits: this.selectedUnits
+                }
+            });
+
+            dialogRef.afterClosed()
+                .subscribe((result) => {
+                    if (result != undefined) {
+                        if (result.error) {
+                            this._messageService.add({
+                                severity: 'error',
+                                summary: 'ADVERTENCIA',
+                                detail: result.message,
+                                life: 9000
+                            });
+                        } else {
+                            this._messageService.add({
+                                severity: 'success',
+                                summary: 'EXITO',
+                                detail: `${result.detail.message}, Sorteo Generado.`,
+                                life: 9000
+                            });
+                            this.refreshManualTest();
+                        }
+                    }
+                });
+        }
     }
 
     testQuery(): void{
@@ -317,8 +386,10 @@ export class AlcoholControlComponent implements OnInit {
     }
 
     refreshPsychoactiveProgram(){
+        this._loadService.show();
         this._htService.getLotteryOfDays().subscribe(
             (resp) => {
+                this._loadService.hide();
                 this.dataSource = new MatTableDataSource(resp.lotteryList);
                 this.pagination = resp.pagination;
                 this.dataSource.paginator = this.paginator;
@@ -403,6 +474,113 @@ export class AlcoholControlComponent implements OnInit {
                 );
             }
         });
+    }
+
+    drop(event: CdkDragDrop<string[]>) {
+        moveItemInArray(this.displayedColumns, event.previousIndex, event.currentIndex);
+    }
+
+    exchangeList(value){
+        this.switch = value;
+        this.dataSource = new MatTableDataSource([]);
+        this._loadService.show();
+        if( this.switch ){
+            this._htService.getLotteryOfDays().subscribe(
+                (resp) => {
+                    this.selectedUnits = resp.selectedList;
+
+                    this._loadService.hide();
+                    this.dataSource = new MatTableDataSource(resp.lotteryList);
+                    this.paginator._intl.itemsPerPageLabel="Registros por pagina";
+                    this.paginator._intl.getRangeLabel = (page: number, pageSize: number, length: number) => {
+                        if (length === 0 || pageSize === 0) {
+                            return `0 de ${length }`;
+                        }
+                        length = Math.max(length, 0);
+                        const startIndex = page * pageSize;
+                        // If the start index exceeds the list length, do not try and fix the end index to the end.
+                        const endIndex = startIndex < length ? Math.min(startIndex + pageSize, length) : startIndex + pageSize;
+                        return `${startIndex + 1} - ${endIndex} de ${length}`;
+                    };
+                    this.paginator._intl.nextPageLabel = 'Página Siguiente';
+                    this.paginator._intl.firstPageLabel = 'Primera Página';
+                    this.paginator._intl.lastPageLabel = 'Ultima Página';
+                    this.paginator._intl.previousPageLabel = 'Página Anterior';
+                    this.pagination = resp.pagination;
+                    this.dataSource.paginator = this.paginator;
+                    this.dataSource.sort = this.sort;
+
+                    this.paginator.page.subscribe(
+                        (event) => {
+
+                        }
+                    );
+                }
+            );
+        }else{
+            this._htService.getManualTest().subscribe(
+                (resp) => {
+                    this._loadService.hide();
+                    this.dataSource = new MatTableDataSource(resp.manualTestList);
+                    this.paginator._intl.itemsPerPageLabel="Registros por pagina";
+                    this.paginator._intl.getRangeLabel = (page: number, pageSize: number, length: number) => {
+                        if (length === 0 || pageSize === 0) {
+                            return `0 de ${length }`;
+                        }
+                        length = Math.max(length, 0);
+                        const startIndex = page * pageSize;
+                        // If the start index exceeds the list length, do not try and fix the end index to the end.
+                        const endIndex = startIndex < length ? Math.min(startIndex + pageSize, length) : startIndex + pageSize;
+                        return `${startIndex + 1} - ${endIndex} de ${length}`;
+                    };
+                    this.paginator._intl.nextPageLabel = 'Página Siguiente';
+                    this.paginator._intl.firstPageLabel = 'Primera Página';
+                    this.paginator._intl.lastPageLabel = 'Ultima Página';
+                    this.paginator._intl.previousPageLabel = 'Página Anterior';
+                    this.pagination = resp.pagination;
+                    this.dataSource.paginator = this.paginator;
+                    this.dataSource.sort = this.sort;
+
+                    this.paginator.page.subscribe(
+                        (event) => {
+
+                        }
+                    );
+                }
+            );
+        }
+    }
+
+    /**
+     * Action archivo
+     */
+    viewDocument(document:any): void {
+        if (document?.document_path) {
+            this.viewer_file = 'url';
+            document.viewer_file = this.viewer_file;
+            const dialogRef = this._matDialog.open(ViewDocumentDialogComponent, {
+                data: document
+            });
+
+            dialogRef.afterClosed()
+                .subscribe((result) => {
+
+                });
+        }else{
+
+        }
+    }
+
+    refreshManualTest(){
+        this._htService.getManualTest().subscribe(
+            (resp) => {
+                this.dataSource = new MatTableDataSource(resp.manualTestList);
+                this.pagination = resp.pagination;
+                this.dataSource.paginator = this.paginator;
+                this.dataSource.sort = this.sort;
+                this._changeDetectorRef.markForCheck();
+            }
+        );
     }
 
 

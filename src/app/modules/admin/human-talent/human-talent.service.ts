@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
-import { Observable, of, from, BehaviorSubject } from "rxjs";
-import {switchMap, map, tap, catchError} from "rxjs/operators";
+import { Observable, of, from, BehaviorSubject,throwError } from "rxjs";
+import {switchMap, map, tap, catchError, take} from "rxjs/operators";
 import { ApiErpService } from '../../../core/api-erp/api-erp.service';
 import { LeafNode, LoadMoreNode, TodoItemNode } from "../human-talent/human-talent.types";
 import {HttpClient, HttpHeaders} from "@angular/common/http";
-import {Validators} from "@angular/forms";
+import {BobyMockApiUtils} from "../../../../@boby/lib/mock-api";
+
 @Injectable({
   providedIn: 'root'
 })
@@ -29,6 +30,10 @@ export class HumanTalentService {
 
     _orgaChartData = new BehaviorSubject< any >([]);
     private _statusOrga: BehaviorSubject<any | null> = new BehaviorSubject('');
+
+
+    private _nodes: BehaviorSubject<any[] | null> = new BehaviorSubject([]);
+    private _node: BehaviorSubject<any[] | null> = new BehaviorSubject(null);
     /**
      * Getter for orga chart data
      */
@@ -734,7 +739,7 @@ export class HumanTalentService {
 
         return from(this._apiErp.post('organigrama/SorteoPruebaPsicoActiva/getLotteryOfDays',{
             start:0,
-            limit:50,
+            limit:1000000,
             sort:'id_control_sorteo_prueba',
             dir:'desc'
         })).pipe(
@@ -809,6 +814,90 @@ export class HumanTalentService {
                 return of({selectedList,lotteryList,pagination});
             })
         );
+    }
+
+    /**
+     * GET manual test
+     */
+    getManualTest():Observable<{ pagination: any; manualTestList: any[] }>{
+
+        return from(this._apiErp.post('organigrama/SorteoPruebaPsicoActiva/getManualTest',{
+            start:0,
+            limit:1000000,
+            sort:'fecha_reg',
+            dir:'desc'
+        })).pipe(
+            switchMap((response: any) => {
+
+                let manualTestList: any[] | null =  JSON.parse(response.datos[0]?.jsond ?? '[]') ;
+                // Get available queries
+                const search = '';
+                const sort = 'testdate';
+                const order = 'desc';
+                const page = 0 ;
+                const size = manualTestList.length;
+                // Clone the products
+
+                // Sort clientes
+                if ( sort === 'testdate' )
+                {
+                    manualTestList.sort((a, b) => {
+                        const fieldA = a[sort].toString().toUpperCase();
+                        const fieldB = b[sort].toString().toUpperCase();
+                        return order === 'desc' ? fieldA.localeCompare(fieldB) : fieldB.localeCompare(fieldA);
+                    });
+                }
+                else
+                {
+                    manualTestList.sort((a, b) => order === 'desc' ? a[sort] - b[sort] : b[sort] - a[sort]);
+                }
+
+                // Paginate - Start
+                const itemsLength = manualTestList.length;
+
+                // Calculate pagination details
+                const begin = page * size;
+                const end = Math.min((size * (page + 1)), itemsLength);
+                const lastPage = Math.max(Math.ceil(itemsLength / size), 1);
+
+                // Prepare the pagination object
+                let pagination = {};
+
+                // If the requested page number is bigger than
+                // the last possible page number, return null for
+                // products but also send the last possible page so
+                // the app can navigate to there
+                if ( page > lastPage )
+                {
+                    manualTestList = null;
+                    pagination = {
+                        lastPage
+                    };
+                }
+                else
+                {
+                    // Paginate the results by size
+                    manualTestList = manualTestList.slice(begin, end);
+
+                    // Prepare the pagination mock-api
+                    pagination = {
+                        length    : itemsLength,
+                        size      : size,
+                        page      : page,
+                        lastPage  : lastPage,
+                        startIndex: begin,
+                        endIndex  : end - 1
+                    };
+                }
+
+                // Return a new observable with the response
+                /*this._lottery$.next(lotteryList);
+                this._selected$.next(selectedList);*/
+
+                return of({manualTestList,pagination});
+            })
+        );
+
     }
 
     /**
@@ -908,16 +997,16 @@ export class HumanTalentService {
     /**
      * GET detail officials
      */
-    getDetailsOfficials(id_uo):Observable<{ pagination: any; officialsList: any[]; information: any; }>{
+    getDetailsOfficials(id,id_control_sorteo_prueba):Observable<{ pagination: any; officialsList: any[]; information: any; }>{
 
         return from(this._apiErp.post('organigrama/SorteoPruebaPsicoActiva/getDetailsOfficials',
-            {id_uo}
+            {id,id_control_sorteo_prueba}
             )).pipe(
             switchMap((response: any) => {
-                const jsonData = JSON.parse(response.datos[0].jsondata);
+                const jsonData = JSON.parse(response.datos[0].djson);
 
-                let information = {name: jsonData.name, date: jsonData.date};
-                let officialsList: any[] | null =  jsonData.officials;
+                let information = {name: jsonData[0].name, date: jsonData[0].date};
+                let officialsList: any[] | null =  jsonData;
                 // Get available queries
                 const search = '';
                 const sort = 'official';
@@ -1301,21 +1390,24 @@ export class HumanTalentService {
     /**
      * POST, PUT test type
      */
-    postTestOfficial(testOfficial, selectedOfficial, archivo: File, imageSrc: any): Observable<any>
+    postTestOfficial(testOfficial:any,selectedOfficial:any,archivo:File,imageSrc:any,id_control_sorteo_prueba:number,id:string): Observable<any>
     {
         return from(this._apiErp.post('organigrama/SorteoPruebaPsicoActiva/postTestOfficial', {
             testOfficial: JSON.stringify(testOfficial),
-            id: selectedOfficial.id,
+            id_uo: selectedOfficial.id,
             ci: selectedOfficial.ci,
             id_funcionario: selectedOfficial.id_funcionario,
             archivo: imageSrc,
-            extension: archivo?.name?.split('.')[1] || ''
+            extension: archivo?.name?.split('.')[1] ?? '',
+            id_control_sorteo_prueba,
+            id
         })).pipe(
             switchMap((resp: any) => {
                 // Return a new observable with the response
                 return of(resp);
             }),
             catchError(error=>{
+                console.warn('catchError', error);
                 return of(error)
             })
         );
@@ -1560,10 +1652,11 @@ export class HumanTalentService {
         );
     }
 
-    savePlanning(id_control_sorteo_prueba, lottery_of_days){
+    savePlanning(id_control_sorteo_prueba, lottery_of_days, schedule){
         return from(this._apiErp.post('organigrama/SorteoPruebaPsicoActiva/putPlanning', {
             id_control_sorteo_prueba: id_control_sorteo_prueba,
-            lottery_of_days: JSON.stringify(lottery_of_days)
+            lottery_of_days: JSON.stringify(lottery_of_days),
+            schedule: JSON.stringify(schedule)
         })).pipe(
             switchMap((resp: any) => {
                 // Return a new observable with the response
@@ -1633,10 +1726,11 @@ export class HumanTalentService {
     /**
      * GET Organizational Units
      */
-    getOrganizationalUnits(): Observable<any[]>
+    getOrganizationalUnits(query): Observable<any[]>
     {
-
-        return from(this._apiErp.post('organigrama/SorteoPruebaPsicoActiva/getOrganizationalUnits',{})).pipe(
+        return from(this._apiErp.post('organigrama/SorteoPruebaPsicoActiva/getOrganizationalUnits',{
+            par_filtro:'UO.codigo#UO.descripcion#UO.nombre_cargo#UO.nombre_unidad',query
+        })).pipe(
             switchMap((resp: any) => {
                 // Return a new observable with the response
                 return of(JSON.parse(resp.datos[0].djson));
@@ -1735,8 +1829,12 @@ export class HumanTalentService {
             params: JSON.stringify(params)
         })).pipe(
             switchMap((response: any) => {
-
-                let queryList: any[] | null =  JSON.parse(response.datos[0].jsondata);
+                let queryList: any[] | null;
+                if (response!=undefined) {
+                    queryList = JSON.parse(response?.datos[0]?.djson) ?? [];
+                }else{
+                    queryList = [];
+                }
                 // Get available queries
                 const search = '';
                 const sort = 'official';
@@ -2159,5 +2257,168 @@ export class HumanTalentService {
 
     postOrganization(orga, statusOrga): Observable<any>{
         return of('');
+    }
+
+    /**
+     * Load Funcionario
+     */
+    searchFuncionario(query: string): Observable<any[]>
+    {
+
+        return from(this._apiErp.post('organigrama/Funcionario/listarFuncionarioCargo',{start:0,limit:50,sort:'desc_funcionario2',dir:'asc',par_filtro:'FUNCAR.desc_funcionario1',query:query})).pipe(
+            switchMap((resp: any) => {
+                // Return a new observable with the response
+                return of(resp.datos);
+            })
+        );
+
+    }
+
+    /**
+     * Get lottery by id
+     */
+    getRafflesById(id: string): Observable<any>
+    {
+        return this._lottery$.pipe(
+            take(1),
+            map((raffles) => {
+
+                // Find the contact
+                const raffle = raffles.find(item => item.id === id) || null;
+
+                // Update the contact
+                this._lottery$.next(raffle);
+
+                // Return the contact
+                return raffle;
+            }),
+            switchMap((raffle) => {
+
+                if ( !raffle )
+                {
+                    return throwError('No se pudo encontrar el rol con identificador ' + id + '!');
+                }
+
+                return of(raffle);
+            })
+        );
+
+    }
+
+    /**
+     * Load Funcionario
+     */
+    saveManagers(id_control_sorteo_prueba,id,managers): Observable<any[]>
+    {
+        return from(this._apiErp.post('organigrama/HumanTalent/saveManagers',
+            {id_control_sorteo_prueba,id,managers}
+            )).pipe(
+            switchMap((resp: any) => {
+                // Return a new observable with the response
+                return of(resp);
+            }),
+            catchError(error =>{
+                return of(error);
+            })
+        );
+
+    }
+
+    /**
+     * Get nodes organization
+     */
+    getNodes(id_uo,type): Observable<any[]>
+    {
+        return from(this._apiErp.post('organigrama/HumanTalent/getOrganization', {id_uo,type})).pipe(
+            switchMap((resp: any) => {
+                const djson = JSON.parse(resp.datos[0].djson);
+                this._nodes.next(djson);
+                // Return the budgets
+                return of(djson);
+            })
+        );
+
+    }
+
+    /**
+     * Getter for nodes
+     */
+    get nodes$(): Observable<any[]>
+    {
+        return this._nodes.asObservable();
+    }
+
+    /**
+     * Getter for node
+     */
+    get node$(): Observable<any>
+    {
+        return this._node.asObservable();
+    }
+
+    /**
+     * Setter for node
+     */
+    set budget(value)
+    {
+        this._node.next(value);
+    }
+
+    /**
+     * POST Manual Test
+     */
+    postManualTest(testOfficial, id_funcionario, archivo: File, imageSrc: any): Observable<any>
+    {
+        return from(this._apiErp.post('organigrama/SorteoPruebaPsicoActiva/postManualTest', {
+            testOfficial: JSON.stringify(testOfficial),
+            id_funcionario,
+            archivo: imageSrc,
+            extension: archivo?.name?.split('.')[1] || '',
+            id: BobyMockApiUtils.guid()
+        })).pipe(
+            switchMap((resp: any) => {
+                // Return a new observable with the response
+                return of(resp);
+            }),
+            catchError(error=>{
+                console.warn('catchError', error);
+                return of(error)
+            })
+        );
+    }
+
+    /**
+     * POST Manual Test
+     */
+    generateTestReport(id): Observable<any>
+    {
+        return from(this._apiErp.post('organigrama/SorteoPruebaPsicoActiva/generateTestReport', {id}))
+            .pipe(
+                switchMap((resp: any) => {
+
+                    // Return a new observable with the response
+                    //return of(JSON.parse(resp?.data?.djson ?? '[]'));
+                    return of(resp);
+                }),
+                catchError(error=>{
+                    console.warn('catchError', error);
+                    return of(error)
+                })
+        );
+    }
+
+    deleteSelection (id): Observable<any>
+    {
+        return from(this._apiErp.post('organigrama/SorteoPruebaPsicoActiva/deleteSelection', {id}))
+            .pipe(
+                switchMap((resp: any) => {
+                    // Return a new observable with the response
+                    return of(resp);
+                }),
+                catchError(error=>{
+                    console.warn('catchError', error);
+                    return of(error)
+                })
+            );
     }
 }

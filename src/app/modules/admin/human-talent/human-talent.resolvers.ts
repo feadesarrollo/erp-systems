@@ -5,6 +5,7 @@ import { catchError, Observable, throwError, of } from 'rxjs';
 import { switchMap } from "rxjs/operators";
 import { PermissionsService } from "./permissions/permissions.service";
 import {OrganizationChartService} from "./settings/organization-chart/organization-chart.service";
+import {ControlBudgetService} from "./processes/control-budget/control-budget.service";
 
 @Injectable({
     providedIn: 'root'
@@ -291,6 +292,54 @@ export class ItemDetailResolver implements Resolve<any>
                     const parentUrl = state.url.split('/').slice(0, -1).join('/');
 
                     console.error('parentUrl',parentUrl);
+                    // Navigate to there
+                    this._router.navigateByUrl(parentUrl);
+
+                    // Throw an error
+                    return throwError(error);
+                })
+            );
+    }
+}
+
+@Injectable({
+    providedIn: 'root'
+})
+export class ListLotteryResolver implements Resolve<any>
+{
+    /**
+     * Constructor
+     */
+    constructor(
+        private _htService: HumanTalentService,
+        private _router: Router
+    )
+    {
+    }
+
+    // -----------------------------------------------------------------------------------------------------
+    // @ Public methods
+    // -----------------------------------------------------------------------------------------------------
+
+    /**
+     * Resolver
+     *
+     * @param route
+     * @param state
+     */
+    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<any>
+    {
+        return this._htService.getRafflesById(route.paramMap.get('id'))
+            .pipe(
+                // Error here means the requested contact is not available
+                catchError((error) => {
+
+                    // Log the error
+                    console.error(error);
+
+                    // Get the parent url
+                    const parentUrl = state.url.split('/').slice(0, -1).join('/');
+
                     // Navigate to there
                     this._router.navigateByUrl(parentUrl);
 

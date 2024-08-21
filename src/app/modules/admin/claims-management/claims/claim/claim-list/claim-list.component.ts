@@ -287,7 +287,7 @@ export class ClaimListComponent implements OnInit {
             }
         });
         /******************************** STORE ********************************/
-
+        console.warn('this.officialRoles',this.officialRoles);
         if ( this.officialRoles.permitsClaim?.length > 0 ){
             this.rolesAllowed = this.officialRoles.permitsClaim.find(perm => perm.states.includes(this.selectedState))?.permission || [];
         }

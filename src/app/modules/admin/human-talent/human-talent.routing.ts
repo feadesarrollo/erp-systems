@@ -18,7 +18,7 @@ import { ClassifiersComponent } from "./classifiers/classifiers.component";
 import { PermissionResolver, PermissionsResolver } from "./permissions/permissions.resolvers";
 import { CanDeactivatePermissionsDetails } from './permissions/permissions.guards';
 import {
-    ItemDetailResolver, ItemsResolver,
+    ItemDetailResolver, ItemsResolver, ListLotteryResolver,
     OrganizationChartResolver,
     OrganizationChartsResolver,
     RoleResolver
@@ -55,6 +55,7 @@ import {ControlBudgetListComponent} from "./processes/control-budget/control-bud
 import {ControlBudgetDetailsComponent} from "./processes/control-budget/control-budget-details/control-budget-details.component";
 import {BudgetResolver, BudgetsResolver} from "./processes/control-budget/control-budget.resolvers";
 import {CanDeactivateBudgetDetails} from "./processes/control-budget/control-budget.guards";
+import {TestOrganizationComponent} from "./processes/alcohol-control/test-organization/test-organization.component";
 
 
 export const humanTalentRoutes: Route[] = [
@@ -211,8 +212,15 @@ export const humanTalentRoutes: Route[] = [
                 component: TestQueryComponent
             },
             {
+                path: 'processes/psychoactive-program/test-organization',
+                component: TestOrganizationComponent
+            },
+            {
                 path: 'processes/psychoactive-program/:id',
-                component: ListLotteryControlComponent
+                component: ListLotteryControlComponent/*,
+                resolve: {
+                    ruffles: ListLotteryResolver
+                }*/
             },
             {
                 path: 'processes/psychoactive-program/:id/details-officials/:id',

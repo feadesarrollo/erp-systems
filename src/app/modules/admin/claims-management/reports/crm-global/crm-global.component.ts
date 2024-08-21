@@ -61,6 +61,8 @@ export class CrmGlobalComponent implements OnInit {
     private _unsubscribeAll: Subject<any> = new Subject<any>();
     FilterForm: FormGroup;
     showDetalle : boolean = false;
+
+    public year: any;
     constructor(
         private _router: Router,
         private _reporteS: ReportsService,
@@ -76,11 +78,16 @@ export class CrmGlobalComponent implements OnInit {
 
         });
 
-        this.FilterForm.get('gestion').setValue('blank');
+        //this.FilterForm.get('gestion').setValue('blank');
 
         this._reporteS.getGestion( ).subscribe(
             (gestion: any[]) => {
                 this.listaGestion = gestion;
+
+                this.year = this.listaGestion.find(ges => ges.gestion == new Date().getFullYear());
+                console.warn('BEFORE',this.FilterForm.get('gestion').getRawValue());
+                this.FilterForm.get('gestion').setValue(this.year);
+                console.warn('AFTER',this.FilterForm.get('gestion').getRawValue());
             }
         );
 
@@ -1220,6 +1227,20 @@ export class CrmGlobalComponent implements OnInit {
 
 
         this._changeDetectorRef.markForCheck();
+    }
+
+    /**
+     * generate report data from the claims
+     *
+     * @private
+     */
+    generateReport(){
+        const params = {};
+        this._reporteS.getReportXls(params).subscribe(
+            (data: any[]) => {
+
+            }
+        );
     }
 
 }

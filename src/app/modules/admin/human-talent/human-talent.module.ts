@@ -102,8 +102,11 @@ import { InputTextModule } from 'primeng/inputtext';
 
 import { ControlBudgetListComponent } from './processes/control-budget/control-budget-list/control-budget-list.component';
 import { ControlBudgetDetailsComponent } from './processes/control-budget/control-budget-details/control-budget-details.component';
-
-
+import { OperationalBaseComponent } from './settings/operational-base/operational-base.component';
+import { MatChipsModule } from '@angular/material/chips';
+import { TestOrganizationComponent } from './processes/alcohol-control/test-organization/test-organization.component';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { ManualTestDialogComponent } from './processes/alcohol-control/manual-test-dialog/manual-test-dialog.component';
 @NgModule({
     declarations: [
         HumanTalentComponent,
@@ -155,7 +158,10 @@ import { ControlBudgetDetailsComponent } from './processes/control-budget/contro
         DocumentViewerComponent,
         ControlBudgetComponent,
         ControlBudgetListComponent,
-        ControlBudgetDetailsComponent
+        ControlBudgetDetailsComponent,
+        OperationalBaseComponent,
+        TestOrganizationComponent,
+        ManualTestDialogComponent
     ],
     imports: [
         RouterModule.forChild(humanTalentRoutes),
@@ -205,7 +211,9 @@ import { ControlBudgetDetailsComponent } from './processes/control-budget/contro
         EditorModule,
         TreeTableModule,
         AutoCompleteModule,
-        InputTextModule
+        InputTextModule,
+        MatChipsModule,
+        MatProgressSpinnerModule
     ],
     providers: [
         MessageService,

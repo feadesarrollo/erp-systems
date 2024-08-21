@@ -13,6 +13,7 @@ import {AlcoholControlDialogComponent} from "../alcohol-control-dialog/alcohol-c
 import { takeUntil, Subject, switchMap, map, debounceTime } from 'rxjs';
 import {DetailsOfficialsDialogComponent} from "./details-officials-dialog/details-officials-dialog.component";
 import { ViewDocumentDialogComponent } from "../details-officials/view-document-dialog/view-document-dialog.component";
+import {PermissionsService} from "../../../permissions/permissions.service";
 
 @Component({
   selector: 'erp-details-officials',
@@ -55,7 +56,8 @@ export class DetailsOfficialsComponent implements OnInit {
     public viewer_file: string ='url';
 
     public information: any;
-
+    private id_control_sorteo_prueba: number;
+    public allowed: any;
     constructor(
         private messageService: MessageService,
         private _htService: HumanTalentService,
@@ -66,14 +68,15 @@ export class DetailsOfficialsComponent implements OnInit {
         private _router: Router,
         private _activatedRoute: ActivatedRoute,
         private _messageService: MessageService,
-        private _route: ActivatedRoute
+        private _route: ActivatedRoute,
+        private _roles: PermissionsService
     ) { }
 
     ngOnInit(): void {
         this._selectedColumns = this.cols;
-
+        this.id_control_sorteo_prueba = +this._route.snapshot.url[this._route.snapshot.url.length-3].path;
         this._loadService.show();
-        this._htService.getDetailsOfficials(this._route.snapshot.paramMap.get('id')).subscribe(
+        this._htService.getDetailsOfficials(this._route.snapshot.paramMap.get('id'),this.id_control_sorteo_prueba).subscribe(
             (resp) => {
                 this._loadService.hide();
                 this.information = resp.information;
@@ -132,6 +135,13 @@ export class DetailsOfficialsComponent implements OnInit {
                 })
             )
             .subscribe();
+
+        this._roles.getRolesByOfficial()
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((roles)=>{
+                this.allowed = roles.find(sys => sys.permissionModule.find(mod=> mod.modules.includes('programa-psicoactivo'))).permissionModule.find(allow => allow.permission).permission;
+                this._changeDetectorRef.markForCheck();
+            });
     }
 
     showNewTestDialog(){
@@ -173,11 +183,11 @@ export class DetailsOfficialsComponent implements OnInit {
      * Action archivo
      */
     viewDocument(document:any): void {
-        if (document?.document_path) {
+        if (document?.tests?.document_path) {
             this.viewer_file = 'url';
-            document.viewer_file = this.viewer_file;
+            document.tests.viewer_file = this.viewer_file;
             const dialogRef = this._matDialog.open(ViewDocumentDialogComponent, {
-                data: document
+                data: document.tests
             });
 
             dialogRef.afterClosed()
@@ -197,9 +207,12 @@ export class DetailsOfficialsComponent implements OnInit {
             height: '60%',
             width: '80%',
             data: {
-                status: 'edit',
-                selectedUnits: this.selectedUnits,
-                selectedOfficial : this.selectedOfficial
+                status : 'edit',
+                selectedUnits : this.selectedUnits,
+                selectedOfficial : this.selectedOfficial,
+                information : this.information,
+                id_control_sorteo_prueba : this.id_control_sorteo_prueba,
+                id : this._route.snapshot.paramMap.get('id')
             }
         });
 
@@ -237,9 +250,10 @@ export class DetailsOfficialsComponent implements OnInit {
     }
 
     refreshDetailsOfficials(){
-
-        this._htService.getDetailsOfficials(this._route.snapshot.paramMap.get('id')).subscribe(
+        this._loadService.show();
+        this._htService.getDetailsOfficials(this._route.snapshot.paramMap.get('id'),+this._route.snapshot.url[this._route.snapshot.url.length-3].path).subscribe(
             (resp) => {
+                this._loadService.hide();
                 this.dataSource = new MatTableDataSource(resp.officialsList);
                 this.pagination = resp.pagination;
                 this.dataSource.paginator = this.paginator;

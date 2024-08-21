@@ -42,7 +42,7 @@
         <router-outlet></router-outlet>
     </mat-drawer>
     <mat-drawer-content class="flex flex-col">
-        <p-treeTable class="overflow-y-auto" (onNodeExpand)="onNodeExpand($event)" [value]="organization" [columns]="cols" [reorderableColumns]="true"
+        <p-treeTable class="overflow-y-auto" [value]="organization" [columns]="cols" [reorderableColumns]="true"
                      [resizableColumns]="true" columnResizeMode="expand" selectionMode="multiple" [reorderableColumns]="true" [lazy]="true"
                      (onLazyLoad)="loadNodes($event)" [loading]="loading" (onNodeExpand)="onNodeExpand($event)" [frozenColumns]="frozenCols" [metaKeySelection]="true">
 

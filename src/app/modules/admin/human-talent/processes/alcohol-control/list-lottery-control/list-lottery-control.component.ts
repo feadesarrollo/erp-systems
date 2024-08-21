@@ -19,11 +19,18 @@ import { TemplatePortal } from '@angular/cdk/portal';
 import {MessageService} from "primeng/api";
 import {BobyLoadingService} from "../../../../../../../@boby/services/loading";
 import {WizardDialogComponent} from "../../../../claims-management/claims/claim/wizard-dialog/wizard-dialog.component";
-import {FormBuilder, FormGroup} from "@angular/forms";
+import {FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {MatDialog} from "@angular/material/dialog";
 import {BobyConfirmationService} from "../../../../../../../@boby/services/confirmation";
 import {ViewDocGenDialogComponent} from "../view-doc-gen-dialog/view-doc-gen-dialog.component";
-import { takeUntil, Subject } from 'rxjs';
+import { Subject,of } from 'rxjs';
+import {MatMenuTrigger} from "@angular/material/menu";
+import {COMMA, ENTER} from "@angular/cdk/keycodes";
+import {MatAutocomplete, MatAutocompleteSelectedEvent, MatAutocompleteTrigger} from "@angular/material/autocomplete";
+import {MatChipInputEvent} from "@angular/material/chips";
+import { filter, switchMap, takeUntil } from "rxjs/operators";
+import {PermissionsService} from "../../../permissions/permissions.service";
+import {AlcoholControlComponent} from "../alcohol-control.component";
 
 @Component({
     selector: 'erp-list-lottery-control',
@@ -42,7 +49,8 @@ export class ListLotteryControlComponent implements OnInit {
     public allDropListsIds: string[] = [];
 
     @ViewChild('eventPanel') private _eventPanel: TemplateRef<any>;
-    @ViewChild('infoDetailsPanelOrigin') private _infoDetailsPanelOrigin: any;
+    @ViewChild('managerPanel') private _managerPanel: TemplateRef<any>;
+    //@ViewChild('infoDetailsPanelOrigin') private _infoDetailsPanelOrigin: any;
 
     @Input() item?: any;
     @Input() parentItem?: any;
@@ -87,7 +95,28 @@ export class ListLotteryControlComponent implements OnInit {
     private col:any;
     public organizationalUnits: any;
     public eventForm: FormGroup;
+    public managerForm: FormGroup;
     /*************************** VAR CALENDAR *******************************/
+
+    @ViewChild('clickMenuTrigger') clickMenuTrigger: MatMenuTrigger;
+    contextMenuPosition = { x: '0px', y: '0px' };
+    separatorKeysCodes: number[] = [ENTER, COMMA];
+
+    @ViewChild('managerInput') managerInput: ElementRef<HTMLInputElement>;
+    @ViewChild('managerAuto') matAutocomplete: MatAutocomplete;
+    @ViewChild('autocompleteTrigger') matManagerTrigger: MatAutocompleteTrigger;
+    public listOfficials: any = [];
+    managers: any = [];
+    selectable = true;
+    removable = true;
+    public allowed: any;
+    public name:string;
+    private schedule: any;
+
+    public color_list: any = ['text-red-500','text-amber-500','text-lime-500','text-green-500','text-cyan-500',
+        'text-sky-500','text-purple-500','text-pink-500','text-rose-500','text-orange-500',
+        'text-yellow-500','text-emerald-500','text-teal-500','text-sky-500','text-blue-500',
+        'text-indigo-500','text-violet-500','text-fuchsia-500'];
     constructor(
         private _route: ActivatedRoute,
         private _htService: HumanTalentService,
@@ -100,48 +129,72 @@ export class ListLotteryControlComponent implements OnInit {
         private _formBuilder: FormBuilder,
         private _matDialog: MatDialog,
         private _fcService: BobyConfirmationService,
-        private _elementRef: ElementRef
+        private _elementRef: ElementRef,
+        private _roles: PermissionsService
     ) { }
 
     ngOnInit(): void {
 
-        this._htService.lottery$.subscribe((lottery)=>{
+        this.name = JSON.parse(localStorage.getItem('aut')).nombre_usuario;
+        this._htService.lottery$
+            .pipe(
+                takeUntil(this._unsubscribeAll),
+                switchMap((raffle)=>{
+                    return of(raffle??true);
+                })
+            ).subscribe((lottery: any)=>{
+                if (lottery) {
+                    if( typeof lottery === 'boolean' ){
+                        this._htService.getLotteryOfDays().subscribe();
+                    }else {
+                        this.selected = lottery.find(item => item.id_control_sorteo_prueba == this._route.snapshot.paramMap.get('id'));
+                        if (['borrador_ps'].includes(this.selected.estado)) {
+                            this.field = 'Editar Planificación';
+                        } else if (['editado_ps'].includes(this.selected.estado)) {
+                            this.field = 'Validar Planificación';
+                        } else if (['elaborado_ps'].includes(this.selected.estado)) {
+                            this.field = 'Aprobar Planificación';
+                        } else {
+                            this.field = 'aprobado_ps';
+                        }
 
-            if (lottery) {
-                this.selected = lottery.find(item => item.id_control_sorteo_prueba == this._route.snapshot.paramMap.get('id'));
+                        let today = new Date(this.selected.start_range.split('/').reverse().join('-'));
+                        today.setDate(today.getDate() + 1);
+                        this.month = today.getMonth();
+                        this.year = today.getFullYear();
 
-                if ( ['borrador_ps'].includes(this.selected.estado) ) {
-                    this.field = 'Editar Planificación';
-                }else if( ['editado_ps'].includes(this.selected.estado) ){
-                    this.field = 'Validar Planificación';
-                }else if( ['elaborado_ps'].includes(this.selected.estado) ){
-                    this.field = 'Aprobar Planificación';
-                }else{
-                    this.field = 'aprobado_ps';
+                        if (this.selected)
+                            this.weeks = this.selected.lottery_of_days;
+
+                        this._changeDetectorRef.markForCheck();
+                    }
                 }
-
-                let today = new Date(this.selected.start_range.split('/').reverse().join('-'));
-                today.setDate(today.getDate() + 1);
-                this.month = today.getMonth();
-                this.year = today.getFullYear();
-
-                if (this.selected)
-                    this.weeks = this.selected.lottery_of_days;
-            }
         });
 
-        this._htService.getOrganizationalUnits().subscribe(
+        this._htService.getOrganizationalUnits('').subscribe(
             (resp) => {
                 this.organizationalUnits = resp;
             }
         );
 
-        /***************** ****************/
-        //this.initDate();
-        //this.getNoOfDays();
-        /***************** ****************/
+        this._roles.getRolesByOfficial()
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((roles)=>{
+                this.allowed = roles.find(sys => sys.permissionModule.find(mod=> mod.modules.includes('programa-psicoactivo'))).permissionModule.find(allow => allow.permission).permission;
+                // Mark for check
+                this._changeDetectorRef.markForCheck();
+            });
     }
 
+    /**
+     * On destroy
+     */
+    ngOnDestroy(): void
+    {
+        // Unsubscribe from all subscriptions
+        this._unsubscribeAll.next(null);
+        this._unsubscribeAll.complete();
+    }
 
     /**
      * Filter by search query
@@ -159,8 +212,11 @@ export class ListLotteryControlComponent implements OnInit {
     }
 
     /****************************************** CALENDAR ******************************************/
+    enter(schedule){
+        this.schedule = schedule;
+    }
 
-    drop(event: CdkDragDrop<any>) {
+    drop(event: CdkDragDrop<any>, dayObj) {
         if (event.previousContainer === event.container) {
             moveItemInArray(
                 event.container.data,
@@ -175,8 +231,9 @@ export class ListLotteryControlComponent implements OnInit {
                 event.currentIndex
             );
             /******************************* BEGIN SAVE DROP *******************************/
+            this.schedule ={...this.schedule,day:dayObj.day,date:dayObj.date};
             this._loadService.show();
-            this._htService.savePlanning(this._route.snapshot.paramMap.get('id'), this.weeks).subscribe(
+                this._htService.savePlanning(this._route.snapshot.paramMap.get('id'), this.weeks, this.schedule).subscribe(
                 (resp)=>{
                     this._loadService.hide();
                     if ( resp.error ){
@@ -214,7 +271,7 @@ export class ListLotteryControlComponent implements OnInit {
 
     savePlanning(){
         this._loadService.show();
-        this._htService.savePlanning(this._route.snapshot.paramMap.get('id'), this.weeks).subscribe(
+        this._htService.savePlanning(this._route.snapshot.paramMap.get('id'), this.weeks, this.schedule).subscribe(
             (resp)=>{
                 this._loadService.hide();
                 if ( resp.error ){
@@ -316,6 +373,8 @@ export class ListLotteryControlComponent implements OnInit {
                     dialogRef.afterClosed().subscribe((result) => {
 
                     });
+                }else{
+                    this._htService.getLotteryOfDays().subscribe();
                 }
             }
         });
@@ -491,7 +550,7 @@ export class ListLotteryControlComponent implements OnInit {
     }
 
     /**
-     * load Oficina
+     * load Organization Unit
      */
     selectionOrganizationalUnits(event): void
     {
@@ -653,7 +712,7 @@ export class ListLotteryControlComponent implements OnInit {
 
                         /******************************* BEGIN SAVE DELETE *******************************/
                         this._loadService.show();
-                        this._htService.savePlanning(this._route.snapshot.paramMap.get('id'), this.weeks).subscribe(
+                        this._htService.savePlanning(this._route.snapshot.paramMap.get('id'), this.weeks, this.schedule).subscribe(
                             (resp)=>{
                                 this._loadService.hide();
                                 if ( resp.error ){
@@ -881,7 +940,160 @@ export class ListLotteryControlComponent implements OnInit {
         this._changeDetectorRef.markForCheck();
     }
 
+    showManager(){
+        console.warn('showManager');
+    }
 
+    onRightMenu(event: MouseEvent, item: any) {
+        event.preventDefault();
+        this.contextMenuPosition.x = event.clientX + 'px';
+        this.contextMenuPosition.y = event.clientY + 'px';
+        this.clickMenuTrigger.menuData = { 'item': item };
+        this.clickMenuTrigger.menu.focusFirstItem('mouse');
+        this.clickMenuTrigger.openMenu();
+    }
 
+    onContextMenuAction(calendarEvent,dayObj) {
+        if (dayObj?.schedules.length > 0) {
+            this.event = dayObj;
+            this.managerForm = this._formBuilder.group({
+                official: ['', Validators.required]
+            });
+            this.managers = dayObj.managers ?? [];
+        }
+        const positionStrategy = this._overlay.position().flexibleConnectedTo(calendarEvent.target).withFlexibleDimensions(false).withPositions([
+            {
+                originX : 'end',
+                originY : 'top',
+                overlayX: 'start',
+                overlayY: 'top',
+                offsetX : 8
+            },
+            {
+                originX : 'start',
+                originY : 'top',
+                overlayX: 'end',
+                overlayY: 'top',
+                offsetX : -8
+            },
+            {
+                originX : 'start',
+                originY : 'bottom',
+                overlayX: 'end',
+                overlayY: 'bottom',
+                offsetX : -8
+            },
+            {
+                originX : 'end',
+                originY : 'bottom',
+                overlayX: 'start',
+                overlayY: 'bottom',
+                offsetX : 8
+            }
+        ]);
 
+        // Create the overlay if it doesn't exist
+        if ( !this._eventPanelOverlayRef )
+        {
+            this._createEventPanelOverlay(positionStrategy);
+        }
+        // Otherwise, just update the position
+        else
+        {
+            this._eventPanelOverlayRef.updatePositionStrategy(positionStrategy);
+        }
+
+        // Attach the portal to the overlay
+        this._eventPanelOverlayRef.attach(new TemplatePortal(this._managerPanel, this._viewContainerRef));
+
+        // Mark for check
+        this._changeDetectorRef.markForCheck();
+    }
+
+    selectedManager(event: MatAutocompleteSelectedEvent): void {
+        const newValue = event.option.viewValue;
+        if (this.managers.includes(newValue)) {
+            this.managers = [...this.managers.filter(manager=>manager !== newValue)];
+        } else {
+            this.managers.push(event.option.viewValue);
+        }
+        this.managerInput.nativeElement.value = '';
+        this.managerForm.get('official').setValue('');
+
+        // keep the autocomplete opened after each item is picked.
+        requestAnimationFrame(()=>{
+            this.openAuto(this.matManagerTrigger);
+        })
+
+    }
+
+    add(event: MatChipInputEvent): void {
+        const input = event.input;
+        const value = event.value;
+
+        // Add our fruit
+        if ((value || '').trim()) {
+            this.managers.push(value.trim());
+        }
+
+        // Reset the input value
+        if (input) {
+            input.value = '';
+        }
+
+        this.managerForm.get('official').setValue('');
+    }
+
+    openAuto(trigger: MatAutocompleteTrigger) {
+        trigger.openPanel();
+        this.managerInput.nativeElement.focus();
+    }
+
+    remove(manager: string): void {
+        const index = this.managers.indexOf(manager);
+
+        if (index >= 0) {
+            this.managers.splice(index, 1);
+        }
+    }
+
+    /**
+     * load Funcionario
+     */
+    searchOfficial(query: string, status: string): void
+    {
+        this._htService.searchFuncionario(query).subscribe(
+            (lists) => {
+                this.listOfficials = lists;
+                if (status == 'open'){
+                    this.managerForm.get('official').setValue(this.listOfficials[0].id_funcionario)
+                }
+            }
+        );
+    }
+
+    saveManagers(){
+        this.event.managers=this.managers;
+        this._loadService.show();
+        this._htService.saveManagers(this._route.snapshot.paramMap.get('id'),this.event.id,JSON.stringify(this.managers)).subscribe(
+            (resp: any) => {
+
+                if ( resp.error ){
+                    this._messageService.add({
+                        severity: 'error',
+                        summary: 'ADVERTENCIA',
+                        detail: resp.message,
+                        life: 9000
+                    });
+                }else{
+                    this._closeEventPanel();
+                    this._loadService.hide();
+                }
+
+        });
+    }
+
+    colors(index){
+        return Math.floor(Math.random() * this.color_list.length);
+    }
 }

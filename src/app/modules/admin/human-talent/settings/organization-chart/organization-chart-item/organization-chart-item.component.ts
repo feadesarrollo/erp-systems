@@ -157,7 +157,6 @@ export class OrganizationChartItemComponent implements OnInit {
     }
 
     sortData(sort: Sort) {
-        console.warn('sortData',sort);
         this.sort = sort.active;
         this.dir = sort.direction;
         this._orgaChartService.getItems(this.id_uo,this.currentPage*this.pageSize,this.pageSize,this.sort,this.dir,this.query).subscribe(

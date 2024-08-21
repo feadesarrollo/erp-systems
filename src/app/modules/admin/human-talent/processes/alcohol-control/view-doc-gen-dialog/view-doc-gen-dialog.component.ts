@@ -20,7 +20,6 @@ export class ViewDocGenDialogComponent implements OnInit {
     ) { }
 
     ngOnInit(): void {
-        console.warn('this._data',this._data);
         this.viewer_file = this._data.viewer_file;
         this.url = `${environment.filesUrl}reportes_generados/${this._data.archivo_generado}`;
     }

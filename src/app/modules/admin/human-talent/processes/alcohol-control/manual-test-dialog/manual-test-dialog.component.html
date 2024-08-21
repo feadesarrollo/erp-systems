@@ -1,5 +1,5 @@
-<div mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle class="flex flex-0 items-center justify-between h-16 pr-3 sm:pr-5 pl-6 sm:pl-8 bg-primary text-on-primary">
-    <div class="text-lg font-medium">DETALLE PRUEBA</div>
+<div mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle class="flex flex-0 items-center justify-between h-12 pr-3 sm:pr-5 pl-6 sm:pl-8 bg-primary text-on-primary">
+    <div class="text-lg font-medium">PRUEBA MANUAL</div>
     <button
         mat-icon-button
         (click)="Close()"
@@ -16,6 +16,27 @@
             <div class="grid divide-x -m-6 ">
                 <div class="flex flex-col items-left justify-left p-6 sm:p-8">
                     <div class="text-5xl font-semibold leading-none tracking-tighter">
+
+                        <mat-form-field class="flex-auto w-full" appearance="fill">
+                            <mat-label>Funcionario</mat-label>
+                            <mat-icon
+                                matPrefix
+                                class="hidden sm:flex icon-size-5"
+                                [svgIcon]="'heroicons_solid:user-circle'"></mat-icon>
+                            <input type="text"
+                                   matInput
+                                   [matAutocomplete]="official"
+                                   (keyup)="searchOfficial($event.target.value)"
+                                   placeholder="Funcionario Recepción ...."
+                                   [formControlName]="'official'">
+                            <mat-autocomplete autoActiveFirstOption
+                                              #official="matAutocomplete"
+                                              [displayWith]="getOfficialName.bind(this)">
+                                <mat-option *ngFor="let off of listOfficials" [value]="off.id_funcionario">
+                                    {{off.desc_funcionario2}}
+                                </mat-option>
+                            </mat-autocomplete>
+                        </mat-form-field>
 
                         <mat-form-field appearance="fill" class="w-full flex-auto">
                             <mat-label>Fecha Prueba</mat-label>
@@ -67,29 +88,18 @@
                             </mat-select>
                         </mat-form-field>
 
-                        <!--<mat-form-field *ngIf="selectionChange == 'positivo'" class="w-full fuse-mat-dense flex-auto">
-                            <mat-label >Archivo</mat-label>
-                            <input [formControlName]="'fileTest'"
-                                   id="{{_data.selectedOfficial.ci}}"
-                                   type="file"
-                                   [multiple]="false"
-                                   [accept]="'application/pdf, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'"
-                                   (change)="onFileChange(fileInput.files)"
-                                   #fileInput>
-                        </mat-form-field>-->
-
                         <div *ngIf="selectionChange == 'positivo'" class="w-full fuse-mat-dense flex-auto">
                             <input
-                                   id="{{_data.selectedOfficial.ci}}"
-                                   class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
-                                   type="file"
-                                   [multiple]="false"
-                                   [accept]="'application/pdf, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'"
-                                   (change)="onFileChange(fileInput.files)"
-                                   #fileInput>
+                                id="{{TestForm.get('official').value}}"
+                                class="absolute h-0 w-0 opacity-0 invisible pointer-events-none"
+                                type="file"
+                                [multiple]="false"
+                                [accept]="'application/pdf, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'"
+                                (change)="onFileChange(fileInput.files)"
+                                #fileInput>
                             <label
                                 class="flex items-center justify-center w-10 h-10 rounded-full cursor-pointer hover:bg-hover"
-                                for="{{_data.selectedOfficial.ci}}"
+                                for="{{TestForm.get('official').value}}"
                                 matRipple>
                                 <mat-icon
                                     [matTooltip]="'Subir Documento'"
@@ -133,7 +143,7 @@
         [color]="'primary'"
         [disabled]="TestForm.invalid"
         [matTooltip]="'Guardar'"
-        (click)="completeDetail()">
+        (click)="postManualTest()">
 
         <ng-container *ngIf="processing">
             <mat-icon><mat-spinner diameter="20"></mat-spinner></mat-icon>
